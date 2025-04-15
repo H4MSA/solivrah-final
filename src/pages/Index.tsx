@@ -1,11 +1,32 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { FiArrowRight } from "react-icons/fi";
+import { useApp } from "@/context/AppContext";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { setIsGuest } = useApp();
+  
+  const handleStartAsGuest = () => {
+    setIsGuest(true);
+    navigate("/home");
+  };
+  
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="min-h-screen flex flex-col items-center justify-center p-6">
+      <div className="max-w-md w-full text-center space-y-8 animate-fade-in">
+        <h1 className="text-4xl font-bold text-gradient">Solivrah</h1>
+        <p className="text-muted text-lg">Unlock your potential through daily quests and guided self-improvement</p>
+        
+        <div className="space-y-4 pt-8">
+          <button 
+            className="btn-primary w-full flex items-center justify-center gap-2"
+            onClick={handleStartAsGuest}
+          >
+            Start as Guest <FiArrowRight />
+          </button>
+        </div>
       </div>
     </div>
   );
