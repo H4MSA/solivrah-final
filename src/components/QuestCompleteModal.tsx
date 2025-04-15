@@ -1,7 +1,8 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { FiCheck, FiCamera, FiX } from "react-icons/fi";
 import { GlassCard } from "./GlassCard";
+import { supabase } from "@/integrations/supabase/client";
 
 interface QuestCompleteModalProps {
   questTitle: string;
@@ -18,13 +19,24 @@ export const QuestCompleteModal: React.FC<QuestCompleteModalProps> = ({
   onClose,
   onComplete,
 }) => {
-  const [photoUploaded, setPhotoUploaded] = React.useState(false);
+  const [photoUploaded, setPhotoUploaded] = useState(false);
+  const [uploading, setUploading] = useState(false);
   
-  const handleUploadPhoto = () => {
+  const handleUploadPhoto = async () => {
+    setUploading(true);
+    
     // In a real app, this would trigger the camera/upload functionality
-    setTimeout(() => {
+    // For demo purposes, we'll simulate an upload
+    try {
+      // Simulate API call to verify photo with AI
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
       setPhotoUploaded(true);
-    }, 1000);
+      setUploading(false);
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+      setUploading(false);
+    }
   };
   
   const handleComplete = () => {
@@ -65,8 +77,9 @@ export const QuestCompleteModal: React.FC<QuestCompleteModalProps> = ({
               <button 
                 className="bg-secondary/40 w-full rounded-xl p-4 flex items-center justify-center gap-2"
                 onClick={handleUploadPhoto}
+                disabled={uploading}
               >
-                <FiCamera /> Upload Photo
+                <FiCamera /> {uploading ? "Uploading..." : "Upload Photo"}
               </button>
             )}
           </div>

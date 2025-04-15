@@ -34,9 +34,9 @@ export const TabNavigation: React.FC = () => {
       <div className="flex items-center justify-around h-full w-full max-w-lg mx-auto">
         <NavItem 
           icon={<FiHome />} 
-          path="/" 
-          isActive={isActive("/")} 
-          onClick={() => navigate("/")}
+          path="/home" 
+          isActive={isActive("/home")} 
+          onClick={() => navigate("/home")}
         />
         <NavItem 
           icon={<FiList />} 

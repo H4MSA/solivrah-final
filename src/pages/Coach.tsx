@@ -1,39 +1,114 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { TabNavigation } from "@/components/TabNavigation";
-import { FiSend, FiUser } from "react-icons/fi";
+import { FiSend, FiMic, FiUser } from "react-icons/fi";
+import { useApp } from "@/context/AppContext";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Message {
+  id?: string;
+  sender: "user" | "ai";
+  text: string;
+  timestamp?: string;
+}
 
 const Coach = () => {
+  const { selectedTheme } = useApp();
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState([
-    { sender: "ai", text: "Hi, I'm your AI Coach. How can I help you today?" },
+  const [messages, setMessages] = useState<Message[]>([
+    { sender: "ai", text: `Hi, I'm your AI Coach for ${selectedTheme}. How can I help you today?` },
   ]);
+  const [isLoading, setIsLoading] = useState(false);
   
-  const handleSend = () => {
+  useEffect(() => {
+    const loadMessages = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('chat_history')
+          .select('*')
+          .eq('theme', selectedTheme)
+          .order('timestamp', { ascending: true });
+          
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          const formattedMessages = data.map(msg => ({
+            id: msg.id,
+            sender: msg.sender === 'user' ? 'user' : 'ai',
+            text: msg.sender === 'user' ? msg.message : msg.response,
+            timestamp: msg.timestamp
+          }));
+          
+          setMessages(prevMessages => {
+            return [prevMessages[0], ...formattedMessages];
+          });
+        }
+      } catch (error) {
+        console.error('Error loading chat history:', error);
+      }
+    };
+    
+    loadMessages();
+  }, [selectedTheme]);
+  
+  const handleSend = async () => {
     if (input.trim() === "") return;
     
-    // Add user message
-    setMessages(prev => [...prev, { sender: "user", text: input }]);
+    const userMessage = { sender: "user", text: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
     
-    // Simulate AI response (would connect to backend in real app)
-    setTimeout(() => {
-      setMessages(prev => [
-        ...prev, 
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      let aiResponse = "";
+      if (selectedTheme === "Discipline") {
+        aiResponse = "Consistency is key to building discipline. Remember that small actions repeated daily lead to significant results over time. What specific habit are you working on right now?";
+      } else if (selectedTheme === "Focus") {
+        aiResponse = "To improve focus, try eliminating distractions from your environment. The ability to concentrate deeply is becoming increasingly rare and valuable. How is your current focus environment?";
+      } else if (selectedTheme === "Resilience") {
+        aiResponse = "Resilience grows through challenges. Each setback is an opportunity to build mental strength. What specific challenge are you facing that I can help with?";
+      } else {
+        aiResponse = "Creativity flourishes when you give yourself permission to experiment without judgment. What creative ideas are you exploring currently?";
+      }
+      
+      setMessages(prev => [...prev, { sender: "ai", text: aiResponse }]);
+      
+    } catch (error) {
+      console.error("Error getting AI response:", error);
+      setMessages(prev => [...prev, { sender: "ai", text: "I'm having trouble connecting right now. Please try again later." }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const saveMessageToSupabase = async (userMessage: string, aiResponse: string) => {
+    try {
+      const { error } = await supabase.from('chat_history').insert([
         { 
-          sender: "ai", 
-          text: "I'm here to support your journey. Remember that consistency is key to building good habits." 
+          message: userMessage, 
+          response: aiResponse,
+          sender: 'user',
+          theme: selectedTheme 
         }
       ]);
-    }, 1000);
-    
-    setInput("");
+      
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error saving message:', error);
+    }
   };
   
   return (
     <div className="min-h-screen pb-20">
       <div className="p-6 space-y-4">
-        <h1 className="text-xl font-medium">AI Coach</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-medium">AI Coach</h1>
+          <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+            <FiUser className="text-white" />
+          </div>
+        </div>
         
         <div className="space-y-4 mb-16">
           {messages.map((message, index) => (
@@ -43,11 +118,21 @@ const Coach = () => {
                 message.sender === "user" 
                   ? "ml-auto bg-primary/20" 
                   : "mr-auto bg-secondary/30"
-              } p-3 rounded-xl max-w-[80%]`}
+              } p-3 rounded-xl max-w-[80%] animate-fade-in`}
             >
               <p className="text-sm">{message.text}</p>
             </div>
           ))}
+          
+          {isLoading && (
+            <div className="mr-auto bg-secondary/30 p-3 rounded-xl max-w-[80%] animate-fade-in">
+              <div className="flex space-x-2">
+                <div className="w-2 h-2 bg-muted rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-muted rounded-full animate-pulse delay-150"></div>
+                <div className="w-2 h-2 bg-muted rounded-full animate-pulse delay-300"></div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       
@@ -60,10 +145,12 @@ const Coach = () => {
             placeholder="Type your question..."
             className="flex-1 bg-transparent border-none outline-none text-sm"
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            disabled={isLoading}
           />
           <button 
             className="bg-primary rounded-full p-2 text-primary-foreground"
             onClick={handleSend}
+            disabled={isLoading}
           >
             <FiSend />
           </button>

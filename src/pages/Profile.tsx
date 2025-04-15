@@ -2,11 +2,12 @@
 import React from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { TabNavigation } from "@/components/TabNavigation";
-import { FiStar, FiZap, FiAward, FiLogIn } from "react-icons/fi";
+import { FiStar, FiZap, FiAward, FiLogIn, FiSettings, FiLogOut } from "react-icons/fi";
 import { useApp } from "@/context/AppContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const Profile = () => {
-  const { isGuest, streak, xp, selectedTheme } = useApp();
+  const { isGuest, streak, xp, selectedTheme, setIsGuest } = useApp();
   
   // Sample user data
   const user = {
@@ -17,6 +18,17 @@ const Profile = () => {
     badges: ["7-Day Streak", "First Quest", "Focus Master", "Photo Verified"],
   };
   
+  const handleLogin = async () => {
+    // In a real app, this would trigger authentication
+    console.log("Login triggered");
+    setIsGuest(false);
+  };
+  
+  const handleLogout = async () => {
+    // In a real app, this would sign out the user
+    setIsGuest(true);
+  };
+  
   return (
     <div className="min-h-screen pb-20">
       <div className="p-6 space-y-6">
@@ -25,6 +37,7 @@ const Profile = () => {
             <span className="text-3xl">👤</span>
           </div>
           <h1 className="text-xl font-medium">{user.name}</h1>
+          <p className="text-muted text-sm">{user.theme} Theme</p>
         </div>
         
         <GlassCard>
@@ -62,9 +75,26 @@ const Profile = () => {
           </div>
         </GlassCard>
         
-        <button className="btn-primary w-full flex items-center justify-center gap-2">
-          <FiLogIn /> Log in to Save Progress
-        </button>
+        {isGuest ? (
+          <button 
+            className="btn-primary w-full flex items-center justify-center gap-2"
+            onClick={handleLogin}
+          >
+            <FiLogIn /> Log in to Save Progress
+          </button>
+        ) : (
+          <div className="space-y-3">
+            <button className="btn-primary w-full flex items-center justify-center gap-2">
+              <FiSettings /> Settings
+            </button>
+            <button 
+              className="bg-secondary/40 text-white rounded-xl px-4 py-3 font-medium w-full flex items-center justify-center gap-2"
+              onClick={handleLogout}
+            >
+              <FiLogOut /> Log Out
+            </button>
+          </div>
+        )}
       </div>
       
       <TabNavigation />
