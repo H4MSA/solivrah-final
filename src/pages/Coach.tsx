@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { TabNavigation } from "@/components/TabNavigation";
@@ -32,14 +33,17 @@ const Coach = () => {
         if (error) throw error;
         
         if (data && data.length > 0) {
-          const formattedMessages = data.map(msg => ({
+          // Convert database records to Message type with proper sender value
+          const formattedMessages: Message[] = data.map(msg => ({
             id: msg.id,
-            sender: msg.sender === 'user' ? 'user' : 'ai',
+            // Ensure sender is properly typed as "user" or "ai"
+            sender: msg.sender === 'user' ? 'user' : 'ai' as "user" | "ai",
             text: msg.sender === 'user' ? msg.message : msg.response,
             timestamp: msg.timestamp
           }));
           
           setMessages(prevMessages => {
+            // Preserve the welcome message and add the history
             return [prevMessages[0], ...formattedMessages];
           });
         }
@@ -54,7 +58,7 @@ const Coach = () => {
   const handleSend = async () => {
     if (input.trim() === "") return;
     
-    const userMessage = { sender: "user", text: input };
+    const userMessage: Message = { sender: "user", text: input };
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
@@ -73,7 +77,11 @@ const Coach = () => {
         aiResponse = "Creativity flourishes when you give yourself permission to experiment without judgment. What creative ideas are you exploring currently?";
       }
       
-      setMessages(prev => [...prev, { sender: "ai", text: aiResponse }]);
+      const aiMessageObj: Message = { sender: "ai", text: aiResponse };
+      setMessages(prev => [...prev, aiMessageObj]);
+      
+      // Save the conversation to Supabase
+      await saveMessageToSupabase(input, aiResponse);
       
     } catch (error) {
       console.error("Error getting AI response:", error);
