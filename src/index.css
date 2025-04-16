@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,15 +6,15 @@
 
 @layer base {
   :root {
-    /* New vibrant color scheme */
-    --background: 260 55% 15%; /* #261b3f */
-    --background-end: 280 40% 20%; /* #392a4e */
+    /* Dark elegant color scheme */
+    --background: 0 0% 8%; /* #141414 */
+    --background-end: 0 0% 12%; /* #1E1E1E */
     --foreground: 0 0% 100%; /* #FFFFFF */
     
-    --card: 270 35% 25%; /* #3d2c5a */
+    --card: 0 0% 15%; /* #262626 */
     --card-foreground: 0 0% 100%; /* #FFFFFF */
     
-    --popover: 270 35% 25%; /* #3d2c5a */
+    --popover: 0 0% 15%; /* #262626 */
     --popover-foreground: 0 0% 100%; /* #FFFFFF */
     
     --primary: 280 80% 70%; /* #c572ff */
@@ -24,17 +23,17 @@
     --secondary: 215 70% 65%; /* #6096ff */
     --secondary-foreground: 0 0% 100%; /* #FFFFFF */
     
-    --muted: 270 20% 50%; /* #836fa4 */
+    --muted: 0 0% 40%; /* #666666 */
     --muted-foreground: 0 0% 85%; /* #d9d9d9 */
     
     --accent: 30 90% 70%; /* #ffb66c */
-    --accent-foreground: 270 35% 25%; /* #3d2c5a */
+    --accent-foreground: 0 0% 12%; /* #1E1E1E */
     
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     
-    --border: 280 40% 65%; /* #a77bcf */
-    --input: 270 35% 25%; /* #3d2c5a */
+    --border: 0 0% 20%; /* #333333 */
+    --input: 0 0% 15%; /* #262626 */
     --ring: 280 80% 70%; /* #c572ff */
     
     --radius: 1rem;
@@ -106,7 +105,7 @@
 
 @layer utilities {
   .glass {
-    @apply bg-card/40 backdrop-blur-lg border border-white/10 shadow-lg;
+    @apply bg-black/50 backdrop-blur-md border border-white/5 shadow-lg;
   }
   
   .glass-card {
@@ -150,14 +149,20 @@
       hover:bg-secondary/50 active:scale-95 shadow-md shadow-secondary/10
       focus:ring-2 focus:ring-secondary/50 focus:ring-offset-2 focus:ring-offset-background;
   }
+
+  .btn-dark {
+    @apply bg-black/80 text-white rounded-xl px-4 py-3 font-medium transition-all border border-white/10
+      hover:border-white/20 active:scale-95 shadow-md
+      focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-background;
+  }
   
   .card-glass {
     @apply glass rounded-2xl p-6 transition-all duration-300 shadow-lg;
   }
   
   .card-action {
-    @apply glass rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer 
-      hover:border-white/20 hover:bg-card/50 active:scale-95 transition-all shadow-md;
+    @apply bg-black/60 rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer 
+      border border-white/5 hover:border-white/10 hover:bg-black/70 active:scale-95 transition-all shadow-md;
   }
   
   .card-stat {
@@ -165,7 +170,7 @@
   }
   
   .badge {
-    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-muted/40 text-white shadow-sm;
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-black/60 text-white shadow-sm border border-white/5;
   }
   
   .nav-item {
@@ -174,15 +179,20 @@
   
   .nav-item-active {
     @apply text-primary relative before:absolute before:bottom-0 before:left-1/2 before:-translate-x-1/2 
-      before:w-1.5 before:h-1.5 before:bg-primary before:rounded-full before:animate-pop-in;
+      before:w-1 before:h-1 before:bg-primary before:rounded-full before:animate-pop-in;
   }
   
   .nav-item-inactive {
-    @apply text-muted hover:text-white;
+    @apply text-muted/70 hover:text-white;
   }
   
   .task-locked {
-    @apply opacity-50 blur-[1px] pointer-events-none;
+    @apply opacity-30 blur-[2px] grayscale pointer-events-none;
+  }
+
+  .menu-item {
+    @apply flex items-center gap-3 p-4 rounded-xl bg-black/60 border border-white/5 
+      hover:border-white/10 transition-all cursor-pointer active:scale-[0.98];
   }
 }
 

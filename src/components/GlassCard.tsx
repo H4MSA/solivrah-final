@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   className?: string;
-  variant?: "default" | "elevated" | "subtle" | "primary" | "accent" | "interactive";
+  variant?: "default" | "elevated" | "subtle" | "primary" | "accent" | "interactive" | "dark";
   animate?: "fade" | "pop" | "blur" | "none";
 }
 
@@ -35,6 +35,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
         variant === "primary" && "bg-gradient-to-br from-primary/30 to-secondary/30 border-primary/20",
         variant === "accent" && "bg-gradient-to-br from-accent/30 to-accent/10 border-accent/20",
         variant === "interactive" && "bg-card/40 border-white/10 hover:bg-card/60 hover:border-white/20 cursor-pointer active:scale-[0.98]",
+        variant === "dark" && "bg-black/70 border-white/5 hover:border-white/10",
         "hover:shadow-xl",
         getAnimationClass(),
         "p-6",
