@@ -4,24 +4,22 @@ import { GlassCard } from "@/components/GlassCard";
 import { FiArrowRight, FiCheck } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
-import { supabase } from "@/integrations/supabase/client";
 
-type Theme = "Discipline" | "Focus" | "Resilience" | "Wildcards";
+type Challenge = "Procrastination" | "Distractions" | "Setbacks" | "Creative Block";
 
 const Survey = () => {
   const navigate = useNavigate();
   const { setSelectedTheme } = useApp();
   const [formData, setFormData] = useState({
-    theme: "Discipline" as Theme,
+    challenge: "Procrastination" as Challenge,
     goal: "",
-    struggle: "",
     timeCommitment: "30"
   });
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [error, setError] = useState("");
   
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -33,22 +31,22 @@ const Survey = () => {
     
     try {
       // Validate form data
-      if (!formData.goal.trim() || !formData.struggle.trim()) {
+      if (!formData.goal.trim()) {
         throw new Error("Please fill out all fields");
       }
       
+      // Map challenge to theme
+      const themeMap = {
+        "Procrastination": "Discipline",
+        "Distractions": "Focus",
+        "Setbacks": "Resilience",
+        "Creative Block": "Wildcards"
+      };
+      
+      const theme = themeMap[formData.challenge] as "Discipline" | "Focus" | "Resilience" | "Wildcards";
+      
       // Save selected theme
-      setSelectedTheme(formData.theme);
-      
-      // In a real app, submit to Supabase
-      // const { error } = await supabase.from('survey_responses').insert([{
-      //   theme: formData.theme,
-      //   goal: formData.goal,
-      //   biggest_struggle: formData.struggle,
-      //   daily_commitment: parseInt(formData.timeCommitment)
-      // }]);
-      
-      // if (error) throw error;
+      setSelectedTheme(theme);
       
       // Simulate API call to generate roadmap
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -76,18 +74,18 @@ const Survey = () => {
       case 1:
         return (
           <GlassCard className="animate-fade-in">
-            <h2 className="text-lg font-medium mb-4">Choose Your Theme</h2>
+            <h2 className="text-lg font-medium mb-4">What's Your Biggest Challenge?</h2>
             <div className="space-y-3">
-              {["Discipline", "Focus", "Resilience", "Wildcards"].map((theme) => (
+              {["Procrastination", "Distractions", "Setbacks", "Creative Block"].map((challenge) => (
                 <div 
-                  key={theme}
-                  onClick={() => setFormData(prev => ({ ...prev, theme: theme as Theme }))}
+                  key={challenge}
+                  onClick={() => setFormData(prev => ({ ...prev, challenge: challenge as Challenge }))}
                   className={`flex items-center justify-between p-3 rounded-xl transition-all cursor-pointer
-                    ${formData.theme === theme ? 'bg-primary/30 border border-primary/50' : 'glass'}
+                    ${formData.challenge === challenge ? 'bg-primary/30 border border-primary/50' : 'glass'}
                   `}
                 >
-                  <span>{theme}</span>
-                  {formData.theme === theme && <FiCheck className="text-primary" />}
+                  <span>{challenge}</span>
+                  {formData.challenge === challenge && <FiCheck className="text-primary" />}
                 </div>
               ))}
             </div>
@@ -104,11 +102,11 @@ const Survey = () => {
         return (
           <GlassCard className="animate-fade-in">
             <h2 className="text-lg font-medium mb-4">Your Goal</h2>
-            <p className="text-muted text-sm mb-4">What do you want to achieve with {formData.theme}?</p>
+            <p className="text-muted text-sm mb-4">What do you want to achieve?</p>
             <textarea
               name="goal"
               value={formData.goal}
-              onChange={(e) => setFormData(prev => ({ ...prev, goal: e.target.value }))}
+              onChange={handleChange}
               placeholder="e.g., Build consistent habits"
               className="w-full p-3 rounded-xl glass text-white bg-transparent min-h-[100px] resize-none"
             />
@@ -131,36 +129,6 @@ const Survey = () => {
           </GlassCard>
         );
       case 3:
-        return (
-          <GlassCard className="animate-fade-in">
-            <h2 className="text-lg font-medium mb-4">Your Struggle</h2>
-            <p className="text-muted text-sm mb-4">What's holding you back?</p>
-            <textarea
-              name="struggle"
-              value={formData.struggle}
-              onChange={(e) => setFormData(prev => ({ ...prev, struggle: e.target.value }))}
-              placeholder="e.g., Procrastination"
-              className="w-full p-3 rounded-xl glass text-white bg-transparent min-h-[100px] resize-none"
-            />
-            <div className="flex gap-2 mt-6">
-              <button 
-                type="button" 
-                className="btn-primary bg-secondary/50 flex-1"
-                onClick={goToPrevStep}
-              >
-                Back
-              </button>
-              <button 
-                type="button" 
-                className="btn-primary flex-1"
-                onClick={goToNextStep}
-              >
-                Continue
-              </button>
-            </div>
-          </GlassCard>
-        );
-      case 4:
         return (
           <GlassCard className="animate-fade-in">
             <h2 className="text-lg font-medium mb-4">Time Commitment</h2>
@@ -198,6 +166,7 @@ const Survey = () => {
                 type="submit" 
                 className="btn-primary flex-1 flex items-center justify-center gap-2"
                 disabled={isLoading}
+                onClick={handleSubmit}
               >
                 {isLoading ? "Generating..." : "Generate Roadmap"} 
                 {!isLoading && <FiArrowRight />}
@@ -211,11 +180,11 @@ const Survey = () => {
   };
   
   return (
-    <div className="min-h-screen pb-6">
+    <div className="min-h-screen bg-gradient-to-b from-background to-background-end pb-6">
       <div className="p-6 space-y-6">
         <h1 className="text-2xl font-bold text-center text-gradient">Let's Get Started</h1>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-4 max-w-md mx-auto">
           {renderStep()}
           
           {error && (
@@ -223,10 +192,10 @@ const Survey = () => {
               {error}
             </div>
           )}
-        </form>
+        </div>
         
         <div className="flex justify-center space-x-2 mt-6">
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3].map((i) => (
             <div 
               key={i}
               className={`w-2 h-2 rounded-full ${
