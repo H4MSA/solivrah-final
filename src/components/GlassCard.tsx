@@ -15,7 +15,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   return (
     <div 
       className={cn(
-        "card-glass animate-fade-in", 
+        "bg-secondary/30 backdrop-blur-md border border-white/10 rounded-xl p-6 shadow-lg animate-fade-in", 
         className
       )}
       {...props}
