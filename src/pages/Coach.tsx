@@ -13,6 +13,16 @@ interface Message {
   timestamp?: string;
 }
 
+// Interface for Supabase chat_history table records
+interface ChatHistoryRecord {
+  id: string;
+  message: string;
+  response: string;
+  theme: string;
+  timestamp: string;
+  user_id: string | null;
+}
+
 const Coach = () => {
   const { selectedTheme } = useApp();
   const [input, setInput] = useState("");
@@ -33,34 +43,31 @@ const Coach = () => {
         if (error) throw error;
         
         if (data && data.length > 0) {
-          // Convert database records to Message type with proper sender value
-          const formattedMessages: Message[] = data.map(msg => ({
-            id: msg.id,
-            // Since 'sender' property doesn't exist directly in the database record,
-            // we need to determine sender based on how we're storing messages
-            sender: "user" as "user" | "ai", // Assume all messages in DB are from user
-            text: msg.message, // User message
-            timestamp: msg.timestamp
-          }));
+          // Convert database records to Message type
+          const formattedMessages: Message[] = [];
           
-          // Also create AI response messages from the database records
-          const aiMessages: Message[] = data.map(msg => ({
-            id: msg.id + "-response",
-            sender: "ai" as "user" | "ai",
-            text: msg.response, // AI response
-            timestamp: msg.timestamp
-          }));
-          
-          // Combine user messages and AI responses in proper order
-          const allMessages: Message[] = [];
-          for (let i = 0; i < formattedMessages.length; i++) {
-            allMessages.push(formattedMessages[i]); // User message first
-            allMessages.push(aiMessages[i]); // Then AI response
-          }
+          // Process each record from the database
+          data.forEach((record: ChatHistoryRecord) => {
+            // Add user message
+            formattedMessages.push({
+              id: `${record.id}-user`,
+              sender: "user",
+              text: record.message,
+              timestamp: record.timestamp
+            });
+            
+            // Add AI response
+            formattedMessages.push({
+              id: `${record.id}-ai`,
+              sender: "ai",
+              text: record.response,
+              timestamp: record.timestamp
+            });
+          });
           
           setMessages(prevMessages => {
             // Preserve the welcome message and add the history
-            return [prevMessages[0], ...allMessages];
+            return [prevMessages[0], ...formattedMessages];
           });
         }
       } catch (error) {
@@ -113,7 +120,6 @@ const Coach = () => {
         { 
           message: userMessage, 
           response: aiResponse,
-          sender: 'user',
           theme: selectedTheme 
         }
       ]);
