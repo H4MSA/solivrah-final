@@ -5,17 +5,24 @@ import { cn } from "@/lib/utils";
 interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   className?: string;
+  variant?: "default" | "elevated" | "subtle";
 }
 
 export const GlassCard: React.FC<GlassCardProps> = ({ 
   children, 
-  className, 
+  className,
+  variant = "default",
   ...props 
 }) => {
   return (
     <div 
       className={cn(
-        "bg-[#3A4546]/80 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-lg animate-fade-in", 
+        "backdrop-blur-md border rounded-2xl shadow-lg animate-fade-in transition-all duration-300",
+        variant === "default" && "bg-[#3A4546]/80 border-white/10",
+        variant === "elevated" && "bg-[#3A4546]/90 border-white/20",
+        variant === "subtle" && "bg-[#3A4546]/60 border-white/5",
+        "hover:border-white/20",
+        "p-6",
         className
       )}
       {...props}

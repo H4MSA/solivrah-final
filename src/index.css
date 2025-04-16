@@ -62,6 +62,18 @@
   .glass-card {
     @apply glass rounded-xl p-6;
   }
+  
+  .gradient-bg {
+    @apply bg-gradient-to-b from-background to-background-end;
+  }
+  
+  .text-gradient {
+    @apply bg-gradient-to-b from-white to-white/80 bg-clip-text text-transparent;
+  }
+  
+  .circle-progress {
+    @apply rounded-full flex items-center justify-center border border-white/10;
+  }
 }
 
 @layer components {
@@ -69,12 +81,36 @@
     @apply bg-primary text-primary-foreground rounded-xl px-4 py-3 font-medium transition-all hover:opacity-90 active:scale-95;
   }
   
+  .btn-secondary {
+    @apply bg-secondary/40 text-white rounded-xl px-4 py-3 font-medium transition-all hover:bg-secondary/50 active:scale-95;
+  }
+  
   .card-glass {
     @apply glass rounded-2xl p-6;
   }
   
-  .text-gradient {
-    @apply bg-gradient-to-b from-white to-white/80 bg-clip-text text-transparent;
+  .card-action {
+    @apply glass rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:opacity-90 active:scale-95 transition-all;
+  }
+  
+  .card-stat {
+    @apply glass rounded-xl p-4 flex flex-col;
+  }
+  
+  .badge {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-secondary/40 text-white;
+  }
+  
+  .nav-item {
+    @apply flex flex-col items-center justify-center p-2 rounded-md transition-all cursor-pointer;
+  }
+  
+  .nav-item-active {
+    @apply text-white;
+  }
+  
+  .nav-item-inactive {
+    @apply text-muted hover:text-white;
   }
 }
 
@@ -94,4 +130,24 @@
 
 .animate-scale {
   animation: scale 0.2s ease-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s infinite ease-in-out;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 3s infinite ease-in-out;
 }

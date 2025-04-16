@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
-import { FiArrowRight, FiCheck } from "react-icons/fi";
+import { FiArrowRight, FiCheck, FiArrowLeft } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 
@@ -74,14 +74,16 @@ const Survey = () => {
       case 1:
         return (
           <GlassCard className="animate-fade-in">
-            <h2 className="text-lg font-medium mb-4">What's Your Biggest Challenge?</h2>
+            <h2 className="text-xl font-semibold text-white mb-5">What's your biggest challenge?</h2>
             <div className="space-y-3">
               {["Procrastination", "Distractions", "Setbacks", "Creative Block"].map((challenge) => (
                 <div 
                   key={challenge}
                   onClick={() => setFormData(prev => ({ ...prev, challenge: challenge as Challenge }))}
-                  className={`flex items-center justify-between p-3 rounded-xl transition-all cursor-pointer
-                    ${formData.challenge === challenge ? 'bg-primary/30 border border-primary/50' : 'glass'}
+                  className={`flex items-center justify-between p-4 rounded-xl transition-all cursor-pointer
+                    ${formData.challenge === challenge ? 
+                      'bg-primary/30 border border-primary/50' : 
+                      'bg-secondary/40 border border-white/5 hover:border-white/20'}
                   `}
                 >
                   <span>{challenge}</span>
@@ -91,39 +93,39 @@ const Survey = () => {
             </div>
             <button 
               type="button" 
-              className="btn-primary w-full mt-6"
+              className="btn-primary w-full mt-6 flex items-center justify-center gap-2"
               onClick={goToNextStep}
             >
-              Continue
+              Continue <FiArrowRight />
             </button>
           </GlassCard>
         );
       case 2:
         return (
           <GlassCard className="animate-fade-in">
-            <h2 className="text-lg font-medium mb-4">Your Goal</h2>
-            <p className="text-muted text-sm mb-4">What do you want to achieve?</p>
+            <h2 className="text-xl font-semibold text-white mb-2">Your Goal</h2>
+            <p className="text-muted text-sm mb-4">What do you want to achieve with Solivrah?</p>
             <textarea
               name="goal"
               value={formData.goal}
               onChange={handleChange}
-              placeholder="e.g., Build consistent habits"
-              className="w-full p-3 rounded-xl glass text-white bg-transparent min-h-[100px] resize-none"
+              placeholder="e.g., Build consistent habits, Improve focus, Overcome procrastination..."
+              className="w-full p-4 rounded-xl glass text-white bg-transparent min-h-[120px] resize-none border border-white/10 focus:border-white/30 outline-none"
             />
             <div className="flex gap-2 mt-6">
               <button 
                 type="button" 
-                className="btn-primary bg-secondary/50 flex-1"
+                className="btn-secondary flex-1 flex items-center justify-center gap-2"
                 onClick={goToPrevStep}
               >
-                Back
+                <FiArrowLeft /> Back
               </button>
               <button 
                 type="button" 
-                className="btn-primary flex-1"
+                className="btn-primary flex-1 flex items-center justify-center gap-2"
                 onClick={goToNextStep}
               >
-                Continue
+                Continue <FiArrowRight />
               </button>
             </div>
           </GlassCard>
@@ -131,36 +133,44 @@ const Survey = () => {
       case 3:
         return (
           <GlassCard className="animate-fade-in">
-            <h2 className="text-lg font-medium mb-4">Time Commitment</h2>
-            <p className="text-muted text-sm mb-4">How much time can you dedicate daily?</p>
+            <h2 className="text-xl font-semibold text-white mb-2">Time Commitment</h2>
+            <p className="text-muted text-sm mb-5">How much time can you dedicate daily?</p>
             
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm">5 min</span>
-              <span className="text-sm">60 min</span>
-            </div>
-            
-            <input
-              type="range"
-              name="timeCommitment"
-              min="5"
-              max="60"
-              step="5"
-              value={formData.timeCommitment}
-              onChange={handleChange}
-              className="w-full"
-            />
-            
-            <div className="text-center my-4">
-              <span className="text-xl font-semibold">{formData.timeCommitment} minutes/day</span>
+            <div className="mb-6">
+              <div className="text-center mb-2">
+                <span className="text-xl font-semibold">{formData.timeCommitment} minutes/day</span>
+              </div>
+              
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-muted">5 min</span>
+                <span className="text-sm text-muted">60 min</span>
+              </div>
+              
+              <input
+                type="range"
+                name="timeCommitment"
+                min="5"
+                max="60"
+                step="5"
+                value={formData.timeCommitment}
+                onChange={handleChange}
+                className="w-full accent-white"
+              />
+              
+              <div className="flex justify-between mt-1">
+                <span className="text-xs text-muted">Minimal</span>
+                <span className="text-xs text-muted">Recommended</span>
+                <span className="text-xs text-muted">Dedicated</span>
+              </div>
             </div>
             
             <div className="flex gap-2 mt-6">
               <button 
                 type="button" 
-                className="btn-primary bg-secondary/50 flex-1"
+                className="btn-secondary flex-1 flex items-center justify-center gap-2"
                 onClick={goToPrevStep}
               >
-                Back
+                <FiArrowLeft /> Back
               </button>
               <button 
                 type="submit" 
@@ -168,7 +178,7 @@ const Survey = () => {
                 disabled={isLoading}
                 onClick={handleSubmit}
               >
-                {isLoading ? "Generating..." : "Generate Roadmap"} 
+                {isLoading ? "Creating..." : "Generate Roadmap"} 
                 {!isLoading && <FiArrowRight />}
               </button>
             </div>
@@ -180,26 +190,32 @@ const Survey = () => {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-background-end pb-6">
-      <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-b from-background to-background-end pb-6 overflow-hidden">
+      {/* Background effect */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+      </div>
+      
+      <div className="p-6 space-y-6 z-10 relative">
         <h1 className="text-2xl font-bold text-center text-gradient">Let's Get Started</h1>
         
         <div className="space-y-4 max-w-md mx-auto">
           {renderStep()}
           
           {error && (
-            <div className="text-red-500 text-center p-2">
+            <div className="text-red-500 text-center p-2 glass rounded-xl">
               {error}
             </div>
           )}
         </div>
         
-        <div className="flex justify-center space-x-2 mt-6">
+        <div className="flex justify-center space-x-3 mt-6">
           {[1, 2, 3].map((i) => (
             <div 
               key={i}
-              className={`w-2 h-2 rounded-full ${
-                step === i ? 'bg-primary' : 'bg-secondary/50'
+              className={`w-3 h-3 rounded-full transition-all ${
+                step === i ? 'bg-primary scale-110' : 'bg-secondary/50'
               }`}
             />
           ))}
