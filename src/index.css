@@ -315,7 +315,7 @@
 }
 
 .animate-morph {
-  animation: morph 5s ease-in-out infinite alternate;
+  animation: morph 8s ease-in-out infinite alternate;
 }
 
 @keyframes progress {
@@ -324,7 +324,7 @@
 }
 
 .animate-progress {
-  animation: progress 2s linear infinite;
+  animation: progress 2s linear forwards;
 }
 
 @keyframes shimmer {
@@ -335,6 +335,38 @@
 .animate-shimmer {
   animation: shimmer 2s infinite;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+}
+
+/* Theme-specific transition effects */
+.theme-transition {
+  transition: background-color 0.7s ease-out, 
+              border-color 0.7s ease-out, 
+              color 0.7s ease-out, 
+              box-shadow 0.7s ease-out;
+}
+
+/* Glassmorphism effects */
+.glassmorphism {
+  @apply backdrop-blur-md bg-white/5 border border-white/10;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+}
+
+.glassmorphism-dark {
+  @apply backdrop-blur-md bg-black/70 border border-white/5;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* Scroll indicator animation */
+@keyframes scroll-indicator {
+  0% { opacity: 1; transform: translateY(0); }
+  30% { opacity: 1; }
+  40% { opacity: 0; transform: translateY(20px); }
+  80% { opacity: 0; }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-scroll-indicator {
+  animation: scroll-indicator 2.5s infinite;
 }
 
 /* Dynamic background bubble effects */
@@ -382,3 +414,26 @@
 .stagger-item:nth-child(3) { animation-delay: 0.3s; }
 .stagger-item:nth-child(4) { animation-delay: 0.4s; }
 .stagger-item:nth-child(5) { animation-delay: 0.5s; }
+
+/* Theme-specific keyframes */
+@keyframes theme-pulse {
+  0% { 
+    box-shadow: 0 0 5px 2px rgba(255, 255, 255, 0.1); 
+  }
+  50% { 
+    box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.2); 
+  }
+  100% { 
+    box-shadow: 0 0 5px 2px rgba(255, 255, 255, 0.1); 
+  }
+}
+
+.animate-theme-pulse {
+  animation: theme-pulse 3s infinite ease-in-out;
+}
+
+/* Smoother animations with high frame rate targeting */
+.smooth-animate {
+  will-change: transform, opacity;
+  animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+}

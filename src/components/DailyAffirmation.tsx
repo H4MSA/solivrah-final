@@ -23,7 +23,7 @@ const affirmations = [
 ];
 
 export const DailyAffirmation: React.FC = () => {
-  const { selectedTheme } = useApp();
+  const { themeColors } = useApp();
   const [affirmation, setAffirmation] = useState("");
   const [shinePosition, setShinePosition] = useState(-100);
   
@@ -79,7 +79,13 @@ export const DailyAffirmation: React.FC = () => {
   }
   
   return (
-    <div className="w-full relative bg-[#121212] border border-[#333333] rounded-xl p-3 overflow-hidden animate-fade-in">
+    <div 
+      className="w-full relative rounded-xl px-4 py-2.5 overflow-hidden animate-fade-in backdrop-blur-sm border"
+      style={{ 
+        backgroundColor: `${themeColors.card}`,
+        borderColor: `${themeColors.cardBorder}`
+      }}
+    >
       {/* Shine effect overlay */}
       <div 
         className="absolute inset-0 z-0 pointer-events-none"
@@ -91,22 +97,21 @@ export const DailyAffirmation: React.FC = () => {
       />
       
       <div className="flex items-center justify-between z-10 relative">
-        <div className="flex items-center gap-2">
-          <span className="text-white font-medium">Today's Affirmation:</span>
-          <span className="text-white font-medium italic animate-fade-in">{affirmation}</span>
-        </div>
+        <p className="text-white font-medium text-sm italic pr-2 truncate">
+          "{affirmation}"
+        </p>
         
-        <div className="flex gap-2">
+        <div className="flex gap-1 flex-shrink-0">
           <button 
             onClick={refreshAffirmation}
-            className="p-1.5 rounded-full bg-[#222222] text-white hover:bg-[#333333] transition-all"
+            className="p-1 rounded-full text-white hover:bg-white/10 transition-all"
             aria-label="Refresh affirmation"
           >
             <FiRefreshCw size={14} />
           </button>
           <button 
             onClick={shareAffirmation}
-            className="p-1.5 rounded-full bg-[#222222] text-white hover:bg-[#333333] transition-all"
+            className="p-1 rounded-full text-white hover:bg-white/10 transition-all"
             aria-label="Share affirmation"
           >
             <FiShare2 size={14} />
