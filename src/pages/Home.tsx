@@ -8,6 +8,7 @@ import { QRScanner } from "@/components/QRScanner";
 import { useApp } from "@/context/AppContext";
 import { DailyAffirmation } from "@/components/DailyAffirmation";
 import { Progress } from "@/components/ui/progress";
+import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 
 const QuestCard = ({ title, description, locked = false, onClick }: { title: string, description: string, locked?: boolean, onClick: () => void }) => {
   const { selectedTheme } = useApp();
@@ -27,34 +28,41 @@ const QuestCard = ({ title, description, locked = false, onClick }: { title: str
   
   return (
     <div 
-      className={`relative overflow-hidden backdrop-blur-md bg-black/40 border border-white/10 rounded-xl p-5 transition-all duration-300 ${
+      className={`relative overflow-hidden backdrop-blur-xl bg-black/40 border border-white/10 rounded-xl p-5 transition-all duration-300 transform-gpu ${
         locked 
-          ? 'task-locked' 
+          ? 'opacity-40 filter blur-[1px] pointer-events-none' 
           : 'cursor-pointer hover:border-white/20 hover:scale-[1.01] active:scale-[0.98]'
       }`}
       onClick={!locked ? onClick : undefined}
-      style={{ boxShadow: `0 5px 15px ${getThemeGlow()}` }}
+      style={{ 
+        boxShadow: `0 10px 25px ${getThemeGlow()}`,
+        transform: locked ? 'none' : 'translateZ(2px)'
+      }}
     >
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-white font-medium">{title}</h3>
         {locked ? (
-          <span className="text-xs bg-[#333333] px-2 py-1 rounded-full text-white flex items-center gap-1">
+          <span className="text-xs bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full text-white flex items-center gap-1 border border-white/5">
             <FiLock size={12} />
             <span>Locked</span>
           </span>
         ) : (
-          <span className="text-xs bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full text-white">Active</span>
+          <span className="text-xs bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full text-white border border-white/10">Active</span>
         )}
       </div>
-      <p className="text-[#AAAAAA] text-sm">{description}</p>
+      <p className="text-white/70 text-sm">{description}</p>
       {!locked && (
-        <button className="mt-4 w-full py-2.5 bg-black/50 backdrop-blur-sm hover:bg-black/70 text-white rounded-lg flex items-center justify-center gap-2 transition-all duration-300 border border-white/10">
+        <HoverBorderGradient
+          containerClassName="w-full mt-4"
+          className="py-1.5 w-full flex items-center justify-center gap-2"
+          onClick={onClick}
+        >
           Start <FiArrowRight size={14} />
-        </button>
+        </HoverBorderGradient>
       )}
       
       {locked && (
-        <div className="absolute inset-0 backdrop-blur-[4px] bg-black/50 flex items-center justify-center">
+        <div className="absolute inset-0 backdrop-blur-[2px] bg-black/40 flex items-center justify-center">
           <FiLock className="text-white/30 text-4xl animate-pulse-slow" />
         </div>
       )}
@@ -67,9 +75,10 @@ const MoodButton = ({ emoji, label, selected, onClick }: { emoji: string, label:
     onClick={onClick}
     className={`flex flex-col items-center p-3 rounded-xl transition-all duration-300 transform ${
       selected 
-        ? 'bg-black/60 backdrop-blur-md border border-white/20 scale-105' 
-        : 'bg-black/40 backdrop-blur-sm border border-white/10 hover:border-white/20 hover:scale-[1.02]'
+        ? 'bg-black/60 backdrop-blur-xl border border-white/20 scale-105 shadow-lg' 
+        : 'bg-black/40 backdrop-blur-xl border border-white/10 hover:border-white/20 hover:scale-[1.02]'
     }`}
+    style={{ transform: selected ? 'translateZ(4px)' : 'translateZ(2px)' }}
   >
     <span className="text-2xl mb-1">{emoji}</span>
     <span className="text-xs font-medium text-white">{label}</span>
@@ -92,9 +101,12 @@ const ActionCard = ({ icon, label, onClick }: { icon: React.ReactNode, label: st
   
   return (
     <div 
-      className="flex flex-col items-center justify-center gap-2 p-3 bg-black/40 backdrop-blur-sm border border-white/10 rounded-xl hover:border-white/20 hover:bg-black/50 active:scale-[0.98] transition-all duration-300 cursor-pointer transform hover:scale-[1.02]"
+      className="flex flex-col items-center justify-center gap-2 p-3 bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl hover:border-white/20 hover:bg-black/50 active:scale-[0.98] transition-all duration-300 cursor-pointer transform hover:scale-[1.02] shadow-lg"
       onClick={onClick}
-      style={{ boxShadow: `0 4px 12px ${getThemeGlow()}` }}
+      style={{ 
+        boxShadow: `0 8px 20px ${getThemeGlow()}`,
+        transform: 'translateZ(3px)'
+      }}
     >
       <div className="text-xl text-white">{icon}</div>
       <span className="text-xs font-medium text-white">{label}</span>
@@ -148,7 +160,7 @@ const Home = () => {
   };
   
   return (
-    <div className="min-h-screen pb-24 text-white">
+    <div className="min-h-screen pb-24 text-white perspective-1000">
       {showScanner && (
         <QRScanner 
           onClose={() => setShowScanner(false)} 
@@ -167,14 +179,16 @@ const Home = () => {
           
           <div className="flex items-center gap-3">
             <button 
-              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center transition-all duration-300 hover:bg-black/60 hover:border-white/20 active:scale-[0.95]"
+              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 flex items-center justify-center transition-all duration-300 hover:bg-black/60 hover:border-white/20 active:scale-[0.95] shadow-lg transform hover:scale-105"
               onClick={() => setShowScanner(true)}
+              style={{ transform: 'translateZ(5px)' }}
             >
               <FiCamera className="text-white" />
             </button>
             <button 
-              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center transition-all duration-300 hover:bg-black/60 hover:border-white/20 active:scale-[0.95]"
+              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 flex items-center justify-center transition-all duration-300 hover:bg-black/60 hover:border-white/20 active:scale-[0.95] shadow-lg transform hover:scale-105"
               onClick={() => navigate("/profile")}
+              style={{ transform: 'translateZ(5px)' }}
             >
               <FiUser className="text-white" />
             </button>
@@ -183,11 +197,14 @@ const Home = () => {
         
         <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
           <div className="relative">
-            <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/50" />
+            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/50">
+              <FiSearch />
+            </div>
             <input 
               type="text" 
               placeholder="Search for quests or tasks..." 
-              className="w-full h-12 bg-black/40 backdrop-blur-sm border border-white/10 rounded-full pl-11 pr-4 text-white placeholder:text-white/50 focus:outline-none focus:border-white/20 transition-all duration-300"
+              className="w-full h-12 bg-black/40 backdrop-blur-xl border border-white/10 rounded-full pl-11 pr-4 text-white placeholder:text-white/50 focus:outline-none focus:border-white/20 transition-all duration-300 shadow-inner"
+              style={{ transform: 'translateZ(1px)' }}
             />
           </div>
         </div>
@@ -205,15 +222,18 @@ const Home = () => {
           />
         </div>
         
-        <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-xl p-4 animate-fade-in" style={{ animationDelay: "0.4s" }}>
+        <div 
+          className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl p-4 animate-fade-in shadow-lg"
+          style={{ animationDelay: "0.4s", transform: 'translateZ(3px)' }}
+        >
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">Progress</h2>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1 bg-black/30 px-2.5 py-1 rounded-full border border-white/5">
                 <FiStar className="text-white/70" size={14} />
                 <span className="text-sm text-white/70">{streak} day streak</span>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 bg-black/30 px-2.5 py-1 rounded-full border border-white/5">
                 <FiZap className="text-white/70" size={14} />
                 <span className="text-sm text-white/70">{xp} XP</span>
               </div>
@@ -225,10 +245,10 @@ const Home = () => {
               <span className="text-white/70">Level {level}</span>
               <span className="text-white/70">{Math.floor(progress)}%</span>
             </div>
-            <div className="h-2 bg-black/30 rounded-full overflow-hidden">
+            <div className="h-2 bg-black/30 rounded-full overflow-hidden border border-white/5">
               <div 
                 className={`h-full ${getThemeColor()}`}
-                style={{ width: `${progress}%` }}
+                style={{ width: `${progress}%`, transition: 'width 1s ease-in-out' }}
               ></div>
             </div>
             <div className="text-xs text-white/70 text-right">{1000 - (xp % 1000)} XP to Level {level + 1}</div>
@@ -238,7 +258,7 @@ const Home = () => {
         <div className="animate-fade-in" style={{ animationDelay: "0.5s" }}>
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-lg font-semibold">How do you feel today?</h2>
-            <span className="text-xs text-white/70">Daily check-in</span>
+            <span className="text-xs text-white/70 bg-black/30 px-2 py-1 rounded-full border border-white/5">Daily check-in</span>
           </div>
           
           <div className="grid grid-cols-3 gap-3">

@@ -23,22 +23,26 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AppProvider>
         <TooltipProvider>
+          {/* Theme background applied to the entire app */}
           <ThemeBackground />
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/quests" element={<Quests />} />
-              <Route path="/coach" element={<Coach />} />
-              <Route path="/community" element={<Community />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/survey" element={<Survey />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          
+          <div className="perspective-1000 transform-gpu"> {/* Adding 3D perspective to the entire app */}
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/quests" element={<Quests />} />
+                <Route path="/coach" element={<Coach />} />
+                <Route path="/community" element={<Community />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/survey" element={<Survey />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </div>
         </TooltipProvider>
       </AppProvider>
     </QueryClientProvider>

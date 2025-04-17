@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { FiRefreshCw, FiShare2 } from "react-icons/fi";
 import { useApp } from "@/context/AppContext";
+import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 
 // Predefined list of affirmations
 const affirmations = [
@@ -74,13 +75,13 @@ export const DailyAffirmation: React.FC = () => {
     }
   };
   
-  // Theme-specific styles
-  const getThemeGlow = () => {
+  // Theme-specific colors
+  const getThemeColor = () => {
     switch (selectedTheme) {
-      case "Discipline": return "rgba(255, 0, 0, 0.1)";
-      case "Focus": return "rgba(0, 128, 128, 0.1)";
-      case "Resilience": return "rgba(255, 165, 0, 0.1)";
-      case "Wildcards": return "rgba(0, 255, 0, 0.1)";
+      case "Discipline": return "rgba(255, 0, 0, 0.2)";
+      case "Focus": return "rgba(0, 128, 128, 0.2)";
+      case "Resilience": return "rgba(255, 165, 0, 0.2)";
+      case "Wildcards": return "rgba(0, 255, 0, 0.2)";
       default: return "rgba(255, 255, 255, 0.1)";
     }
   };
@@ -90,38 +91,40 @@ export const DailyAffirmation: React.FC = () => {
   }
   
   return (
-    <div 
-      className="w-full relative backdrop-blur-sm bg-black/40 border border-white/10 rounded-full p-2.5 overflow-hidden animate-fade-in shadow-lg"
-      style={{ boxShadow: `0 0 15px ${getThemeGlow()}` }}
-    >
-      {/* Shine effect overlay */}
+    <div className="relative mb-3 animate-fade-in">
       <div 
-        className="absolute inset-0 z-0 pointer-events-none"
-        style={{
-          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
-          transform: `translateX(${shinePosition}%)`,
-          transition: "transform 1s ease-in-out",
-        }}
-      />
-      
-      <div className="flex items-center justify-between z-10 relative px-3">
-        <span className="text-white/90 text-sm font-medium italic truncate mr-2 flex-1">{affirmation}</span>
+        className="w-full relative backdrop-blur-xl bg-black/30 border border-white/10 rounded-full py-1.5 px-3 overflow-hidden shadow-lg"
+        style={{ boxShadow: `0 0 15px ${getThemeColor()}` }}
+      >
+        {/* Shine effect overlay */}
+        <div 
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{
+            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
+            transform: `translateX(${shinePosition}%)`,
+            transition: "transform 1s ease-in-out",
+          }}
+        />
         
-        <div className="flex gap-1 shrink-0">
-          <button 
-            onClick={refreshAffirmation}
-            className="p-1 rounded-full bg-[#222222] text-white hover:bg-[#333333] transition-all"
-            aria-label="Refresh affirmation"
-          >
-            <FiRefreshCw size={12} />
-          </button>
-          <button 
-            onClick={shareAffirmation}
-            className="p-1 rounded-full bg-[#222222] text-white hover:bg-[#333333] transition-all"
-            aria-label="Share affirmation"
-          >
-            <FiShare2 size={12} />
-          </button>
+        <div className="flex items-center justify-between z-10 relative">
+          <span className="text-white/90 text-xs font-medium italic truncate mr-2 flex-1">{affirmation}</span>
+          
+          <div className="flex gap-1 shrink-0">
+            <button 
+              onClick={refreshAffirmation}
+              className="p-1 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all transform hover:scale-110 active:scale-95"
+              aria-label="Refresh affirmation"
+            >
+              <FiRefreshCw size={10} />
+            </button>
+            <button 
+              onClick={shareAffirmation}
+              className="p-1 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all transform hover:scale-110 active:scale-95"
+              aria-label="Share affirmation"
+            >
+              <FiShare2 size={10} />
+            </button>
+          </div>
         </div>
       </div>
     </div>
