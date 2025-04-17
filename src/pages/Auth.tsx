@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Logo } from "@/components/Logo";
@@ -24,39 +23,35 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [animation, setAnimation] = useState("");
   
-  const { setUser } = useApp();
+  const { setUser, setIsGuest } = useApp();
   
-  // Mock login function
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // In a real app, this would connect to your authentication backend
       if (mode === 'login') {
-        // Mock successful login
         setUser({
           id: "user-1",
           name: "Test User",
           email: email || phone,
         });
+        setIsGuest(false);
         navigate('/home');
       } else {
-        // Mock registration
         if (password !== confirmPassword) {
           throw new Error("Passwords don't match");
         }
         
-        // Mock successful registration
         setUser({
           id: "user-1",
           name: name,
           email: email || phone,
         });
+        setIsGuest(false);
         navigate('/survey');
       }
     } catch (err: any) {
@@ -70,15 +65,14 @@ const Auth = () => {
     setLoading(true);
     
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Mock successful Google login
       setUser({
         id: "google-user-1",
         name: "Google User",
         email: "google@example.com",
       });
+      setIsGuest(false);
       navigate('/home');
     } catch (err: any) {
       setError("Google authentication failed");
@@ -97,7 +91,6 @@ const Auth = () => {
   
   return (
     <div className="min-h-screen w-full flex flex-col justify-center items-center bg-black p-4">
-      {/* Background effects */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-[300px] h-[300px] bg-[#333333]/10 rounded-full blur-[100px]"></div>
         <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-[#444444]/10 rounded-full blur-[100px]"></div>

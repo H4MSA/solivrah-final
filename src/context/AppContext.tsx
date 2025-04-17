@@ -2,6 +2,12 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+type User = {
+  id: string;
+  name: string;
+  email: string;
+};
+
 type Theme = "Discipline" | "Focus" | "Resilience" | "Wildcards";
 
 interface AppContextType {
@@ -9,19 +15,22 @@ interface AppContextType {
   selectedTheme: Theme;
   streak: number;
   xp: number;
+  user: User | null;
   setIsGuest: (value: boolean) => void;
   setSelectedTheme: (theme: Theme) => void;
   incrementStreak: () => void;
   addXP: (amount: number) => void;
+  setUser: (user: User | null) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [isGuest, setIsGuest] = useState(true);
   const [selectedTheme, setSelectedTheme] = useState<Theme>("Discipline");
   const [streak, setStreak] = useState(0);
   const [xp, setXP] = useState(0);
+  const [user, setUser] = useState<User | null>(null);
   
   // Load saved data from local storage for guest users
   useEffect(() => {
@@ -58,10 +67,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     selectedTheme,
     streak,
     xp,
+    user,
     setIsGuest,
     setSelectedTheme,
     incrementStreak,
-    addXP
+    addXP,
+    setUser
   };
   
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
