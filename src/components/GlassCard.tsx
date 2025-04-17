@@ -7,6 +7,7 @@ interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
   variant?: "default" | "elevated" | "subtle" | "primary" | "accent" | "interactive" | "dark";
   animate?: "fade" | "pop" | "blur" | "none";
+  interactive?: boolean;
 }
 
 export const GlassCard: React.FC<GlassCardProps> = ({ 
@@ -14,6 +15,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   className,
   variant = "default",
   animate = "none",
+  interactive = false,
   ...props 
 }) => {
   const getAnimationClass = () => {
@@ -28,17 +30,17 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   return (
     <div 
       className={cn(
-        "backdrop-blur-md border rounded-2xl shadow-lg transition-all duration-300",
-        variant === "default" && "bg-card/40 border-white/10",
-        variant === "elevated" && "bg-card/60 border-white/20 shadow-xl",
-        variant === "subtle" && "bg-card/20 border-white/5",
-        variant === "primary" && "bg-gradient-to-br from-primary/30 to-secondary/30 border-primary/20",
-        variant === "accent" && "bg-gradient-to-br from-accent/30 to-accent/10 border-accent/20",
-        variant === "interactive" && "bg-card/40 border-white/10 hover:bg-card/60 hover:border-white/20 cursor-pointer active:scale-[0.98]",
-        variant === "dark" && "bg-black/70 border-white/5 hover:border-white/10",
-        "hover:shadow-xl",
+        "backdrop-blur-md border rounded-xl shadow-lg transition-all duration-300",
+        variant === "default" && "bg-[#121212]/90 border-[#333333] text-white",
+        variant === "elevated" && "bg-[#181818]/95 border-[#383838] shadow-xl text-white",
+        variant === "subtle" && "bg-[#0D0D0D]/95 border-[#222222] text-white",
+        variant === "primary" && "bg-gradient-to-br from-[#121212]/95 to-[#1F1F1F]/95 border-[#333333]",
+        variant === "accent" && "bg-gradient-to-br from-[#1D1D1D]/95 to-[#121212]/95 border-[#333333]",
+        variant === "interactive" && "bg-[#121212]/95 border-[#333333] hover:bg-[#181818] hover:border-[#444444] cursor-pointer active:scale-[0.98]",
+        variant === "dark" && "bg-black/90 border-[#222222] hover:border-[#333333]",
+        interactive && "cursor-pointer hover:shadow-xl active:scale-[0.98] hover:bg-[#181818]",
         getAnimationClass(),
-        "p-6",
+        "p-5",
         className
       )}
       {...props}
