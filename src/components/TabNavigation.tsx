@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FiHome, FiList, FiUsers, FiMessageCircle, FiUser } from "react-icons/fi";
+import { useApp } from "@/context/AppContext";
 
 interface NavItemProps {
   icon: React.ReactNode;
@@ -12,33 +13,48 @@ interface NavItemProps {
 }
 
 const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive, onClick }) => {
+  const { selectedTheme } = useApp();
+  
+  // Theme-specific glow colors
+  const getThemeGlow = () => {
+    if (!isActive) return "transparent";
+    
+    switch (selectedTheme) {
+      case "Discipline": return "rgba(255, 0, 0, 0.3)";
+      case "Focus": return "rgba(0, 128, 128, 0.3)";
+      case "Resilience": return "rgba(255, 165, 0, 0.3)";
+      case "Wildcards": return "rgba(0, 255, 0, 0.3)";
+      default: return "rgba(255, 255, 255, 0.3)";
+    }
+  };
+  
   return (
     <div 
-      className="flex flex-col items-center justify-center py-2 px-3 transition-all duration-300 cursor-pointer relative"
+      className="flex flex-col items-center justify-center py-1 px-2 transition-all duration-300 cursor-pointer"
       onClick={onClick}
     >
-      <div className={`relative transition-all duration-300 ${isActive ? 'scale-110' : ''}`}>
-        {isActive && (
-          <div className="absolute -inset-1 bg-white/5 rounded-full blur-sm animate-pulse-slow"></div>
-        )}
-        <div className={`text-xl mb-1 transition-all duration-300 ${isActive ? 'text-white' : 'text-[#808080]'}`}>
+      <div 
+        className={`p-2 rounded-full flex items-center justify-center transition-all duration-300 ${
+          isActive ? 'scale-110 bg-black/30 backdrop-blur-md' : 'scale-100'
+        }`}
+        style={{ 
+          boxShadow: isActive ? `0 0 10px ${getThemeGlow()}` : 'none',
+          transform: isActive ? 'translateY(-8px)' : 'translateY(0)'
+        }}
+      >
+        <div className={`text-xl transition-all duration-300 ${isActive ? 'text-white' : 'text-[#808080]'}`}>
           {icon}
         </div>
       </div>
       
-      <span className={`text-xs font-medium transition-all duration-300 ${isActive ? 'text-white' : 'text-[#808080]'}`}>
+      <span 
+        className={`text-xs font-medium transition-all duration-300 ${
+          isActive ? 'text-white opacity-100' : 'text-[#808080] opacity-70'
+        }`}
+        style={{ marginTop: isActive ? '0' : '8px' }}
+      >
         {label}
       </span>
-      
-      {isActive && (
-        <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full bg-white animate-pulse-slow"></div>
-      )}
-      
-      <div 
-        className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 h-0.5 rounded-full transition-all duration-300 ${
-          isActive ? 'w-10 bg-white' : 'w-0 bg-transparent'
-        }`} 
-      />
     </div>
   );
 };
@@ -47,6 +63,7 @@ export const TabNavigation: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mounted, setMounted] = useState(false);
+  const { selectedTheme } = useApp();
   
   // Fix the active path detection
   const isActive = (path: string) => location.pathname === path;
@@ -74,14 +91,28 @@ export const TabNavigation: React.FC = () => {
       }, 300);
     }, 100);
   };
+  
+  // Get theme-specific color
+  const getThemeBorderColor = () => {
+    switch (selectedTheme) {
+      case "Discipline": return "rgba(255, 0, 0, 0.2)";
+      case "Focus": return "rgba(0, 128, 128, 0.2)";
+      case "Resilience": return "rgba(255, 165, 0, 0.2)";
+      case "Wildcards": return "rgba(0, 255, 0, 0.2)";
+      default: return "rgba(255, 255, 255, 0.1)";
+    }
+  };
 
   return (
     <div className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-500 ${mounted ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'}`}>
       {/* Blurred background */}
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-xl border-t border-[#222222] z-0"></div>
+      <div 
+        className="absolute inset-0 bg-black/70 backdrop-blur-xl border-t shadow-xl z-0"
+        style={{ borderColor: getThemeBorderColor() }}
+      ></div>
       
       {/* Content */}
-      <div className="relative z-10 flex items-center justify-around h-16 w-full max-w-lg mx-auto px-2">
+      <div className="relative z-10 flex items-center justify-around py-1 w-full max-w-lg mx-auto px-2 h-16">
         {navItems.map((item) => (
           <NavItem 
             key={item.path}
@@ -93,6 +124,9 @@ export const TabNavigation: React.FC = () => {
           />
         ))}
       </div>
+      
+      {/* Safe area padding for notched phones */}
+      <div className="h-6 bg-black"></div>
     </div>
   );
 };

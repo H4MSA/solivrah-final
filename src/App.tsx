@@ -14,6 +14,7 @@ import Survey from "./pages/Survey";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { AppProvider } from "./context/AppContext";
+import { ThemeBackground } from "./components/ThemeBackground";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AppProvider>
         <TooltipProvider>
+          <ThemeBackground />
           <Toaster />
           <Sonner />
           <BrowserRouter>

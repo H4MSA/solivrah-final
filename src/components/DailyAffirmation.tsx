@@ -74,12 +74,26 @@ export const DailyAffirmation: React.FC = () => {
     }
   };
   
+  // Theme-specific styles
+  const getThemeGlow = () => {
+    switch (selectedTheme) {
+      case "Discipline": return "rgba(255, 0, 0, 0.1)";
+      case "Focus": return "rgba(0, 128, 128, 0.1)";
+      case "Resilience": return "rgba(255, 165, 0, 0.1)";
+      case "Wildcards": return "rgba(0, 255, 0, 0.1)";
+      default: return "rgba(255, 255, 255, 0.1)";
+    }
+  };
+  
   if (!affirmation) {
     return null;
   }
   
   return (
-    <div className="w-full relative bg-[#121212] border border-[#333333] rounded-xl p-3 overflow-hidden animate-fade-in">
+    <div 
+      className="w-full relative backdrop-blur-sm bg-black/40 border border-white/10 rounded-full p-2.5 overflow-hidden animate-fade-in shadow-lg"
+      style={{ boxShadow: `0 0 15px ${getThemeGlow()}` }}
+    >
       {/* Shine effect overlay */}
       <div 
         className="absolute inset-0 z-0 pointer-events-none"
@@ -90,26 +104,23 @@ export const DailyAffirmation: React.FC = () => {
         }}
       />
       
-      <div className="flex items-center justify-between z-10 relative">
-        <div className="flex items-center gap-2">
-          <span className="text-white font-medium">Today's Affirmation:</span>
-          <span className="text-white font-medium italic animate-fade-in">{affirmation}</span>
-        </div>
+      <div className="flex items-center justify-between z-10 relative px-3">
+        <span className="text-white/90 text-sm font-medium italic truncate mr-2 flex-1">{affirmation}</span>
         
-        <div className="flex gap-2">
+        <div className="flex gap-1 shrink-0">
           <button 
             onClick={refreshAffirmation}
-            className="p-1.5 rounded-full bg-[#222222] text-white hover:bg-[#333333] transition-all"
+            className="p-1 rounded-full bg-[#222222] text-white hover:bg-[#333333] transition-all"
             aria-label="Refresh affirmation"
           >
-            <FiRefreshCw size={14} />
+            <FiRefreshCw size={12} />
           </button>
           <button 
             onClick={shareAffirmation}
-            className="p-1.5 rounded-full bg-[#222222] text-white hover:bg-[#333333] transition-all"
+            className="p-1 rounded-full bg-[#222222] text-white hover:bg-[#333333] transition-all"
             aria-label="Share affirmation"
           >
-            <FiShare2 size={14} />
+            <FiShare2 size={12} />
           </button>
         </div>
       </div>
