@@ -109,6 +109,11 @@
     @apply active:scale-[0.98] transition-all touch-manipulation;
     -webkit-tap-highlight-color: transparent;
   }
+  
+  /* Page transition effect */
+  .page-transition {
+    @apply duration-300 transition-opacity opacity-80;
+  }
 }
 
 @layer utilities {
@@ -138,6 +143,10 @@
   
   .touch-feedback {
     @apply active:scale-[0.98] transition-transform duration-200;
+  }
+  
+  .task-locked {
+    @apply opacity-40 filter grayscale blur-[2px] pointer-events-none;
   }
 }
 
@@ -190,10 +199,6 @@
     @apply text-[#808080] hover:text-white;
   }
   
-  .task-locked {
-    @apply opacity-30 blur-[2px] grayscale pointer-events-none;
-  }
-
   .menu-item {
     @apply flex items-center gap-3 p-4 rounded-xl bg-[#121212] border border-[#333333] 
       hover:border-[#444444] transition-all cursor-pointer active:scale-[0.98];
@@ -208,6 +213,33 @@
 
 .animate-fade-in {
   animation: fade-in 0.4s ease-out forwards;
+}
+
+@keyframes fade-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(10px); }
+}
+
+.animate-fade-out {
+  animation: fade-out 0.4s ease-out forwards;
+}
+
+@keyframes blur-in {
+  from { opacity: 0; filter: blur(8px); }
+  to { opacity: 1; filter: blur(0); }
+}
+
+.animate-blur-in {
+  animation: blur-in 0.5s ease-out forwards;
+}
+
+@keyframes blur-out {
+  from { opacity: 1; filter: blur(0); }
+  to { opacity: 0; filter: blur(8px); }
+}
+
+.animate-blur-out {
+  animation: blur-out 0.5s ease-out forwards;
 }
 
 @keyframes scale {
@@ -239,6 +271,26 @@
   animation: float 3s infinite ease-in-out;
 }
 
+@keyframes float-reverse {
+  0% { transform: translateY(-8px); }
+  50% { transform: translateY(0px); }
+  100% { transform: translateY(-8px); }
+}
+
+.animate-float-reverse {
+  animation: float-reverse 4s infinite ease-in-out;
+}
+
+@keyframes float-slow {
+  0% { transform: translateY(-4px); }
+  50% { transform: translateY(4px); }
+  100% { transform: translateY(-4px); }
+}
+
+.animate-float-slow {
+  animation: float-slow 8s infinite ease-in-out;
+}
+
 @keyframes pop-in {
   0% { 
     opacity: 0; 
@@ -257,19 +309,32 @@
   animation: pop-in 0.5s forwards;
 }
 
-@keyframes blur-in {
-  from { 
-    opacity: 0; 
-    filter: blur(8px);
-  }
-  to { 
-    opacity: 1; 
-    filter: blur(0);
-  }
+@keyframes morph {
+  0% { border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%; }
+  100% { border-radius: 40% 60%; }
 }
 
-.animate-blur-in {
-  animation: blur-in 0.5s ease-out forwards;
+.animate-morph {
+  animation: morph 5s ease-in-out infinite alternate;
+}
+
+@keyframes progress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(0); }
+}
+
+.animate-progress {
+  animation: progress 2s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
 }
 
 /* Dynamic background bubble effects */
@@ -289,3 +354,31 @@
     @apply touch-manipulation;
   }
 }
+
+/* 3D Tilt Effect */
+.tilt-card {
+  transform-style: preserve-3d;
+  transform: perspective(1000px);
+  transition: transform 0.3s ease;
+}
+
+.tilt-card-content {
+  transform: translateZ(20px);
+}
+
+/* Spin Animation */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin 8s linear infinite;
+}
+
+/* Stagger animations */
+.stagger-item:nth-child(1) { animation-delay: 0.1s; }
+.stagger-item:nth-child(2) { animation-delay: 0.2s; }
+.stagger-item:nth-child(3) { animation-delay: 0.3s; }
+.stagger-item:nth-child(4) { animation-delay: 0.4s; }
+.stagger-item:nth-child(5) { animation-delay: 0.5s; }

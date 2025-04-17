@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { TabNavigation } from "@/components/TabNavigation";
-import { FiArrowRight, FiStar, FiZap, FiUser, FiCamera, FiMessageCircle, FiUsers, FiChevronRight, FiSearch } from "react-icons/fi";
+import { FiArrowRight, FiStar, FiZap, FiUser, FiCamera, FiMessageCircle, FiUsers, FiChevronRight, FiSearch, FiLock } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { QRScanner } from "@/components/QRScanner";
 import { useApp } from "@/context/AppContext";
@@ -11,13 +10,20 @@ import { Progress } from "@/components/ui/progress";
 
 const QuestCard = ({ title, description, locked = false, onClick }: { title: string, description: string, locked?: boolean, onClick: () => void }) => (
   <div 
-    className={`bg-[#121212] border border-[#333333] rounded-xl p-5 transition-all duration-300 ${locked ? 'opacity-40 filter grayscale blur-[1px]' : 'cursor-pointer hover:border-[#444444] active:scale-[0.98]'}`}
+    className={`relative overflow-hidden bg-[#121212] border border-[#333333] rounded-xl p-5 transition-all duration-300 ${
+      locked 
+        ? 'pointer-events-none task-locked' 
+        : 'cursor-pointer hover:border-[#444444] hover:scale-[1.01] active:scale-[0.98]'
+    }`}
     onClick={!locked ? onClick : undefined}
   >
     <div className="flex justify-between items-center mb-3">
       <h3 className="text-white font-medium">{title}</h3>
       {locked ? (
-        <span className="text-xs bg-[#333333] px-2 py-1 rounded-full text-white">Locked</span>
+        <span className="text-xs bg-[#333333] px-2 py-1 rounded-full text-white flex items-center gap-1">
+          <FiLock size={12} />
+          <span>Locked</span>
+        </span>
       ) : (
         <span className="text-xs bg-[#222222] px-2 py-1 rounded-full text-white">Active</span>
       )}
@@ -28,16 +34,22 @@ const QuestCard = ({ title, description, locked = false, onClick }: { title: str
         Start <FiArrowRight size={14} />
       </button>
     )}
+    
+    {locked && (
+      <div className="absolute inset-0 backdrop-blur-[4px] bg-black/50 flex items-center justify-center">
+        <FiLock className="text-white/30 text-4xl animate-pulse-slow" />
+      </div>
+    )}
   </div>
 );
 
 const MoodButton = ({ emoji, label, selected, onClick }: { emoji: string, label: string, selected?: boolean, onClick: () => void }) => (
   <button 
     onClick={onClick}
-    className={`flex flex-col items-center p-4 rounded-xl transition-all duration-300 ${
+    className={`flex flex-col items-center p-4 rounded-xl transition-all duration-300 transform ${
       selected 
-        ? 'bg-[#222222] border border-[#444444]' 
-        : 'bg-[#121212] border border-[#333333] hover:border-[#444444]'
+        ? 'bg-[#222222] border border-[#444444] scale-105' 
+        : 'bg-[#121212] border border-[#333333] hover:border-[#444444] hover:scale-[1.02]'
     }`}
   >
     <span className="text-3xl mb-2">{emoji}</span>
@@ -47,7 +59,7 @@ const MoodButton = ({ emoji, label, selected, onClick }: { emoji: string, label:
 
 const ActionCard = ({ icon, label, onClick }: { icon: React.ReactNode, label: string, onClick: () => void }) => (
   <div 
-    className="flex flex-col items-center justify-center gap-3 p-4 bg-[#121212] border border-[#333333] rounded-xl hover:border-[#444444] hover:bg-[#181818] active:scale-[0.98] transition-all duration-300 cursor-pointer"
+    className="flex flex-col items-center justify-center gap-3 p-4 bg-[#121212] border border-[#333333] rounded-xl hover:border-[#444444] hover:bg-[#181818] active:scale-[0.98] transition-all duration-300 cursor-pointer transform hover:scale-[1.02]"
     onClick={onClick}
   >
     <div className="text-2xl text-white">{icon}</div>
@@ -63,7 +75,6 @@ const Home = () => {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   
   useEffect(() => {
-    // Set appropriate greeting based on time of day
     const hour = new Date().getHours();
     if (hour >= 12 && hour < 17) {
       setGreeting("Good afternoon");
@@ -74,17 +85,11 @@ const Home = () => {
   
   const handleScan = (code: string) => {
     console.log("QR code scanned:", code);
-    // In a real app, this would validate the code against the backend
     setShowScanner(false);
-    
-    // Give some XP for scanning a code
     addXP(50);
   };
   
-  // Calculate level based on XP (1000 XP per level)
   const level = Math.floor(xp / 1000) + 1;
-  
-  // Calculate progress to next level (percentage)
   const progress = ((xp % 1000) / 1000) * 100;
   
   const moods = [
@@ -103,7 +108,6 @@ const Home = () => {
       )}
       
       <div className="p-4 space-y-6">
-        {/* Header */}
         <div className="flex justify-between items-center py-2 animate-fade-in">
           <div>
             <h1 className="text-xl text-white font-medium">
@@ -128,7 +132,6 @@ const Home = () => {
           </div>
         </div>
         
-        {/* Search Bar */}
         <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
           <div className="relative">
             <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#888888]" />
@@ -140,12 +143,10 @@ const Home = () => {
           </div>
         </div>
         
-        {/* Daily Affirmation */}
         <div className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
           <DailyAffirmation />
         </div>
         
-        {/* Today's Quest */}
         <div className="animate-fade-in" style={{ animationDelay: "0.3s" }}>
           <h2 className="text-xl font-semibold mb-3">Today's Quest</h2>
           <QuestCard 
@@ -155,7 +156,6 @@ const Home = () => {
           />
         </div>
         
-        {/* Progress Overview */}
         <div className="bg-[#121212] border border-[#333333] rounded-xl p-5 animate-fade-in" style={{ animationDelay: "0.4s" }}>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">Progress</h2>
@@ -176,13 +176,16 @@ const Home = () => {
               <span className="text-[#AAAAAA]">Level {level}</span>
               <span className="text-[#AAAAAA]">{Math.floor(progress)}%</span>
             </div>
-            <Progress value={progress} className="h-2 bg-[#222222]" 
-                    indicatorClassName="bg-white" />
+            <Progress 
+              value={progress} 
+              className="h-2 bg-[#222222]" 
+              indicatorClassName="bg-white"
+              levelIndicator
+            />
             <div className="text-xs text-[#AAAAAA] text-right">{1000 - (xp % 1000)} XP to Level {level + 1}</div>
           </div>
         </div>
         
-        {/* Mood Tracker */}
         <div className="animate-fade-in" style={{ animationDelay: "0.5s" }}>
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-xl font-semibold">How do you feel today?</h2>
@@ -202,7 +205,6 @@ const Home = () => {
           </div>
         </div>
         
-        {/* Quick Actions */}
         <div className="animate-fade-in" style={{ animationDelay: "0.6s" }}>
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-xl font-semibold">Quick Actions</h2>
@@ -227,7 +229,6 @@ const Home = () => {
           </div>
         </div>
         
-        {/* Tomorrow's Tasks - Locked and Blurred */}
         <div className="animate-fade-in" style={{ animationDelay: "0.7s" }}>
           <h2 className="text-xl font-semibold mb-3">Coming Up</h2>
           <QuestCard 

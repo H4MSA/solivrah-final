@@ -2,11 +2,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Logo } from "@/components/Logo";
-import { FiArrowRight, FiShield, FiCheckCircle } from "react-icons/fi";
+import { FiArrowRight, FiShield, FiCheckCircle, FiUser } from "react-icons/fi";
 import { GlassCard } from "@/components/GlassCard";
 
 const Feature = ({ icon, text }: { icon: React.ReactNode, text: string }) => (
-  <div className="flex items-start gap-3 p-4 bg-black/40 backdrop-blur-md rounded-xl animate-pop-in border border-[#333333] hover:border-[#444444] transition-all duration-300 cursor-pointer">
+  <div className="flex items-start gap-3 p-4 bg-black/40 backdrop-blur-md rounded-xl animate-pop-in border border-[#333333] hover:border-[#444444] transition-all duration-300 cursor-pointer transform hover:scale-[1.02]">
     <div className="p-2 rounded-full bg-[#222222] text-white flex-shrink-0">
       {icon}
     </div>
@@ -30,9 +30,10 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col justify-between p-6 bg-black overflow-hidden">
       {/* Background effects */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#333333]/10 rounded-full blur-[100px]"></div>
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[#444444]/10 rounded-full blur-[100px]"></div>
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#333333]/10 rounded-full blur-[100px] animate-float"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[#444444]/10 rounded-full blur-[100px] animate-float-reverse"></div>
+        <div className="absolute top-1/2 left-1/3 w-[200px] h-[200px] bg-[#222222]/10 rounded-full blur-[80px] animate-float-slow"></div>
       </div>
       
       <div className={`flex-1 flex flex-col justify-center items-center text-center space-y-8 transition-all duration-1000 z-10 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
@@ -65,17 +66,27 @@ const Index = () => {
           
           <div className="flex flex-col w-full gap-4 mt-6">
             <button
-              className="flex items-center justify-center gap-2 px-6 py-4 bg-white text-black rounded-xl font-semibold text-lg transition-all duration-300 hover:bg-[#EEEEEE] active:scale-[0.98] shadow-lg"
-              onClick={() => navigate("/survey")}
+              className="flex items-center justify-center gap-2 px-6 py-4 bg-white text-black rounded-xl font-semibold text-lg transition-all duration-300 hover:bg-[#EEEEEE] active:scale-[0.98] shadow-lg animate-pop-in"
+              onClick={() => navigate("/auth")}
+              style={{ animationDelay: "0.3s" }}
             >
-              Get Started <FiArrowRight />
+              Create Account <FiArrowRight />
             </button>
             
             <button
-              className="flex items-center justify-center gap-2 px-6 py-3.5 bg-[#222222] text-white rounded-xl font-medium transition-all duration-300 hover:bg-[#333333] active:scale-[0.98] border border-[#333333]"
+              className="flex items-center justify-center gap-2 px-6 py-3.5 bg-[#222222] text-white rounded-xl font-medium transition-all duration-300 hover:bg-[#333333] active:scale-[0.98] border border-[#333333] animate-pop-in"
               onClick={() => navigate("/home")}
+              style={{ animationDelay: "0.4s" }}
             >
               Continue as Guest
+            </button>
+            
+            <button
+              className="flex items-center justify-center gap-2 px-6 py-3.5 bg-transparent text-white rounded-xl font-medium transition-all duration-300 hover:bg-[#121212] active:scale-[0.98] border border-[#333333] animate-pop-in"
+              onClick={() => navigate("/auth")}
+              style={{ animationDelay: "0.5s" }}
+            >
+              <FiUser size={18} /> Sign In
             </button>
           </div>
         </div>

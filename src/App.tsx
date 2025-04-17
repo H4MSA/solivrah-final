@@ -11,6 +11,7 @@ import Coach from "./pages/Coach";
 import Community from "./pages/Community";
 import Profile from "./pages/Profile";
 import Survey from "./pages/Survey";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { AppProvider } from "./context/AppContext";
 
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/community" element={<Community />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/survey" element={<Survey />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
