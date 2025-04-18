@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { TabNavigation } from "@/components/TabNavigation";
 import { GlassCard } from "@/components/GlassCard";
@@ -15,10 +16,12 @@ import {
   Info, 
   LogOut, 
   RefreshCw,
-  Users 
+  Users
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { ProfileReset } from "@/components/ProfileReset";
+import { ProfileAchievements } from "@/components/ProfileAchievements";
+import { ProfileStats } from "@/components/ProfileStats";
 
 const ProfileSection = ({ title, children }: { title: string, children: React.ReactNode }) => (
   <div className="mb-6">
@@ -237,6 +240,10 @@ const Profile = () => {
             </ProfileSection>
           </>
         )}
+        
+        {activeTab === 'achievements' && <ProfileAchievements />}
+        
+        {activeTab === 'stats' && <ProfileStats />}
       </div>
       
       <TabNavigation />

@@ -15,10 +15,37 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { AppProvider } from "./context/AppContext";
 import { ThemeBackground } from "./components/ThemeBackground";
+import { useEffect } from "react";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 const App = () => {
+  // Request camera permission on app startup
+  useEffect(() => {
+    const requestCameraPermission = async () => {
+      try {
+        // Just check if we can access the camera
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        // Stop the stream immediately after checking permission
+        stream.getTracks().forEach(track => track.stop());
+        console.log("Camera permission granted");
+      } catch (err) {
+        console.warn("Camera permission not granted:", err);
+      }
+    };
+    
+    // Request permission when the app loads
+    requestCameraPermission();
+  }, []);
+  
   return (
     <QueryClientProvider client={queryClient}>
       <AppProvider>

@@ -131,16 +131,18 @@ const Coach = () => {
   };
   
   return (
-    <div className="min-h-screen pb-20">
-      <div className="p-6 space-y-4">
+    <div className="min-h-screen pb-20 flex flex-col">
+      <div className="p-6 flex-shrink-0">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-medium">AI Coach</h1>
           <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
             <FiUser className="text-white" />
           </div>
         </div>
-        
-        <div className="space-y-4 mb-16">
+      </div>
+      
+      <div className="flex-1 overflow-y-auto px-6 pb-4">
+        <div className="space-y-4">
           {messages.map((message, index) => (
             <div 
               key={index}
@@ -166,7 +168,7 @@ const Coach = () => {
         </div>
       </div>
       
-      <div className="fixed bottom-20 left-0 right-0 p-4">
+      <div className="sticky bottom-20 left-0 right-0 p-4 bg-background z-10">
         <div className="flex items-center gap-2 glass rounded-full p-2 pr-4">
           <input 
             type="text" 
