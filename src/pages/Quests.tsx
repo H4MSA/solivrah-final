@@ -157,9 +157,6 @@ const Quests = () => {
   ];
   
   useEffect(() => {
-    // In a real app, fetch quests from Supabase based on selectedTheme
-    // For now, let's use our local data and simulate a completed first quest
-    
     let themeQuests = disciplineQuests;
     if (selectedTheme === "Focus") {
       themeQuests = focusQuests;
@@ -198,13 +195,11 @@ const Quests = () => {
   const handleCompleteQuest = (photoUrl?: string) => {
     if (!activeQuest) return;
     
-    // Update quest status
     setQuests(quests.map(q => {
       if (q.id === activeQuest.id) {
         return { ...q, status: "completed" };
       }
       
-      // Unlock next quest if it's locked
       if (q.day === activeQuest.day + 1 && q.status === "locked") {
         return { ...q, status: "active" };
       }
@@ -212,18 +207,14 @@ const Quests = () => {
       return q;
     }));
     
-    // Add XP and increment streak
     addXP(activeQuest.xp);
     incrementStreak();
     
-    // Close modal
     setShowCompleteModal(false);
     setActiveQuest(null);
   };
   
-  // Function to send quest completion to Supabase (in a real implementation)
   const saveQuestCompletion = async (questId: number, photoUrl?: string) => {
-    // This would be implemented in a real app with Supabase
     console.log("Saving quest completion", questId, photoUrl);
   };
   
@@ -279,11 +270,11 @@ const Quests = () => {
       
       {showCompleteModal && activeQuest && (
         <QuestCompleteModal
-          questTitle={activeQuest.title}
-          xpEarned={activeQuest.xp}
+          questId={activeQuest.id.toString()}
+          title={activeQuest.title}
+          xp={activeQuest.xp}
           requiresPhoto={activeQuest.requiresPhoto}
           onClose={() => setShowCompleteModal(false)}
-          onComplete={handleCompleteQuest}
         />
       )}
       
