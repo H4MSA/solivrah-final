@@ -20,6 +20,9 @@ interface AppContextType {
   resetProgress: () => void;
   user: User | null;
   setUser: (user: User | null) => void;
+  incrementStreak: () => void;
+  isGuest: boolean;
+  setIsGuest: (isGuest: boolean) => void;
 }
 
 // Create context with default values
@@ -32,6 +35,9 @@ const AppContext = createContext<AppContextType>({
   resetProgress: () => {},
   user: null,
   setUser: () => {},
+  incrementStreak: () => {},
+  isGuest: true,
+  setIsGuest: () => {},
 });
 
 // Hook to use the AppContext
@@ -44,6 +50,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const storedStreak = parseInt(localStorage.getItem("streak") || "0", 10);
   const storedXP = parseInt(localStorage.getItem("xp") || "0", 10);
   const storedUser = localStorage.getItem("user");
+  const storedIsGuest = localStorage.getItem("isGuest") === "false" ? false : true;
   
   // State
   const [selectedTheme, setSelectedTheme] = useState<"Discipline" | "Focus" | "Resilience" | "Wildcards">(
@@ -52,6 +59,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [streak, setStreak] = useState(storedStreak);
   const [xp, setXP] = useState(storedXP);
   const [user, setUser] = useState<User | null>(storedUser ? JSON.parse(storedUser) : null);
+  const [isGuest, setIsGuest] = useState<boolean>(storedIsGuest);
   
   // Update localStorage when state changes
   useEffect(() => {
@@ -74,6 +82,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [user]);
   
+  useEffect(() => {
+    localStorage.setItem("isGuest", isGuest.toString());
+  }, [isGuest]);
+  
   // Function to add XP
   const addXP = (amount: number) => {
     setXP(prevXP => prevXP + amount);
@@ -86,6 +98,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setStreak(prevStreak => prevStreak + 1);
       localStorage.setItem("lastStreakDate", today);
     }
+  };
+  
+  // Function to increment streak
+  const incrementStreak = () => {
+    setStreak(prevStreak => prevStreak + 1);
+    localStorage.setItem("lastStreakDate", new Date().toDateString());
   };
   
   // Function to reset progress
@@ -105,6 +123,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     resetProgress,
     user,
     setUser,
+    incrementStreak,
+    isGuest,
+    setIsGuest,
   };
   
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
