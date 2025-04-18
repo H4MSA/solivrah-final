@@ -1,13 +1,15 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Logo } from "@/components/Logo";
 import { GlassCard } from "@/components/GlassCard";
-import { FiMail, FiPhone, FiLock, FiArrowRight, FiChevronLeft, FiEye, FiEyeOff } from "react-icons/fi";
+import { Mail, Phone, Lock, ArrowRight, ChevronLeft, Eye, EyeOff } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { useApp } from "@/context/AppContext";
+import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -24,38 +26,101 @@ const Auth = () => {
   const [animation, setAnimation] = useState("");
   
   const { setUser, setIsGuest } = useApp();
+  const { toast } = useToast();
+  
+  useEffect(() => {
+    // Clear any guest state
+    setIsGuest(false);
+  }, [setIsGuest]);
+  
+  const validateForm = () => {
+    setError("");
+    
+    if (mode === 'register') {
+      if (!name.trim()) {
+        setError("Name is required");
+        return false;
+      }
+      
+      if (password !== confirmPassword) {
+        setError("Passwords don't match");
+        return false;
+      }
+      
+      if (password.length < 6) {
+        setError("Password must be at least 6 characters");
+        return false;
+      }
+    }
+    
+    if (method === 'email') {
+      if (!email.includes('@') || !email.includes('.')) {
+        setError("Please enter a valid email");
+        return false;
+      }
+    } else {
+      if (phone.length < 10) {
+        setError("Please enter a valid phone number");
+        return false;
+      }
+    }
+    
+    if (!password) {
+      setError("Password is required");
+      return false;
+    }
+    
+    return true;
+  };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setLoading(true);
     
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       if (mode === 'login') {
+        // For demo purposes, we're creating a mock user
         setUser({
           id: "user-1",
           name: "Test User",
           email: email || phone,
         });
-        setIsGuest(false);
+        
+        toast({
+          title: "Welcome back!",
+          description: "You've successfully logged in",
+        });
+        
         navigate('/home');
       } else {
-        if (password !== confirmPassword) {
-          throw new Error("Passwords don't match");
-        }
-        
         setUser({
-          id: "user-1",
+          id: "user-" + Date.now(),
           name: name,
           email: email || phone,
         });
-        setIsGuest(false);
+        
+        toast({
+          title: "Account created!",
+          description: "Welcome to Solivrah",
+        });
+        
         navigate('/survey');
       }
     } catch (err: any) {
       setError(err.message || "Authentication failed");
+      
+      toast({
+        title: "Authentication failed",
+        description: err.message || "Please check your credentials and try again",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -72,10 +137,21 @@ const Auth = () => {
         name: "Google User",
         email: "google@example.com",
       });
-      setIsGuest(false);
+      
+      toast({
+        title: "Google sign in successful",
+        description: "Welcome to Solivrah",
+      });
+      
       navigate('/home');
     } catch (err: any) {
       setError("Google authentication failed");
+      
+      toast({
+        title: "Google sign in failed",
+        description: "Please try again or use another method",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -98,7 +174,7 @@ const Auth = () => {
       
       <div className={`w-full max-w-md z-10 transition-all duration-500 ${animation}`}>
         <div className="flex justify-center mb-6">
-          <Logo className="text-5xl animate-float" />
+          <Logo className="animate-float" />
         </div>
         
         <GlassCard className="backdrop-blur-lg p-6 animate-pop-in">
@@ -141,25 +217,25 @@ const Auth = () => {
               <button
                 type="button"
                 onClick={() => setMethod('email')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md transition-all touch-manipulation ${
                   method === 'email' 
                     ? 'bg-[#222222] text-white' 
                     : 'text-[#888888] hover:text-white'
                 }`}
               >
-                <FiMail size={16} />
+                <Mail size={16} />
                 <span>Email</span>
               </button>
               <button
                 type="button"
                 onClick={() => setMethod('phone')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md transition-all touch-manipulation ${
                   method === 'phone' 
                     ? 'bg-[#222222] text-white' 
                     : 'text-[#888888] hover:text-white'
                 }`}
               >
-                <FiPhone size={16} />
+                <Phone size={16} />
                 <span>Phone</span>
               </button>
             </div>
@@ -211,9 +287,9 @@ const Auth = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#888888] hover:text-white transition-colors"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#888888] hover:text-white transition-colors touch-manipulation"
                 >
-                  {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
@@ -246,7 +322,7 @@ const Auth = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-white text-black py-3 rounded-xl font-medium transition-all hover:bg-[#EEEEEE] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 bg-white text-black py-3 rounded-xl font-medium transition-all hover:bg-[#EEEEEE] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed touch-manipulation"
             >
               {loading ? (
                 <>
@@ -254,7 +330,7 @@ const Auth = () => {
                 </>
               ) : (
                 <>
-                  {mode === 'login' ? 'Sign In' : 'Create Account'} <FiArrowRight />
+                  {mode === 'login' ? 'Sign In' : 'Create Account'} <ArrowRight />
                 </>
               )}
             </button>
@@ -277,7 +353,7 @@ const Auth = () => {
           <button
             type="button"
             onClick={handleGoogleLogin}
-            className="mt-4 w-full flex items-center justify-center gap-3 bg-[#121212] text-white py-3 rounded-xl border border-[#333333] font-medium transition-all hover:bg-[#1A1A1A] active:scale-[0.98]"
+            className="mt-4 w-full flex items-center justify-center gap-3 bg-[#121212] text-white py-3 rounded-xl border border-[#333333] font-medium transition-all hover:bg-[#1A1A1A] active:scale-[0.98] touch-manipulation"
           >
             <FcGoogle size={20} />
             Continue with Google
@@ -287,7 +363,7 @@ const Auth = () => {
             <button 
               type="button" 
               onClick={toggleMode}
-              className="text-white hover:underline transition-all"
+              className="text-white hover:underline transition-all touch-manipulation"
             >
               {mode === 'login' 
                 ? "Don't have an account? Sign Up" 
@@ -299,9 +375,9 @@ const Auth = () => {
             <button 
               type="button" 
               onClick={() => navigate('/')}
-              className="text-[#888888] text-sm hover:text-white flex items-center justify-center gap-1 mx-auto transition-colors"
+              className="text-[#888888] text-sm hover:text-white flex items-center justify-center gap-1 mx-auto transition-colors touch-manipulation"
             >
-              <FiChevronLeft size={14} /> Back to Home
+              <ChevronLeft size={14} /> Back to Home
             </button>
           </div>
         </GlassCard>

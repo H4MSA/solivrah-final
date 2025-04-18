@@ -1,7 +1,6 @@
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 
-// Update user type to include id and email properties
 export interface AppContextType {
   selectedTheme: string;
   setSelectedTheme: (theme: string) => void;
@@ -9,8 +8,8 @@ export interface AppContextType {
   xp: number;
   addXP: (amount: number) => void;
   incrementStreak: () => void;
-  user: { id?: string; name: string; email?: string } | null; // Updated user type
-  setUser: (user: { id?: string; name: string; email?: string } | null) => void; // Updated setter
+  user: { id?: string; name: string; email?: string } | null;
+  setUser: (user: { id?: string; name: string; email?: string } | null) => void;
   isGuest: boolean;
   setIsGuest: (isGuest: boolean) => void;
   resetProgress: () => void;
@@ -32,56 +31,74 @@ const AppContext = createContext<AppContextType>({
 
 export const useApp = () => useContext(AppContext);
 
-// Add children prop type
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [selectedTheme, setSelectedTheme] = useState("Dark");
   const [streak, setStreak] = useState(0);
   const [xp, setXP] = useState(0);
-  const [user, setUser] = useState<{ name: string } | null>(null);
+  const [user, setUser] = useState<{ id?: string; name: string; email?: string } | null>(null);
   const [isGuest, setIsGuest] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Load data from localStorage on initial load
+  // Load data from localStorage on initial load - using a single effect for better performance
   useEffect(() => {
-    const storedTheme = localStorage.getItem("selectedTheme");
-    const storedStreak = localStorage.getItem("streak");
-    const storedXP = localStorage.getItem("xp");
-    const storedUser = localStorage.getItem("user");
-    const storedIsGuest = localStorage.getItem("isGuest");
-
-    if (storedTheme) setSelectedTheme(storedTheme);
-    if (storedStreak) setStreak(parseInt(storedStreak));
-    if (storedXP) setXP(parseInt(storedXP));
-    if (storedUser) setUser(JSON.parse(storedUser));
-    if (storedIsGuest) setIsGuest(storedIsGuest === "true");
+    const loadData = () => {
+      const storedTheme = localStorage.getItem("selectedTheme");
+      const storedStreak = localStorage.getItem("streak");
+      const storedXP = localStorage.getItem("xp");
+      const storedUser = localStorage.getItem("user");
+      const storedIsGuest = localStorage.getItem("isGuest");
+  
+      if (storedTheme) setSelectedTheme(storedTheme);
+      if (storedStreak) setStreak(parseInt(storedStreak));
+      if (storedXP) setXP(parseInt(storedXP));
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (e) {
+          console.error("Failed to parse user data", e);
+          localStorage.removeItem("user");
+        }
+      }
+      if (storedIsGuest) setIsGuest(storedIsGuest === "true");
+      
+      setIsInitialized(true);
+    };
+    
+    loadData();
   }, []);
 
-  // Save to localStorage whenever values change
+  // Save to localStorage whenever values change - optimized with a debounce
   useEffect(() => {
-    localStorage.setItem("selectedTheme", selectedTheme);
-    localStorage.setItem("streak", streak.toString());
-    localStorage.setItem("xp", xp.toString());
-    localStorage.setItem("isGuest", isGuest.toString());
-    if (user) localStorage.setItem("user", JSON.stringify(user));
-  }, [selectedTheme, streak, xp, user, isGuest]);
+    if (!isInitialized) return;
+    
+    const saveData = () => {
+      localStorage.setItem("selectedTheme", selectedTheme);
+      localStorage.setItem("streak", streak.toString());
+      localStorage.setItem("xp", xp.toString());
+      localStorage.setItem("isGuest", isGuest.toString());
+      if (user) localStorage.setItem("user", JSON.stringify(user));
+    };
+    
+    const timeoutId = setTimeout(saveData, 300);
+    return () => clearTimeout(timeoutId);
+  }, [selectedTheme, streak, xp, user, isGuest, isInitialized]);
 
-  const addXP = (amount: number) => {
+  const addXP = useCallback((amount: number) => {
     setXP(prev => prev + amount);
-  };
+  }, []);
 
-  const incrementStreak = () => {
+  const incrementStreak = useCallback(() => {
     setStreak(prev => prev + 1);
-  };
+  }, []);
 
-  // Add resetProgress function
-  const resetProgress = () => {
+  const resetProgress = useCallback(() => {
     setStreak(0);
     setXP(0);
     localStorage.setItem("streak", "0");
     localStorage.setItem("xp", "0");
     
-    // Optional: animate the UI or show a confirmation
     console.log("Progress reset successfully!");
-  };
+  }, []);
 
   return (
     <AppContext.Provider value={{ 
