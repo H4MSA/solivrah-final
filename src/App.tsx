@@ -26,7 +26,8 @@ const App = () => {
           {/* Theme background applied to the entire app */}
           <ThemeBackground />
           
-          <div className="min-h-screen w-full max-w-md mx-auto perspective-[1500px] transform-gpu"> 
+          {/* iPhone 14 optimized container (390px width, full height) */}
+          <div className="min-h-screen w-full max-w-[390px] mx-auto perspective-[1500px] transform-gpu overflow-hidden"> 
             <Toaster />
             <Sonner />
             <BrowserRouter>

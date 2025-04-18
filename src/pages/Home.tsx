@@ -2,25 +2,26 @@
 import React, { useState, useEffect } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { TabNavigation } from "@/components/TabNavigation";
-import { ArrowRight, Star, Zap, User, Camera, MessageCircle, Users, Lock, Search } from "lucide-react";
+import { ArrowRight, Star, Zap, User, Camera, MessageCircle, Users, Lock, Search, ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { QRScanner } from "@/components/QRScanner";
+import { CameraUpload } from "@/components/CameraUpload";
 import { useApp } from "@/context/AppContext";
 import { DailyAffirmation } from "@/components/DailyAffirmation";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 
 const QuestCard = ({ title, description, locked = false, onClick }: { title: string, description: string, locked?: boolean, onClick: () => void }) => (
   <div 
-    className={`relative overflow-hidden backdrop-blur-xl border rounded-xl p-5 transition-all duration-300 transform-gpu shadow-lg ${
+    className={`relative overflow-hidden backdrop-blur-xl border rounded-xl p-4 transition-all duration-300 transform-gpu shadow-lg ${
       locked 
         ? 'bg-[#1A1A1A]/60 border-white/5 opacity-50 filter blur-[1px] pointer-events-none' 
-        : 'bg-[#2D2D2D]/80 border-white/10 cursor-pointer hover:border-white/15 hover:scale-[1.01] active:scale-[0.98]'
+        : 'bg-[#1A1A1A]/80 border-white/10 cursor-pointer hover:border-white/15 hover:scale-[1.01] active:scale-[0.98]'
     }`}
     onClick={!locked ? onClick : undefined}
     style={{ transform: locked ? 'translateZ(2px)' : 'translateZ(5px)' }}
   >
-    <div className="flex justify-between items-center mb-3">
-      <h3 className="text-white font-medium">{title}</h3>
+    <div className="flex justify-between items-center mb-2">
+      <h3 className="text-white font-medium text-base">{title}</h3>
       {locked ? (
         <span className="text-xs bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full text-white flex items-center gap-1 border border-white/5">
           <Lock size={12} />
@@ -33,7 +34,7 @@ const QuestCard = ({ title, description, locked = false, onClick }: { title: str
     <p className="text-[#E0E0E0] text-sm">{description}</p>
     {!locked && (
       <HoverBorderGradient
-        containerClassName="w-full mt-4"
+        containerClassName="w-full mt-3"
         className="py-2 w-full flex items-center justify-center gap-2"
         onClick={onClick}
       >
@@ -52,9 +53,9 @@ const QuestCard = ({ title, description, locked = false, onClick }: { title: str
 const MoodButton = ({ emoji, label, selected, onClick }: { emoji: string, label: string, selected?: boolean, onClick: () => void }) => (
   <button 
     onClick={onClick}
-    className={`flex flex-col items-center p-3 rounded-xl transition-all duration-300 transform-gpu ${
+    className={`flex flex-col items-center p-3 rounded-xl transition-all duration-300 transform-gpu active:scale-95 ${
       selected 
-        ? 'bg-[#2D2D2D]/90 backdrop-blur-xl border border-white/15 scale-105 shadow-lg' 
+        ? 'bg-[#222222]/90 backdrop-blur-xl border border-white/15 scale-105 shadow-lg' 
         : 'bg-[#1A1A1A]/70 backdrop-blur-xl border border-white/5 hover:border-white/10 hover:scale-[1.02]'
     }`}
     style={{ transform: selected ? 'translateZ(8px)' : 'translateZ(4px)' }}
@@ -67,7 +68,7 @@ const MoodButton = ({ emoji, label, selected, onClick }: { emoji: string, label:
 const ActionCard = ({ icon, label, onClick }: { icon: React.ReactNode, label: string, onClick: () => void }) => {
   return (
     <div 
-      className="flex flex-col items-center justify-center gap-2 p-3 bg-[#2D2D2D]/80 backdrop-blur-xl border border-white/10 rounded-xl hover:border-white/15 hover:bg-[#333333]/70 active:scale-[0.98] transition-all duration-300 cursor-pointer transform-gpu hover:scale-[1.02] shadow-lg"
+      className="flex flex-col items-center justify-center gap-2 p-3 bg-[#1A1A1A]/80 backdrop-blur-xl border border-white/10 rounded-xl hover:border-white/15 hover:bg-[#222222]/70 active:scale-[0.95] transition-all duration-300 cursor-pointer transform-gpu hover:scale-[1.02] shadow-lg"
       onClick={onClick}
       style={{ transform: 'translateZ(6px)' }}
     >
@@ -77,9 +78,32 @@ const ActionCard = ({ icon, label, onClick }: { icon: React.ReactNode, label: st
   );
 };
 
+const CollapsibleSection = ({ title, children, defaultOpen = true }: { title: string, children: React.ReactNode, defaultOpen?: boolean }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  
+  return (
+    <div className="space-y-3">
+      <div 
+        className="flex justify-between items-center cursor-pointer"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <h2 className="text-lg font-semibold">{title}</h2>
+        <button className="p-1 rounded-full bg-[#1A1A1A]/70 border border-white/5 active:scale-95 transition-all">
+          {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        </button>
+      </div>
+      
+      <div className={`space-y-3 transition-all duration-300 ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+        {children}
+      </div>
+    </div>
+  );
+};
+
 const Home = () => {
   const navigate = useNavigate();
   const [showScanner, setShowScanner] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
   const { streak, xp, selectedTheme, addXP, user } = useApp();
   const [greeting, setGreeting] = useState("Good morning");
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
@@ -97,6 +121,15 @@ const Home = () => {
     console.log("QR code scanned:", code);
     setShowScanner(false);
     addXP(50);
+  };
+  
+  const handleCameraCapture = (file: File) => {
+    console.log("Photo captured:", file);
+    // Handle the captured photo
+    setTimeout(() => {
+      addXP(30);
+      setShowCamera(false);
+    }, 500);
   };
   
   const level = Math.floor(xp / 1000) + 1;
@@ -120,7 +153,15 @@ const Home = () => {
         />
       )}
       
-      <div className="p-5 space-y-5">
+      {showCamera && (
+        <CameraUpload 
+          onClose={() => setShowCamera(false)} 
+          onCapture={handleCameraCapture}
+          title="Capture a Moment"
+        />
+      )}
+      
+      <div className="p-4 space-y-4">
         <div className="flex justify-between items-center py-2 animate-fade-in">
           <div>
             <h1 className="text-xl text-white font-medium">
@@ -131,14 +172,14 @@ const Home = () => {
           
           <div className="flex items-center gap-3">
             <button 
-              className="w-10 h-10 rounded-full bg-[#2D2D2D]/70 backdrop-blur-xl border border-white/10 flex items-center justify-center transition-all duration-300 hover:bg-[#333333]/80 hover:border-white/15 active:scale-[0.95] shadow-lg transform-gpu hover:scale-105"
-              onClick={() => setShowScanner(true)}
+              className="w-10 h-10 rounded-full bg-[#1A1A1A]/70 backdrop-blur-xl border border-white/10 flex items-center justify-center transition-all duration-300 hover:bg-[#222222]/80 hover:border-white/15 active:scale-[0.95] shadow-lg transform-gpu hover:scale-105"
+              onClick={() => setShowCamera(true)}
               style={{ transform: 'translateZ(10px)' }}
             >
               <Camera size={20} className="text-white" />
             </button>
             <button 
-              className="w-10 h-10 rounded-full bg-[#2D2D2D]/70 backdrop-blur-xl border border-white/10 flex items-center justify-center transition-all duration-300 hover:bg-[#333333]/80 hover:border-white/15 active:scale-[0.95] shadow-lg transform-gpu hover:scale-105"
+              className="w-10 h-10 rounded-full bg-[#1A1A1A]/70 backdrop-blur-xl border border-white/10 flex items-center justify-center transition-all duration-300 hover:bg-[#222222]/80 hover:border-white/15 active:scale-[0.95] shadow-lg transform-gpu hover:scale-105"
               onClick={() => navigate("/profile")}
               style={{ transform: 'translateZ(10px)' }}
             >
@@ -155,7 +196,7 @@ const Home = () => {
             <input 
               type="text" 
               placeholder="Search for quests or tasks..." 
-              className="w-full h-12 bg-[#1A1A1A]/70 backdrop-blur-xl border border-white/10 rounded-full pl-11 pr-4 text-white placeholder:text-white/50 focus:outline-none focus:border-white/15 transition-all duration-300 shadow-inner transform-gpu"
+              className="w-full h-11 bg-[#121212]/70 backdrop-blur-xl border border-white/10 rounded-full pl-11 pr-4 text-white placeholder:text-white/50 focus:outline-none focus:border-white/15 transition-all duration-300 shadow-inner transform-gpu"
               style={{ transform: 'translateZ(3px)' }}
             />
           </div>
@@ -165,29 +206,28 @@ const Home = () => {
           <DailyAffirmation />
         </div>
         
-        <div className="animate-fade-in" style={{ animationDelay: "0.3s" }}>
-          <h2 className="text-lg font-semibold mb-3">Today's Quest</h2>
+        <CollapsibleSection title="Today's Quest" defaultOpen={true}>
           <QuestCard 
             title="Track your time for 24 hours" 
             description="Document how you spend your day to identify time-wasting activities and opportunities for improvement."
             onClick={() => navigate("/quests")}
           />
-        </div>
+        </CollapsibleSection>
         
         <div 
-          className="bg-[#2D2D2D]/80 backdrop-blur-xl border border-white/10 rounded-xl p-4 animate-fade-in shadow-lg transform-gpu"
+          className="bg-[#1A1A1A]/80 backdrop-blur-xl border border-white/10 rounded-xl p-4 animate-fade-in shadow-lg transform-gpu"
           style={{ animationDelay: "0.4s", transform: 'translateZ(7px)' }}
         >
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-3">
             <h2 className="text-lg font-semibold">Progress</h2>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 bg-black/30 px-2.5 py-1 rounded-full border border-white/5">
+              <div className="flex items-center gap-1 bg-black/30 px-2 py-1 rounded-full border border-white/5">
                 <Star size={14} className="text-white/70" />
-                <span className="text-sm text-white/70">{streak} day streak</span>
+                <span className="text-xs text-white/70">{streak} day streak</span>
               </div>
-              <div className="flex items-center gap-1 bg-black/30 px-2.5 py-1 rounded-full border border-white/5">
+              <div className="flex items-center gap-1 bg-black/30 px-2 py-1 rounded-full border border-white/5">
                 <Zap size={14} className="text-white/70" />
-                <span className="text-sm text-white/70">{xp} XP</span>
+                <span className="text-xs text-white/70">{xp} XP</span>
               </div>
             </div>
           </div>
@@ -197,7 +237,7 @@ const Home = () => {
               <span className="text-white/70">Level {level}</span>
               <span className="text-white/70">{Math.floor(progress)}%</span>
             </div>
-            <div className="h-2.5 bg-[#1A1A1A] rounded-full overflow-hidden border border-white/5">
+            <div className="h-2.5 bg-[#111111] rounded-full overflow-hidden border border-white/5">
               <div 
                 className="h-full bg-gradient-to-r from-white/80 to-white/70"
                 style={{ width: `${progress}%`, transition: 'width 1s ease-in-out' }}
@@ -207,9 +247,8 @@ const Home = () => {
           </div>
         </div>
         
-        <div className="animate-fade-in" style={{ animationDelay: "0.5s" }}>
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-semibold">How do you feel today?</h2>
+        <CollapsibleSection title="How do you feel today?" defaultOpen={true}>
+          <div className="flex justify-end mb-2">
             <span className="text-xs text-white/70 bg-black/30 px-2 py-1 rounded-full border border-white/5">Daily check-in</span>
           </div>
           
@@ -224,13 +263,9 @@ const Home = () => {
               />
             ))}
           </div>
-        </div>
+        </CollapsibleSection>
         
-        <div className="animate-fade-in" style={{ animationDelay: "0.6s" }}>
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-semibold">Quick Actions</h2>
-          </div>
-          
+        <CollapsibleSection title="Quick Actions" defaultOpen={true}>
           <div className="grid grid-cols-3 gap-3">
             <ActionCard 
               icon={<MessageCircle size={20} />} 
@@ -248,17 +283,16 @@ const Home = () => {
               onClick={() => setShowScanner(true)} 
             />
           </div>
-        </div>
+        </CollapsibleSection>
         
-        <div className="animate-fade-in" style={{ animationDelay: "0.7s" }}>
-          <h2 className="text-lg font-semibold mb-3">Coming Up</h2>
+        <CollapsibleSection title="Coming Up" defaultOpen={true}>
           <QuestCard 
             title="Day 2: Morning Routine" 
             description="Establish a productive morning routine to set the tone for your day."
             locked={true}
             onClick={() => {}}
           />
-        </div>
+        </CollapsibleSection>
       </div>
       
       <TabNavigation />

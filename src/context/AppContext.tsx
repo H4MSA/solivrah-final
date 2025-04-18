@@ -1,132 +1,103 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-// User type
-interface User {
-  name: string;
-  email?: string;
-  id?: string;
-  photoURL?: string;
-  bio?: string;
-}
-
-// AppContext type
-interface AppContextType {
-  selectedTheme: "Discipline" | "Focus" | "Resilience" | "Wildcards";
-  setSelectedTheme: (theme: "Discipline" | "Focus" | "Resilience" | "Wildcards") => void;
+// Add resetProgress to the context type
+export interface AppContextType {
+  selectedTheme: string;
+  setSelectedTheme: (theme: string) => void;
   streak: number;
   xp: number;
   addXP: (amount: number) => void;
-  resetProgress: () => void;
-  user: User | null;
-  setUser: (user: User | null) => void;
   incrementStreak: () => void;
+  user: { name: string } | null;
+  setUser: (user: { name: string } | null) => void;
   isGuest: boolean;
   setIsGuest: (isGuest: boolean) => void;
+  resetProgress: () => void;
 }
 
-// Create context with default values
 const AppContext = createContext<AppContextType>({
-  selectedTheme: "Focus",
+  selectedTheme: "Dark",
   setSelectedTheme: () => {},
   streak: 0,
   xp: 0,
   addXP: () => {},
-  resetProgress: () => {},
+  incrementStreak: () => {},
   user: null,
   setUser: () => {},
-  incrementStreak: () => {},
-  isGuest: true,
+  isGuest: false,
   setIsGuest: () => {},
+  resetProgress: () => {},
 });
 
-// Hook to use the AppContext
 export const useApp = () => useContext(AppContext);
 
-// Provider component
+// Add children prop type
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Get values from local storage or use defaults
-  const storedTheme = localStorage.getItem("selectedTheme") as "Discipline" | "Focus" | "Resilience" | "Wildcards" | null;
-  const storedStreak = parseInt(localStorage.getItem("streak") || "0", 10);
-  const storedXP = parseInt(localStorage.getItem("xp") || "0", 10);
-  const storedUser = localStorage.getItem("user");
-  const storedIsGuest = localStorage.getItem("isGuest") === "false" ? false : true;
-  
-  // State
-  const [selectedTheme, setSelectedTheme] = useState<"Discipline" | "Focus" | "Resilience" | "Wildcards">(
-    storedTheme || "Focus"
-  );
-  const [streak, setStreak] = useState(storedStreak);
-  const [xp, setXP] = useState(storedXP);
-  const [user, setUser] = useState<User | null>(storedUser ? JSON.parse(storedUser) : null);
-  const [isGuest, setIsGuest] = useState<boolean>(storedIsGuest);
-  
-  // Update localStorage when state changes
+  const [selectedTheme, setSelectedTheme] = useState("Dark");
+  const [streak, setStreak] = useState(0);
+  const [xp, setXP] = useState(0);
+  const [user, setUser] = useState<{ name: string } | null>(null);
+  const [isGuest, setIsGuest] = useState(false);
+
+  // Load data from localStorage on initial load
+  useEffect(() => {
+    const storedTheme = localStorage.getItem("selectedTheme");
+    const storedStreak = localStorage.getItem("streak");
+    const storedXP = localStorage.getItem("xp");
+    const storedUser = localStorage.getItem("user");
+    const storedIsGuest = localStorage.getItem("isGuest");
+
+    if (storedTheme) setSelectedTheme(storedTheme);
+    if (storedStreak) setStreak(parseInt(storedStreak));
+    if (storedXP) setXP(parseInt(storedXP));
+    if (storedUser) setUser(JSON.parse(storedUser));
+    if (storedIsGuest) setIsGuest(storedIsGuest === "true");
+  }, []);
+
+  // Save to localStorage whenever values change
   useEffect(() => {
     localStorage.setItem("selectedTheme", selectedTheme);
-  }, [selectedTheme]);
-  
-  useEffect(() => {
     localStorage.setItem("streak", streak.toString());
-  }, [streak]);
-  
-  useEffect(() => {
     localStorage.setItem("xp", xp.toString());
-  }, [xp]);
-  
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem("user", JSON.stringify(user));
-    } else {
-      localStorage.removeItem("user");
-    }
-  }, [user]);
-  
-  useEffect(() => {
     localStorage.setItem("isGuest", isGuest.toString());
-  }, [isGuest]);
-  
-  // Function to add XP
+    if (user) localStorage.setItem("user", JSON.stringify(user));
+  }, [selectedTheme, streak, xp, user, isGuest]);
+
   const addXP = (amount: number) => {
-    setXP(prevXP => prevXP + amount);
-    
-    // Check if this is a new day and update streak
-    const lastStreak = localStorage.getItem("lastStreakDate");
-    const today = new Date().toDateString();
-    
-    if (lastStreak !== today) {
-      setStreak(prevStreak => prevStreak + 1);
-      localStorage.setItem("lastStreakDate", today);
-    }
+    setXP(prev => prev + amount);
   };
-  
-  // Function to increment streak
+
   const incrementStreak = () => {
-    setStreak(prevStreak => prevStreak + 1);
-    localStorage.setItem("lastStreakDate", new Date().toDateString());
+    setStreak(prev => prev + 1);
   };
-  
-  // Function to reset progress
+
+  // Add resetProgress function
   const resetProgress = () => {
-    setXP(0);
     setStreak(0);
-    localStorage.removeItem("lastStreakDate");
+    setXP(0);
+    localStorage.setItem("streak", "0");
+    localStorage.setItem("xp", "0");
+    
+    // Optional: animate the UI or show a confirmation
+    console.log("Progress reset successfully!");
   };
-  
-  // Context value
-  const value = {
-    selectedTheme,
-    setSelectedTheme,
-    streak,
-    xp,
-    addXP,
-    resetProgress,
-    user,
-    setUser,
-    incrementStreak,
-    isGuest,
-    setIsGuest,
-  };
-  
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+
+  return (
+    <AppContext.Provider value={{ 
+      selectedTheme, 
+      setSelectedTheme, 
+      streak, 
+      xp, 
+      addXP, 
+      incrementStreak,
+      user,
+      setUser,
+      isGuest,
+      setIsGuest,
+      resetProgress
+    }}>
+      {children}
+    </AppContext.Provider>
+  );
 };
