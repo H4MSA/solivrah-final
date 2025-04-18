@@ -1,132 +1,83 @@
 
 import React, { useState, useEffect } from "react";
-import { FiRefreshCw, FiShare2 } from "react-icons/fi";
+import { Quote, RefreshCw } from "lucide-react";
 import { useApp } from "@/context/AppContext";
-import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 
-// Predefined list of affirmations
 const affirmations = [
-  "You are capable of amazing things.",
-  "Every small step takes you closer to your goals.",
-  "Your discipline today creates freedom tomorrow.",
-  "Focus on progress, not perfection.",
-  "Resilience is your superpower.",
-  "You have the strength to overcome any obstacle.",
-  "Consistency compounds over time.",
-  "Your creativity knows no bounds.",
-  "Today's challenges are tomorrow's strengths.",
-  "You are in control of your habits and choices.",
-  "Small daily improvements lead to stunning results.",
-  "Your potential is limitless.",
-  "Every moment is a chance to begin again.",
-  "Trust the process. Growth takes time.",
-  "You are stronger than your excuses."
+  "I am capable of creating positive change in my life.",
+  "My potential to succeed is limitless.",
+  "Today, I choose progress over perfection.",
+  "I have the power to overcome any obstacle.",
+  "Every challenge helps me grow stronger.",
+  "I embrace the journey of self-improvement.",
+  "Each small step forward is meaningful.",
+  "My discipline creates freedom in my life.",
+  "I celebrate my progress, no matter how small.",
+  "I am worthy of success and happiness.",
+  "My focus determines my reality.",
+  "I trust in my ability to figure things out.",
+  "Today's efforts create tomorrow's achievements.",
+  "I am becoming better every day.",
+  "My resilience is stronger than any setback."
 ];
 
-export const DailyAffirmation: React.FC = () => {
+export const DailyAffirmation = () => {
   const { selectedTheme } = useApp();
-  const [affirmation, setAffirmation] = useState("");
-  const [shinePosition, setShinePosition] = useState(-100);
+  const [affirmation, setAffirmation] = useState<string>("");
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   
   useEffect(() => {
-    // Select an affirmation based on the day of the year (so it's consistent for the day)
-    const dayOfYear = Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
-    const index = dayOfYear % affirmations.length;
-    setAffirmation(affirmations[index]);
+    // Get a random affirmation or use stored one
+    const storedAffirmation = localStorage.getItem("dailyAffirmation");
+    const storedDate = localStorage.getItem("affirmationDate");
+    const today = new Date().toDateString();
     
-    // Set up the shine animation
-    const shineInterval = setInterval(() => {
-      setShinePosition(-100);
-      setTimeout(() => {
-        setShinePosition(100);
-      }, 100);
-    }, 5000);
-    
-    return () => clearInterval(shineInterval);
+    if (storedAffirmation && storedDate === today) {
+      setAffirmation(storedAffirmation);
+    } else {
+      getNewAffirmation();
+    }
   }, []);
   
-  const refreshAffirmation = () => {
-    // Pick a random affirmation different from the current one
-    let index;
-    do {
-      index = Math.floor(Math.random() * affirmations.length);
-    } while (affirmations[index] === affirmation);
-    setAffirmation(affirmations[index]);
+  const getNewAffirmation = () => {
+    setRefreshing(true);
+    const randomIndex = Math.floor(Math.random() * affirmations.length);
+    const newAffirmation = affirmations[randomIndex];
     
-    // Trigger shine effect
-    setShinePosition(-100);
+    // Save to localStorage
+    localStorage.setItem("dailyAffirmation", newAffirmation);
+    localStorage.setItem("affirmationDate", new Date().toDateString());
+    
+    // Fade effect
     setTimeout(() => {
-      setShinePosition(100);
-    }, 100);
+      setAffirmation(newAffirmation);
+      setRefreshing(false);
+    }, 300);
   };
-  
-  const shareAffirmation = () => {
-    // In a real app, this would use the native share API
-    if (navigator.share) {
-      navigator.share({
-        title: "My Daily Affirmation",
-        text: affirmation,
-        url: "https://solivrah.app"
-      }).catch(console.error);
-    } else {
-      // Fallback
-      alert("Copied to clipboard: " + affirmation);
-      navigator.clipboard.writeText(affirmation).catch(console.error);
-    }
-  };
-  
-  // Theme-specific colors
-  const getThemeColor = () => {
-    switch (selectedTheme) {
-      case "Discipline": return "rgba(255, 0, 0, 0.2)";
-      case "Focus": return "rgba(0, 128, 128, 0.2)";
-      case "Resilience": return "rgba(255, 165, 0, 0.2)";
-      case "Wildcards": return "rgba(0, 255, 0, 0.2)";
-      default: return "rgba(255, 255, 255, 0.1)";
-    }
-  };
-  
-  if (!affirmation) {
-    return null;
-  }
   
   return (
-    <div className="relative mb-3 animate-fade-in">
-      <div 
-        className="w-full relative backdrop-blur-xl bg-black/30 border border-white/10 rounded-full py-1.5 px-3 overflow-hidden shadow-lg"
-        style={{ boxShadow: `0 0 15px ${getThemeColor()}` }}
-      >
-        {/* Shine effect overlay */}
-        <div 
-          className="absolute inset-0 z-0 pointer-events-none"
-          style={{
-            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
-            transform: `translateX(${shinePosition}%)`,
-            transition: "transform 1s ease-in-out",
-          }}
-        />
-        
-        <div className="flex items-center justify-between z-10 relative">
-          <span className="text-white/90 text-xs font-medium italic truncate mr-2 flex-1">{affirmation}</span>
-          
-          <div className="flex gap-1 shrink-0">
-            <button 
-              onClick={refreshAffirmation}
-              className="p-1 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all transform hover:scale-110 active:scale-95"
-              aria-label="Refresh affirmation"
-            >
-              <FiRefreshCw size={10} />
-            </button>
-            <button 
-              onClick={shareAffirmation}
-              className="p-1 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all transform hover:scale-110 active:scale-95"
-              aria-label="Share affirmation"
-            >
-              <FiShare2 size={10} />
-            </button>
-          </div>
-        </div>
+    <div 
+      className="relative overflow-hidden backdrop-blur-xl bg-[#1E1E1E]/80 border border-white/10 rounded-xl p-4 shadow-lg transform-gpu"
+      style={{ transform: 'translateZ(5px)' }}
+    >
+      <div className="absolute top-3 left-3">
+        <Quote size={18} className="text-white/30" />
       </div>
+      
+      <div className="ml-7 mr-7">
+        <h3 className="text-sm uppercase tracking-wider text-white/60 font-medium mb-1">Daily Affirmation</h3>
+        <p className={`text-white text-base font-medium ${refreshing ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}>
+          {affirmation}
+        </p>
+      </div>
+      
+      <button 
+        onClick={getNewAffirmation}
+        className="absolute top-3 right-3 text-white/50 hover:text-white transition-all active:scale-90"
+        disabled={refreshing}
+      >
+        <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
+      </button>
     </div>
   );
 };

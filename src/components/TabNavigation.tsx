@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FiHome, FiList, FiUsers, FiMessageCircle, FiUser } from "react-icons/fi";
+import { Home, ListChecks, Users, MessageCircle, User } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 
@@ -13,34 +13,19 @@ interface NavItemProps {
   onClick: () => void;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive, onClick }) => {
-  const { selectedTheme } = useApp();
-  
-  // Theme-specific glow colors
-  const getThemeGlow = () => {
-    if (!isActive) return "transparent";
-    
-    switch (selectedTheme) {
-      case "Discipline": return "rgba(255, 0, 0, 0.3)";
-      case "Focus": return "rgba(0, 128, 128, 0.3)";
-      case "Resilience": return "rgba(255, 165, 0, 0.3)";
-      case "Wildcards": return "rgba(0, 255, 0, 0.3)";
-      default: return "rgba(255, 255, 255, 0.2)";
-    }
-  };
-  
+const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive, onClick }) => {  
   return (
     <div 
-      className="flex flex-col items-center justify-center py-1 px-2 transition-all duration-300 cursor-pointer transform"
+      className="flex flex-col items-center justify-center py-1 px-3 transition-all duration-300 cursor-pointer transform-gpu touch-manipulation"
       onClick={onClick}
-      style={{ transform: isActive ? 'translateZ(10px)' : 'translateZ(1px)' }}
+      style={{ transform: isActive ? 'translateZ(15px)' : 'translateZ(1px)' }}
     >
       <div 
-        className={`p-2 rounded-full flex items-center justify-center transition-all duration-300 ${
-          isActive ? 'scale-115 bg-black/30 backdrop-blur-xl border border-white/10' : 'scale-100'
+        className={`p-2.5 rounded-full flex items-center justify-center transition-all duration-300 ${
+          isActive ? 'scale-110 bg-[#333333] backdrop-blur-xl border border-white/10' : 'scale-100 bg-transparent'
         }`}
         style={{ 
-          boxShadow: isActive ? `0 0 15px ${getThemeGlow()}` : 'none',
+          boxShadow: isActive ? '0 5px 15px rgba(0,0,0,0.3)' : 'none',
           transform: isActive ? 'translateY(-8px)' : 'translateY(0)'
         }}
       >
@@ -65,7 +50,6 @@ export const TabNavigation: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mounted, setMounted] = useState(false);
-  const { selectedTheme } = useApp();
   
   // Fix the active path detection
   const isActive = (path: string) => location.pathname === path;
@@ -76,11 +60,11 @@ export const TabNavigation: React.FC = () => {
   }, []);
   
   const navItems = [
-    { path: "/home", label: "Home", icon: <FiHome /> },
-    { path: "/quests", label: "Quests", icon: <FiList /> },
-    { path: "/community", label: "Community", icon: <FiUsers /> },
-    { path: "/coach", label: "Coach", icon: <FiMessageCircle /> },
-    { path: "/profile", label: "Profile", icon: <FiUser /> },
+    { path: "/home", label: "Home", icon: <Home size={24} /> },
+    { path: "/quests", label: "Quests", icon: <ListChecks size={24} /> },
+    { path: "/community", label: "Community", icon: <Users size={24} /> },
+    { path: "/coach", label: "Coach", icon: <MessageCircle size={24} /> },
+    { path: "/profile", label: "Profile", icon: <User size={24} /> },
   ];
 
   const handleNavigation = (path: string) => {
@@ -93,17 +77,6 @@ export const TabNavigation: React.FC = () => {
       }, 300);
     }, 100);
   };
-  
-  // Get theme-specific color
-  const getThemeBorderColor = () => {
-    switch (selectedTheme) {
-      case "Discipline": return "rgba(255, 0, 0, 0.2)";
-      case "Focus": return "rgba(0, 128, 128, 0.2)";
-      case "Resilience": return "rgba(255, 165, 0, 0.2)";
-      case "Wildcards": return "rgba(0, 255, 0, 0.2)";
-      default: return "rgba(255, 255, 255, 0.1)";
-    }
-  };
 
   return (
     <div 
@@ -111,15 +84,12 @@ export const TabNavigation: React.FC = () => {
     >
       {/* Blurred background */}
       <div 
-        className="absolute inset-0 bg-black/70 backdrop-blur-xl border-t shadow-xl z-0"
-        style={{ 
-          borderColor: getThemeBorderColor(),
-          transform: 'translateZ(2px)'
-        }}
+        className="absolute inset-0 bg-[#121212]/90 backdrop-blur-xl border-t border-white/5 shadow-2xl z-0"
+        style={{ transform: 'translateZ(2px)' }}
       ></div>
       
       {/* Content */}
-      <div className="relative z-10 flex items-center justify-around py-1 w-full max-w-lg mx-auto px-2 h-16">
+      <div className="relative z-10 flex items-center justify-around py-2 w-full max-w-lg mx-auto px-3 h-16">
         {navItems.map((item) => (
           <NavItem 
             key={item.path}

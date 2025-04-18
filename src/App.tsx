@@ -26,7 +26,7 @@ const App = () => {
           {/* Theme background applied to the entire app */}
           <ThemeBackground />
           
-          <div className="perspective-1000 transform-gpu"> {/* Adding 3D perspective to the entire app */}
+          <div className="min-h-screen w-full max-w-md mx-auto perspective-[1500px] transform-gpu"> 
             <Toaster />
             <Sonner />
             <BrowserRouter>
