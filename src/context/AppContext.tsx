@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-// Add resetProgress to the context type
+// Update user type to include id and email properties
 export interface AppContextType {
   selectedTheme: string;
   setSelectedTheme: (theme: string) => void;
@@ -9,8 +9,8 @@ export interface AppContextType {
   xp: number;
   addXP: (amount: number) => void;
   incrementStreak: () => void;
-  user: { name: string } | null;
-  setUser: (user: { name: string } | null) => void;
+  user: { id?: string; name: string; email?: string } | null; // Updated user type
+  setUser: (user: { id?: string; name: string; email?: string } | null) => void; // Updated setter
   isGuest: boolean;
   setIsGuest: (isGuest: boolean) => void;
   resetProgress: () => void;

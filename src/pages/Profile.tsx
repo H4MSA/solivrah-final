@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { TabNavigation } from "@/components/TabNavigation";
 import { GlassCard } from "@/components/GlassCard";
-import { Star, Trophy, CheckCircle, Calendar, Download, Share2, Settings, Bell, Activity, Lock, Info, LogOut, RefreshCw } from "lucide-react";
+import { Star, Trophy, CheckCircle, Calendar, Download, Share2, Settings, Bell, Activity, Lock, Info, LogOut, RefreshCw, Users } from "lucide-react"; // Added Users import
 import { useApp } from "@/context/AppContext";
 import { ProfileReset } from "@/components/ProfileReset";
 
