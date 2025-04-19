@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { GlassCard } from "@/components/GlassCard";
-import { TabNavigation } from "@/components/TabNavigation";
 import { ArrowRight, Star, Zap, User, Camera, MessageCircle, Users, Lock, Search, ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { QRScanner } from "@/components/QRScanner";
@@ -13,7 +12,7 @@ const QuestCard = ({ title, description, locked = false, onClick }: { title: str
   <div 
     className={`relative overflow-hidden backdrop-blur-xl border rounded-xl p-4 transition-all duration-300 transform-gpu shadow-lg ${
       locked 
-        ? 'bg-[#1A1A1A]/60 border-white/5 opacity-50 filter blur-[1px] pointer-events-none' 
+        ? 'bg-[#1A1A1A]/60 border-white/5 opacity-50 pointer-events-none' 
         : 'bg-[#1A1A1A]/80 border-white/10 cursor-pointer hover:border-white/15 hover:scale-[1.01] active:scale-[0.98]'
     }`}
     onClick={!locked ? onClick : undefined}
@@ -32,17 +31,16 @@ const QuestCard = ({ title, description, locked = false, onClick }: { title: str
     </div>
     <p className="text-[#E0E0E0] text-sm">{description}</p>
     {!locked && (
-      <HoverBorderGradient
-        containerClassName="w-full mt-3"
-        className="py-2 w-full flex items-center justify-center gap-2"
+      <button 
+        className="w-full mt-3 py-2.5 rounded-xl bg-white text-black font-medium flex items-center justify-center gap-2"
         onClick={onClick}
       >
         Start <ArrowRight size={16} />
-      </HoverBorderGradient>
+      </button>
     )}
     
     {locked && (
-      <div className="absolute inset-0 backdrop-blur-[2px] bg-black/40 flex items-center justify-center">
+      <div className="absolute inset-0 backdrop-blur-sm bg-black/40 flex items-center justify-center">
         <Lock className="text-white/30 text-4xl animate-pulse-slow" />
       </div>
     )}

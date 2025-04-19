@@ -108,9 +108,9 @@ const CalendarModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-[#1A1A1A] border border-white/10 text-white">
+      <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-2xl p-6 shadow-xl">
         <DialogHeader>
-          <DialogTitle>Activity Calendar</DialogTitle>
+          <DialogTitle className="text-xl">Activity Calendar</DialogTitle>
           <DialogDescription className="text-white/70">
             View your daily activity and streaks
           </DialogDescription>
@@ -175,9 +175,9 @@ const ThemeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-[#1A1A1A] border border-white/10 text-white">
+      <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-2xl p-6 shadow-xl">
         <DialogHeader>
-          <DialogTitle>Theme Preferences</DialogTitle>
+          <DialogTitle className="text-xl">Theme Preferences</DialogTitle>
           <DialogDescription className="text-white/70">
             Choose your focus area
           </DialogDescription>
@@ -233,9 +233,9 @@ const ExportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-[#1A1A1A] border border-white/10 text-white">
+      <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-2xl p-6 shadow-xl">
         <DialogHeader>
-          <DialogTitle>Export Your Data</DialogTitle>
+          <DialogTitle className="text-xl">Export Your Data</DialogTitle>
           <DialogDescription className="text-white/70">
             Download your progress and achievements
           </DialogDescription>
@@ -284,9 +284,9 @@ const ShareModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-[#1A1A1A] border border-white/10 text-white">
+      <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-2xl p-6 shadow-xl">
         <DialogHeader>
-          <DialogTitle>Share Your Progress</DialogTitle>
+          <DialogTitle className="text-xl">Share Your Progress</DialogTitle>
           <DialogDescription className="text-white/70">
             Let others know about your journey
           </DialogDescription>

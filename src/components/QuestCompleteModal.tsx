@@ -54,7 +54,7 @@ export const QuestCompleteModal: React.FC<QuestCompleteModalProps> = ({
     <div className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         {stage === 'initial' && (
-          <GlassCard variant="dark" className="relative p-4">
+          <GlassCard variant="dark" className="relative p-4 rounded-2xl">
             <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 w-24 h-24 rounded-full bg-black flex items-center justify-center border-4 border-background">
               <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
                 <CheckCircle className="w-10 h-10 text-primary" />
@@ -73,18 +73,18 @@ export const QuestCompleteModal: React.FC<QuestCompleteModalProps> = ({
               {requiresPhoto ? (
                 <button
                   onClick={() => setStage('photo')}
-                  className="w-full py-3 rounded-xl bg-primary text-primary-foreground flex items-center justify-center gap-2 mt-4"
+                  className="w-full py-3 rounded-xl bg-white text-black flex items-center justify-center gap-2 mt-4 font-medium"
                 >
                   <Camera size={18} />
-                  <span>Continue with Photo Verification</span>
+                  <span>Continue with Photo</span>
                 </button>
               ) : (
                 <button
                   onClick={handleComplete}
-                  className="w-full py-3 rounded-xl bg-primary text-primary-foreground flex items-center justify-center gap-2 mt-4"
+                  className="w-full py-3 rounded-xl bg-white text-black flex items-center justify-center gap-2 mt-4 font-medium"
                 >
-                  <ArrowRight size={18} />
                   <span>Claim Reward</span>
+                  <ArrowRight size={18} />
                 </button>
               )}
             </div>
@@ -100,7 +100,7 @@ export const QuestCompleteModal: React.FC<QuestCompleteModalProps> = ({
         )}
         
         {stage === 'complete' && (
-          <GlassCard variant="dark" className="relative p-4">
+          <GlassCard variant="dark" className="relative p-4 rounded-2xl">
             <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 w-24 h-24 rounded-full bg-black flex items-center justify-center border-4 border-background">
               <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
                 <CheckCircle className="w-10 h-10 text-primary" />
@@ -120,10 +120,10 @@ export const QuestCompleteModal: React.FC<QuestCompleteModalProps> = ({
               
               <button
                 onClick={onClose}
-                className="w-full py-3 rounded-xl bg-primary text-primary-foreground flex items-center justify-center gap-2 mt-4"
+                className="w-full py-3 rounded-xl bg-white text-black flex items-center justify-center gap-2 mt-4 font-medium"
               >
-                <ArrowRight size={18} />
                 <span>Continue</span>
+                <ArrowRight size={18} />
               </button>
             </div>
           </GlassCard>
