@@ -20,10 +20,9 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive, onClick }) => 
     >
       <div 
         className={`p-2.5 rounded-full flex items-center justify-center transition-all duration-300 ${
-          isActive ? 'scale-110 bg-[#222222] backdrop-blur-xl border border-white/10' : 'scale-100 bg-transparent'
+          isActive ? 'scale-110 bg-[#222222] backdrop-blur-xl border border-white/15 shadow-lg' : 'scale-100 bg-transparent'
         }`}
         style={{ 
-          boxShadow: isActive ? '0 5px 15px rgba(0,0,0,0.3)' : 'none',
           transform: isActive ? 'translateY(-8px)' : 'translateY(0)'
         }}
       >
@@ -67,20 +66,22 @@ export const TabNavigation: React.FC = () => {
   };
 
   return (
-    <nav className="flex items-center justify-around w-full h-16 bg-[#0A0A0A]/90 backdrop-blur-xl border-t border-white/5 shadow-2xl z-50">
-      {navItems.map((item) => (
-        <NavItem 
-          key={item.path}
-          icon={item.icon}
-          label={item.label} 
-          path={item.path} 
-          isActive={isActive(item.path)} 
-          onClick={() => handleNavigation(item.path)}
-        />
-      ))}
-      
-      {/* Safe area padding for iPhone */}
-      <div className="h-8 bg-black absolute bottom-0 left-0 right-0 -z-10" />
-    </nav>
+    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none">
+      <nav className="flex items-center justify-around w-full max-w-[390px] h-16 bg-[#0A0A0A]/90 backdrop-blur-xl border-t border-white/5 shadow-2xl z-50 pointer-events-auto">
+        {navItems.map((item) => (
+          <NavItem 
+            key={item.path}
+            icon={item.icon}
+            label={item.label} 
+            path={item.path} 
+            isActive={isActive(item.path)} 
+            onClick={() => handleNavigation(item.path)}
+          />
+        ))}
+        
+        {/* Safe area padding for iPhone */}
+        <div className="h-8 bg-black absolute bottom-0 left-0 right-0 -z-10" />
+      </nav>
+    </div>
   );
 };

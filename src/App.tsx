@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AppProvider } from "./context/AppContext";
 import { ThemeBackground } from "./components/ThemeBackground";
 import { TabNavigation } from "./components/TabNavigation";
@@ -47,13 +47,18 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 // App Layout with Navigation
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+  const showNavigation = ['/home', '/quests', '/community', '/coach', '/profile'].includes(location.pathname);
+  
   return (
     <>
       {/* Main content area with scroll */}
       <main className="flex-1 overflow-y-auto overflow-x-hidden">
         {children}
       </main>
-      <TabNavigation />
+      
+      {/* Only show TabNavigation on app pages, not on public pages */}
+      {showNavigation && <TabNavigation />}
     </>
   );
 };

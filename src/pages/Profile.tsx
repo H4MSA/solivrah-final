@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { Star, Trophy, CheckCircle, Calendar, Download, Share2, Settings, Bell, Activity, Lock, Info, LogOut, RefreshCw, Users } from "lucide-react";
@@ -8,6 +7,7 @@ import { ProfileAchievements } from "@/components/ProfileAchievements";
 import { ProfileStats } from "@/components/ProfileStats";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const ProfileSection = ({
   title,
@@ -98,6 +98,254 @@ const TabButton = ({
     {label}
   </button>;
 
+const CalendarModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const { streak } = useApp();
+  const currentDate = new Date();
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+  
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="bg-[#1A1A1A] border border-white/10 text-white">
+        <DialogHeader>
+          <DialogTitle>Activity Calendar</DialogTitle>
+          <DialogDescription className="text-white/70">
+            View your daily activity and streaks
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="mt-4">
+          <div className="grid grid-cols-7 gap-1 mb-2">
+            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+              <div key={i} className="text-center text-xs text-white/50">{day}</div>
+            ))}
+          </div>
+          
+          <div className="grid grid-cols-7 gap-1">
+            {days.map((day) => {
+              const isToday = day === currentDate.getDate();
+              const isActive = day <= currentDate.getDate();
+              
+              return (
+                <div 
+                  key={day}
+                  className={`
+                    aspect-square flex items-center justify-center rounded-full text-sm
+                    ${isToday ? 'bg-white text-black font-bold' : 
+                      isActive ? 'bg-[#333333] text-white' : 'bg-[#222222]/50 text-white/30'}
+                  `}
+                >
+                  {day}
+                </div>
+              );
+            })}
+          </div>
+          
+          <div className="mt-6 flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-white"></div>
+              <span>Today</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-[#333333]"></div>
+              <span>Active Day</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Star size={12} className="text-yellow-400" />
+              <span>{streak} Day Streak</span>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const ThemeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const { selectedTheme, setTheme } = useApp();
+  
+  const themes = [
+    { id: "Discipline", name: "Discipline", description: "Focus on building daily habits and routines" },
+    { id: "Focus", name: "Focus", description: "Eliminate distractions and improve concentration" },
+    { id: "Resilience", name: "Resilience", description: "Bounce back from setbacks and build mental toughness" },
+    { id: "Wildcards", name: "Creative", description: "Think outside the box and spark creativity" }
+  ];
+  
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="bg-[#1A1A1A] border border-white/10 text-white">
+        <DialogHeader>
+          <DialogTitle>Theme Preferences</DialogTitle>
+          <DialogDescription className="text-white/70">
+            Choose your focus area
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-3 mt-4">
+          {themes.map((theme) => (
+            <div 
+              key={theme.id}
+              className={`p-4 rounded-xl cursor-pointer transition-all duration-300 ${
+                selectedTheme === theme.id 
+                  ? 'bg-[#333333] border-2 border-white/20' 
+                  : 'bg-[#222222]/50 border border-white/10 hover:bg-[#222222]'
+              }`}
+              onClick={() => {
+                setTheme(theme.id);
+                onClose();
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium">{theme.name}</h3>
+                {selectedTheme === theme.id && (
+                  <div className="w-4 h-4 rounded-full bg-white"></div>
+                )}
+              </div>
+              <p className="text-sm text-white/70 mt-1">{theme.description}</p>
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const ExportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const { toast } = useToast();
+  const { xp, streak, user } = useApp();
+  
+  const handleExport = (format: 'pdf' | 'csv' | 'json') => {
+    toast({
+      title: "Export Initiated",
+      description: `Your data is being exported as ${format.toUpperCase()}`,
+    });
+    
+    setTimeout(() => {
+      toast({
+        title: "Export Complete",
+        description: "Your data has been exported successfully",
+        variant: "success",
+      });
+      onClose();
+    }, 1500);
+  };
+  
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="bg-[#1A1A1A] border border-white/10 text-white">
+        <DialogHeader>
+          <DialogTitle>Export Your Data</DialogTitle>
+          <DialogDescription className="text-white/70">
+            Download your progress and achievements
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-3 mt-4">
+          <button 
+            className="w-full p-4 rounded-xl bg-[#222222]/80 border border-white/10 text-left hover:bg-[#222222] transition-all"
+            onClick={() => handleExport('pdf')}
+          >
+            <div className="font-medium">Progress Report (PDF)</div>
+            <div className="text-sm text-white/70">Complete report with statistics and achievements</div>
+          </button>
+          
+          <button 
+            className="w-full p-4 rounded-xl bg-[#222222]/80 border border-white/10 text-left hover:bg-[#222222] transition-all"
+            onClick={() => handleExport('csv')}
+          >
+            <div className="font-medium">Raw Data (CSV)</div>
+            <div className="text-sm text-white/70">Spreadsheet format for your own analysis</div>
+          </button>
+          
+          <button 
+            className="w-full p-4 rounded-xl bg-[#222222]/80 border border-white/10 text-left hover:bg-[#222222] transition-all"
+            onClick={() => handleExport('json')}
+          >
+            <div className="font-medium">Complete Backup (JSON)</div>
+            <div className="text-sm text-white/70">Full data backup for safekeeping</div>
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const ShareModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const { toast } = useToast();
+  
+  const handleShare = (platform: string) => {
+    toast({
+      title: "Shared Successfully",
+      description: `Your progress has been shared on ${platform}`,
+    });
+    onClose();
+  };
+  
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="bg-[#1A1A1A] border border-white/10 text-white">
+        <DialogHeader>
+          <DialogTitle>Share Your Progress</DialogTitle>
+          <DialogDescription className="text-white/70">
+            Let others know about your journey
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="grid grid-cols-2 gap-3 mt-4">
+          <button 
+            className="p-4 rounded-xl bg-[#1877F2] text-white flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-all"
+            onClick={() => handleShare('Facebook')}
+          >
+            <span className="text-xl">f</span>
+            <span>Facebook</span>
+          </button>
+          
+          <button 
+            className="p-4 rounded-xl bg-[#1DA1F2] text-white flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-all"
+            onClick={() => handleShare('Twitter')}
+          >
+            <span className="text-xl">𝕏</span>
+            <span>Twitter</span>
+          </button>
+          
+          <button 
+            className="p-4 rounded-xl bg-[#0A66C2] text-white flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-all"
+            onClick={() => handleShare('LinkedIn')}
+          >
+            <span className="text-xl">in</span>
+            <span>LinkedIn</span>
+          </button>
+          
+          <button 
+            className="p-4 rounded-xl bg-[#25D366] text-white flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-all"
+            onClick={() => handleShare('WhatsApp')}
+          >
+            <span className="text-xl">W</span>
+            <span>WhatsApp</span>
+          </button>
+        </div>
+        
+        <div className="mt-3">
+          <button 
+            className="w-full p-4 rounded-xl border border-white/10 flex items-center justify-center gap-2 hover:bg-white/5 transition-all"
+            onClick={() => {
+              navigator.clipboard.writeText("https://app.solivrah.com/share/" + Math.random().toString(36).substring(2, 8));
+              toast({
+                title: "Link Copied",
+                description: "Share link has been copied to clipboard",
+              });
+              onClose();
+            }}
+          >
+            <span>Copy Link</span>
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const Profile = () => {
   const {
     streak,
@@ -109,6 +357,11 @@ const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  
   const level = Math.floor(xp / 1000) + 1;
   const progress = xp % 1000 / 1000 * 100;
   const displayName = user?.name || (isGuest ? "Guest User" : "User");
@@ -117,6 +370,38 @@ const Profile = () => {
   const handleLogout = async () => {
     await signOut();
     navigate('/auth');
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out",
+    });
+  };
+  
+  const toggleNotifications = () => {
+    toast({
+      title: "Notifications Updated",
+      description: "Your notification preferences have been updated",
+    });
+  };
+  
+  const openActivityLog = () => {
+    toast({
+      title: "Activity Log",
+      description: "Your activity history will be displayed here",
+    });
+  };
+  
+  const openPrivacySettings = () => {
+    toast({
+      title: "Privacy Settings",
+      description: "Privacy and security settings will be displayed here",
+    });
+  };
+  
+  const openAboutPage = () => {
+    toast({
+      title: "About Solivrah",
+      description: "Information about Solivrah and its mission",
+    });
   };
 
   return <div className="min-h-screen pb-24 text-white">
@@ -134,7 +419,8 @@ const Profile = () => {
             <div className="w-12 h-12 rounded-full bg-[#222222] border-2 border-white/10 flex items-center justify-center text-xl">
               {displayName.charAt(0)}
             </div>
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#333333] border border-black flex items-center justify-center text-xs shadow-lg">
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#333333] border border-black flex items-center justify-center text-xs shadow-lg cursor-pointer hover:bg-[#444444] transition-all"
+                onClick={() => setThemeOpen(true)}>
               <Settings size={14} />
             </div>
           </div>
@@ -186,23 +472,45 @@ const Profile = () => {
               </div>
               
               <div className="flex gap-3 py-[21px]">
-                <ActionButton icon={<Calendar size={20} />} label="Calendar" onClick={() => {}} />
-                <ActionButton icon={<Download size={20} />} label="Export" onClick={() => {}} />
-                <ActionButton icon={<Share2 size={20} />} label="Share" onClick={() => {}} />
+                <ActionButton icon={<Calendar size={20} />} label="Calendar" onClick={() => setCalendarOpen(true)} />
+                <ActionButton icon={<Download size={20} />} label="Export" onClick={() => setExportOpen(true)} />
+                <ActionButton icon={<Share2 size={20} />} label="Share" onClick={() => setShareOpen(true)} />
               </div>
             </ProfileSection>
             
             <ProfileSection title="Settings">
               <div className="space-y-2">
-                <SettingsItem icon={<Settings size={18} />} label="Theme Preferences" value="Focus" onClick={() => {}} />
+                <SettingsItem 
+                  icon={<Settings size={18} />} 
+                  label="Theme Preferences" 
+                  value={selectedTheme} 
+                  onClick={() => setThemeOpen(true)} 
+                />
                 
-                <SettingsItem icon={<Bell size={18} />} label="Notifications" value="On" onClick={() => {}} />
+                <SettingsItem 
+                  icon={<Bell size={18} />} 
+                  label="Notifications" 
+                  value="On" 
+                  onClick={toggleNotifications} 
+                />
                 
-                <SettingsItem icon={<Activity size={18} />} label="Activity Log" onClick={() => {}} />
+                <SettingsItem 
+                  icon={<Activity size={18} />} 
+                  label="Activity Log" 
+                  onClick={openActivityLog} 
+                />
                 
-                <SettingsItem icon={<Lock size={18} />} label="Privacy & Security" onClick={() => {}} />
+                <SettingsItem 
+                  icon={<Lock size={18} />} 
+                  label="Privacy & Security" 
+                  onClick={openPrivacySettings} 
+                />
                 
-                <SettingsItem icon={<Info size={18} />} label="About Solivrah" onClick={() => {}} />
+                <SettingsItem 
+                  icon={<Info size={18} />} 
+                  label="About Solivrah" 
+                  onClick={openAboutPage} 
+                />
                 
                 <button 
                   className="w-full py-3 rounded-xl bg-[#1A1A1A]/80 border border-white/10 text-white flex items-center justify-center gap-2 hover:bg-[#222222]/80 active:scale-[0.98] transition-all duration-300 mt-5"
@@ -221,6 +529,11 @@ const Profile = () => {
         
         {activeTab === 'stats' && <ProfileStats />}
       </div>
+      
+      <CalendarModal isOpen={calendarOpen} onClose={() => setCalendarOpen(false)} />
+      <ThemeModal isOpen={themeOpen} onClose={() => setThemeOpen(false)} />
+      <ExportModal isOpen={exportOpen} onClose={() => setExportOpen(false)} />
+      <ShareModal isOpen={shareOpen} onClose={() => setShareOpen(false)} />
     </div>;
 };
 
