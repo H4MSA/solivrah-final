@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { Star, Trophy, CheckCircle, Calendar, Download, Share2, Settings, Bell, Activity, Lock, Info, LogOut, RefreshCw, Users } from "lucide-react";
@@ -163,7 +164,7 @@ const CalendarModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
 };
 
 const ThemeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const { selectedTheme, setTheme } = useApp();
+  const { selectedTheme, setSelectedTheme } = useApp();
   
   const themes = [
     { id: "Discipline", name: "Discipline", description: "Focus on building daily habits and routines" },
@@ -192,7 +193,7 @@ const ThemeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                   : 'bg-[#222222]/50 border border-white/10 hover:bg-[#222222]'
               }`}
               onClick={() => {
-                setTheme(theme.id);
+                setSelectedTheme(theme.id);
                 onClose();
               }}
             >
@@ -225,7 +226,6 @@ const ExportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
       toast({
         title: "Export Complete",
         description: "Your data has been exported successfully",
-        variant: "success",
       });
       onClose();
     }, 1500);
@@ -352,7 +352,8 @@ const Profile = () => {
     xp,
     user,
     isGuest,
-    signOut
+    signOut,
+    selectedTheme
   } = useApp();
   const navigate = useNavigate();
   const { toast } = useToast();

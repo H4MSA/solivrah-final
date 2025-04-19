@@ -1,7 +1,6 @@
 
 import React, { useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
-import { TabNavigation } from "@/components/TabNavigation";
 import { CheckCircle, Camera, Award, ArrowRight } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +12,7 @@ interface QuestCompleteModalProps {
   xp: number;
   requiresPhoto?: boolean;
   onClose: () => void;
+  onComplete?: (photoUrl?: string) => void;
 }
 
 export const QuestCompleteModal: React.FC<QuestCompleteModalProps> = ({
@@ -21,6 +21,7 @@ export const QuestCompleteModal: React.FC<QuestCompleteModalProps> = ({
   xp,
   requiresPhoto = false,
   onClose,
+  onComplete
 }) => {
   const { addXP, incrementStreak } = useApp();
   const [stage, setStage] = useState<'initial' | 'photo' | 'complete'>(requiresPhoto ? 'photo' : 'initial');
@@ -41,6 +42,10 @@ export const QuestCompleteModal: React.FC<QuestCompleteModalProps> = ({
     if (stage === 'photo') {
       setStage('complete');
     } else {
+      // Call the onComplete callback if provided
+      if (onComplete) {
+        onComplete();
+      }
       onClose();
     }
   };
