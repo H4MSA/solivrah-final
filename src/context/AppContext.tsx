@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface AppContextType {
   selectedTheme: string;
@@ -13,6 +14,7 @@ export interface AppContextType {
   isGuest: boolean;
   setIsGuest: (isGuest: boolean) => void;
   resetProgress: () => void;
+  loading: boolean;
 }
 
 const AppContext = createContext<AppContextType>({
@@ -27,6 +29,7 @@ const AppContext = createContext<AppContextType>({
   isGuest: false,
   setIsGuest: () => {},
   resetProgress: () => {},
+  loading: true,
 });
 
 export const useApp = () => useContext(AppContext);
@@ -38,36 +41,83 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [user, setUser] = useState<{ id?: string; name: string; email?: string } | null>(null);
   const [isGuest, setIsGuest] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Load data from localStorage on initial load - using a single effect for better performance
+  // Check for existing session on initial load
   useEffect(() => {
-    const loadData = () => {
-      const storedTheme = localStorage.getItem("selectedTheme");
-      const storedStreak = localStorage.getItem("streak");
-      const storedXP = localStorage.getItem("xp");
-      const storedUser = localStorage.getItem("user");
-      const storedIsGuest = localStorage.getItem("isGuest");
-  
-      if (storedTheme) setSelectedTheme(storedTheme);
-      if (storedStreak) setStreak(parseInt(storedStreak));
-      if (storedXP) setXP(parseInt(storedXP));
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-        } catch (e) {
-          console.error("Failed to parse user data", e);
-          localStorage.removeItem("user");
+    const checkSession = async () => {
+      try {
+        // Check for Supabase session first
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          // User is authenticated with Supabase
+          setUser({
+            id: session.user.id,
+            name: session.user.user_metadata?.name || 'User',
+            email: session.user.email,
+          });
+          console.log("User authenticated from Supabase session");
+        } else {
+          // Check localStorage for saved user data as fallback
+          const storedUser = localStorage.getItem("user");
+          const storedIsGuest = localStorage.getItem("isGuest");
+          
+          if (storedUser) {
+            try {
+              setUser(JSON.parse(storedUser));
+              console.log("User restored from localStorage");
+            } catch (e) {
+              console.error("Failed to parse user data", e);
+              localStorage.removeItem("user");
+            }
+          }
+          
+          if (storedIsGuest) {
+            setIsGuest(storedIsGuest === "true");
+          }
         }
+        
+        // Load theme and progress data
+        const storedTheme = localStorage.getItem("selectedTheme");
+        const storedStreak = localStorage.getItem("streak");
+        const storedXP = localStorage.getItem("xp");
+        
+        if (storedTheme) setSelectedTheme(storedTheme);
+        if (storedStreak) setStreak(parseInt(storedStreak));
+        if (storedXP) setXP(parseInt(storedXP));
+        
+        setIsInitialized(true);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error checking auth session:", error);
+        setLoading(false);
       }
-      if (storedIsGuest) setIsGuest(storedIsGuest === "true");
-      
-      setIsInitialized(true);
     };
     
-    loadData();
+    checkSession();
+    
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event);
+      
+      if (event === 'SIGNED_IN' && session) {
+        setUser({
+          id: session.user.id,
+          name: session.user.user_metadata?.name || 'User',
+          email: session.user.email,
+        });
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  // Save to localStorage whenever values change - optimized with a debounce
+  // Save to localStorage whenever values change
   useEffect(() => {
     if (!isInitialized) return;
     
@@ -112,7 +162,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setUser,
       isGuest,
       setIsGuest,
-      resetProgress
+      resetProgress,
+      loading
     }}>
       {children}
     </AppContext.Provider>

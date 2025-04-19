@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { TabNavigation } from "@/components/TabNavigation";
@@ -167,12 +168,11 @@ const Quests = () => {
     }
     
     const formattedQuests = themeQuests.map((quest, index) => {
+      // All quests start as locked except the first one which is active
       let status: "completed" | "active" | "locked" = "locked";
       
       if (index === 0) {
-        status = "completed";
-      } else if (index === 1) {
-        status = "active";
+        status = "active"; // First quest is active, not completed
       }
       
       return {

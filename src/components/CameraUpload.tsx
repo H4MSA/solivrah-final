@@ -1,7 +1,8 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Camera, Upload, X, Image as ImageIcon, Check } from "lucide-react";
 import { GlassCard } from "./GlassCard";
+import { useToast } from "@/hooks/use-toast";
 
 interface CameraUploadProps {
   onCapture: (file: File) => void;
@@ -12,17 +13,22 @@ interface CameraUploadProps {
 export const CameraUpload = ({ onCapture, onClose, title = "Take a photo" }: CameraUploadProps) => {
   const [mode, setMode] = useState<'initial' | 'camera' | 'upload' | 'preview'>('initial');
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [cameraPermission, setCameraPermission] = useState<boolean | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const { toast } = useToast();
 
   // Start camera
   const startCamera = async () => {
     try {
+      // Request camera permission only when needed
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment' }
       });
+      
+      setCameraPermission(true);
       setStream(mediaStream);
       
       if (videoRef.current) {
@@ -32,6 +38,14 @@ export const CameraUpload = ({ onCapture, onClose, title = "Take a photo" }: Cam
       setMode('camera');
     } catch (err) {
       console.error("Error accessing camera:", err);
+      setCameraPermission(false);
+      
+      toast({
+        title: "Camera Access Denied",
+        description: "Please allow camera access to take photos",
+        variant: "destructive"
+      });
+      
       // Fallback to upload if camera access fails
       setMode('upload');
     }
@@ -100,7 +114,7 @@ export const CameraUpload = ({ onCapture, onClose, title = "Take a photo" }: Cam
   };
 
   // Clean up on unmount
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       stopCamera();
     };
