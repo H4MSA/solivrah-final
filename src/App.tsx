@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "./context/AppContext";
 import { ThemeBackground } from "./components/ThemeBackground";
+import { TabNavigation } from "./components/TabNavigation";  // Add this import
 import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Quests from "./pages/Quests";
