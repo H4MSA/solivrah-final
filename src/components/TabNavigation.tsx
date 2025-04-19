@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Home, ListChecks, Users, MessageCircle, User } from "lucide-react";
 
@@ -51,13 +51,8 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive, onClick }) => 
 export const TabNavigation: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [mounted, setMounted] = useState(false);
   
   const isActive = (path: string) => location.pathname === path;
-  
-  useEffect(() => {
-    setMounted(true);
-  }, []);
   
   const navItems = [
     { path: "/home", label: "Home", icon: <Home size={24} /> },
@@ -72,7 +67,7 @@ export const TabNavigation: React.FC = () => {
   };
 
   return (
-    <nav className="flex items-center justify-around w-full h-16 bg-[#0A0A0A]/90 backdrop-blur-xl border-t border-white/5 shadow-2xl">
+    <nav className="flex items-center justify-around w-full h-16 bg-[#0A0A0A]/90 backdrop-blur-xl border-t border-white/5 shadow-2xl z-50">
       {navItems.map((item) => (
         <NavItem 
           key={item.path}

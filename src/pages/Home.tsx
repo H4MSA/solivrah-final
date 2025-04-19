@@ -1,7 +1,5 @@
-
 import React, { useState, useEffect } from "react";
 import { GlassCard } from "@/components/GlassCard";
-import { TabNavigation } from "@/components/TabNavigation";
 import { ArrowRight, Star, Zap, User, Camera, MessageCircle, Users, Lock, Search, ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { QRScanner } from "@/components/QRScanner";

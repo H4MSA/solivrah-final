@@ -3,10 +3,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider } from "./context/AppContext";
 import { ThemeBackground } from "./components/ThemeBackground";
-import { TabNavigation } from "./components/TabNavigation";  // Add this import
+import { TabNavigation } from "./components/TabNavigation";
+import { useApp } from "./context/AppContext";
 import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Quests from "./pages/Quests";
@@ -27,6 +28,36 @@ const queryClient = new QueryClient({
   },
 });
 
+// Protected route component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useApp();
+  
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen bg-black">
+      <div className="animate-spin w-8 h-8 border-t-2 border-white rounded-full"></div>
+    </div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+// App Layout with Navigation
+const AppLayout = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <>
+      {/* Main content area with scroll */}
+      <main className="flex-1 overflow-y-auto overflow-x-hidden">
+        {children}
+      </main>
+      <TabNavigation />
+    </>
+  );
+};
+
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
@@ -41,21 +72,52 @@ const App = () => {
             <Sonner />
             
             <BrowserRouter>
-              {/* Main content area with scroll */}
-              <main className="flex-1 overflow-y-auto overflow-x-hidden">
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/home" element={<Home />} />
-                  <Route path="/quests" element={<Quests />} />
-                  <Route path="/coach" element={<Coach />} />
-                  <Route path="/community" element={<Community />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/survey" element={<Survey />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
-              <TabNavigation />
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/survey" element={<Survey />} />
+                
+                {/* Protected routes with TabNavigation */}
+                <Route path="/home" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <Home />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/quests" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <Quests />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/coach" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <Coach />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/community" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <Community />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <Profile />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                
+                {/* Catch-all for 404s */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
             </BrowserRouter>
           </div>
         </TooltipProvider>

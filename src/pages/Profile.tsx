@@ -1,11 +1,14 @@
+
 import React, { useState } from "react";
-import { TabNavigation } from "@/components/TabNavigation";
 import { GlassCard } from "@/components/GlassCard";
 import { Star, Trophy, CheckCircle, Calendar, Download, Share2, Settings, Bell, Activity, Lock, Info, LogOut, RefreshCw, Users } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { ProfileReset } from "@/components/ProfileReset";
 import { ProfileAchievements } from "@/components/ProfileAchievements";
 import { ProfileStats } from "@/components/ProfileStats";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+
 const ProfileSection = ({
   title,
   children
@@ -16,6 +19,7 @@ const ProfileSection = ({
     <h2 className="text-lg font-semibold mb-3">{title}</h2>
     {children}
   </div>;
+
 const StatCard = ({
   icon,
   value,
@@ -31,6 +35,7 @@ const StatCard = ({
     <div className="text-2xl font-semibold">{value}</div>
     <div className="text-xs text-white/70">{label}</div>
   </div>;
+
 const Badge = ({
   icon,
   label,
@@ -45,6 +50,7 @@ const Badge = ({
     </div>
     <span className="text-xs font-medium">{label}</span>
   </div>;
+
 const ActionButton = ({
   icon,
   label,
@@ -59,6 +65,7 @@ const ActionButton = ({
     <div className="text-xl text-white">{icon}</div>
     <span className="text-xs font-medium">{label}</span>
   </button>;
+
 const SettingsItem = ({
   icon,
   label,
@@ -78,6 +85,7 @@ const SettingsItem = ({
     </div>
     {value && <div className="text-sm text-white/70">{value}</div>}
   </div>;
+
 const TabButton = ({
   label,
   active,
@@ -89,18 +97,27 @@ const TabButton = ({
 }) => <button className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${active ? 'bg-[#222222] text-white' : 'bg-transparent text-white/60 hover:text-white/80'}`} onClick={onClick}>
     {label}
   </button>;
+
 const Profile = () => {
   const {
     streak,
     xp,
     user,
-    isGuest
+    isGuest,
+    signOut
   } = useApp();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
   const level = Math.floor(xp / 1000) + 1;
   const progress = xp % 1000 / 1000 * 100;
   const displayName = user?.name || (isGuest ? "Guest User" : "User");
   const completedQuests = 0; // This would come from your state
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/auth');
+  };
 
   return <div className="min-h-screen pb-24 text-white">
       <div className="p-4 space-y-5 animate-fade-in">
@@ -187,7 +204,10 @@ const Profile = () => {
                 
                 <SettingsItem icon={<Info size={18} />} label="About Solivrah" onClick={() => {}} />
                 
-                <button className="w-full py-3 rounded-xl bg-[#1A1A1A]/80 border border-white/10 text-white flex items-center justify-center gap-2 hover:bg-[#222222]/80 active:scale-[0.98] transition-all duration-300 mt-5">
+                <button 
+                  className="w-full py-3 rounded-xl bg-[#1A1A1A]/80 border border-white/10 text-white flex items-center justify-center gap-2 hover:bg-[#222222]/80 active:scale-[0.98] transition-all duration-300 mt-5"
+                  onClick={handleLogout}
+                >
                   <LogOut size={18} />
                   <span>Log Out</span>
                 </button>
@@ -201,8 +221,7 @@ const Profile = () => {
         
         {activeTab === 'stats' && <ProfileStats />}
       </div>
-      
-      <TabNavigation />
     </div>;
 };
+
 export default Profile;

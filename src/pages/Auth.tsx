@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { useApp } from "@/context/AppContext";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -25,8 +26,15 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [animation, setAnimation] = useState("");
   
-  const { setUser, setIsGuest } = useApp();
+  const { setUser, setIsGuest, user } = useApp();
   const { toast } = useToast();
+  
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user) {
+      navigate('/home');
+    }
+  }, [user, navigate]);
   
   useEffect(() => {
     // Clear any guest state
@@ -81,30 +89,39 @@ const Auth = () => {
     }
     
     setLoading(true);
+    setError("");
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
       if (mode === 'login') {
-        // For demo purposes, we're creating a mock user
-        setUser({
-          id: "user-1",
-          name: "Test User",
-          email: email || phone,
+        // Real Supabase authentication
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
         });
         
-        toast({
-          title: "Welcome back!",
-          description: "You've successfully logged in",
-        });
+        if (error) throw error;
         
-        navigate('/home');
+        if (data.user) {
+          toast({
+            title: "Welcome back!",
+            description: "You've successfully logged in",
+          });
+          
+          navigate('/home');
+        }
       } else {
-        setUser({
-          id: "user-" + Date.now(),
-          name: name,
-          email: email || phone,
+        // Register new user
+        const { data, error } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              name: name,
+            },
+          },
         });
+        
+        if (error) throw error;
         
         toast({
           title: "Account created!",
@@ -114,6 +131,7 @@ const Auth = () => {
         navigate('/survey');
       }
     } catch (err: any) {
+      console.error("Auth error:", err);
       setError(err.message || "Authentication failed");
       
       toast({
@@ -130,20 +148,17 @@ const Auth = () => {
     setLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setUser({
-        id: "google-user-1",
-        name: "Google User",
-        email: "google@example.com",
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/home',
+        },
       });
       
-      toast({
-        title: "Google sign in successful",
-        description: "Welcome to Solivrah",
-      });
+      if (error) throw error;
       
-      navigate('/home');
+      // The user will be redirected to Google for authentication
+      
     } catch (err: any) {
       setError("Google authentication failed");
       
@@ -152,9 +167,26 @@ const Auth = () => {
         description: "Please try again or use another method",
         variant: "destructive",
       });
-    } finally {
       setLoading(false);
     }
+  };
+  
+  const handleGuestLogin = () => {
+    // Create a temporary guest user
+    const guestUser = {
+      id: `guest-${Date.now()}`,
+      name: "Guest User",
+    };
+    
+    setUser(guestUser);
+    setIsGuest(true);
+    
+    toast({
+      title: "Guest mode activated",
+      description: "You can explore the app without creating an account",
+    });
+    
+    navigate('/home');
   };
   
   const toggleMode = () => {
@@ -357,6 +389,14 @@ const Auth = () => {
           >
             <FcGoogle size={20} />
             Continue with Google
+          </button>
+          
+          <button
+            type="button"
+            onClick={handleGuestLogin}
+            className="mt-3 w-full flex items-center justify-center gap-3 bg-transparent text-white py-3 rounded-xl border border-[#333333] font-medium transition-all hover:bg-[#1A1A1A]/30 active:scale-[0.98] touch-manipulation"
+          >
+            Continue as Guest
           </button>
           
           <div className="mt-6 text-center">
