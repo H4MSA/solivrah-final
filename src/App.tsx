@@ -3,7 +3,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AppProvider } from "./context/AppContext";
+import { ThemeBackground } from "./components/ThemeBackground";
 import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Quests from "./pages/Quests";
@@ -13,15 +15,13 @@ import Profile from "./pages/Profile";
 import Survey from "./pages/Survey";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-import { AppProvider } from "./context/AppContext";
-import { ThemeBackground } from "./components/ThemeBackground";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
     },
   },
 });
@@ -34,22 +34,27 @@ const App = () => {
           {/* Theme background applied to the entire app */}
           <ThemeBackground />
           
-          {/* Optimized for Android - using standard mobile width */}
-          <div className="min-h-screen w-full max-w-[390px] mx-auto perspective-[1500px] transform-gpu overflow-hidden relative"> 
+          {/* Fixed viewport container */}
+          <div className="fixed inset-0 flex flex-col w-full max-w-[390px] mx-auto bg-black overflow-hidden">
             <Toaster />
             <Sonner />
+            
             <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/quests" element={<Quests />} />
-                <Route path="/coach" element={<Coach />} />
-                <Route path="/community" element={<Community />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/survey" element={<Survey />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              {/* Main content area with scroll */}
+              <main className="flex-1 overflow-y-auto overflow-x-hidden">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/quests" element={<Quests />} />
+                  <Route path="/coach" element={<Coach />} />
+                  <Route path="/community" element={<Community />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/survey" element={<Survey />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </main>
+              <TabNavigation />
             </BrowserRouter>
           </div>
         </TooltipProvider>
