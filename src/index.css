@@ -328,6 +328,21 @@
     @apply flex items-center gap-3 p-4 rounded-xl bg-[#121212] border border-[#333333] 
       hover:border-[#444444] transition-all cursor-pointer active:scale-[0.98];
   }
+
+  /* -- NAVBAR CUSTOMIZATION FOR NOTCH LAYOUT -- */
+  .nav-notch {
+    border-radius: 1.7rem;
+    background: rgba(0,0,0,0.90);
+    box-shadow: 0 6px 22px 0 rgba(0,0,0,0.44);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .nav-notch-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+  }
 }
 
 /* Animations */
@@ -400,10 +415,6 @@
   0% { transform: translateY(-8px); }
   50% { transform: translateY(0px); }
   100% { transform: translateY(-8px); }
-}
-
-.animate-float-reverse {
-  animation: float-reverse 4s infinite ease-in-out;
 }
 
 @keyframes float-slow {

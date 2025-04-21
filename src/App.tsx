@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -76,7 +75,6 @@ const App = () => {
       await supabase.auth.getSession();
       setSessionChecked(true);
     };
-    
     checkSession();
   }, []);
   
@@ -92,27 +90,20 @@ const App = () => {
         <TooltipProvider>
           {/* Theme background applied to the entire app */}
           <ThemeBackground />
-          
-          {/* Fixed viewport container with safe areas */}
-          <div className="fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-black overflow-hidden px-4 pt-safe pb-safe">
+          <div className="fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-black overflow-hidden px-0 pt-safe pb-safe">
             <Toaster />
             <Sonner />
-            
             <BrowserRouter>
               <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<Index />} />
+                {/* Home as default - redirect / to /home */}
+                <Route path="/" element={<Navigate to="/home" replace />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
-                
-                {/* Survey route (accessible after auth) */}
                 <Route path="/survey" element={
                   <ProtectedRoute>
                     <Survey />
                   </ProtectedRoute>
                 } />
-                
-                {/* Protected routes with TabNavigation */}
                 <Route path="/home" element={
                   <ProtectedRoute>
                     <AppLayout>
@@ -120,17 +111,28 @@ const App = () => {
                     </AppLayout>
                   </ProtectedRoute>
                 } />
-                <Route path="/quests" element={
+                {/* Add missing tabs for consistency with navbar */}
+                <Route path="/wallet" element={
                   <ProtectedRoute>
                     <AppLayout>
-                      <Quests />
+                      {/* <WalletPage /> // Add your Wallet page component */}
+                      <div className="text-white p-8 text-center">Wallet Page (coming soon)</div>
                     </AppLayout>
                   </ProtectedRoute>
                 } />
-                <Route path="/coach" element={
+                <Route path="/exchange" element={
                   <ProtectedRoute>
                     <AppLayout>
-                      <Coach />
+                      {/* <ExchangePage /> // Add your Exchange page component */}
+                      <div className="text-white p-8 text-center">Exchange Page (coming soon)</div>
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/markets" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      {/* <MarketsPage /> // Add your Markets page component */}
+                      <div className="text-white p-8 text-center">Markets Page (coming soon)</div>
                     </AppLayout>
                   </ProtectedRoute>
                 } />
@@ -141,6 +143,13 @@ const App = () => {
                     </AppLayout>
                   </ProtectedRoute>
                 } />
+                <Route path="/coach" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <Coach />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
                 <Route path="/profile" element={
                   <ProtectedRoute>
                     <AppLayout>
@@ -148,8 +157,6 @@ const App = () => {
                     </AppLayout>
                   </ProtectedRoute>
                 } />
-                
-                {/* Catch-all for 404s */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
