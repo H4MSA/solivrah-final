@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { GlassCard } from "@/components/GlassCard";
-import { TabNavigation } from "@/components/TabNavigation";
-import { Send, User } from "lucide-react";
+import { Send, User, ArrowLeft } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -24,10 +23,10 @@ interface ChatHistoryRecord {
 }
 
 const Coach = () => {
-  const { selectedTheme } = useApp();
+  const { selectedTheme, user } = useApp();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([
-    { sender: "ai", text: `Hi, I'm your AI Coach for ${selectedTheme}. How can I help you today?` },
+    { sender: "ai", text: `Hi, I'm your AI Coach for ${selectedTheme || 'personal development'}. How can I help you today?` },
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -35,6 +34,8 @@ const Coach = () => {
   useEffect(() => {
     const loadMessages = async () => {
       try {
+        if (!user) return; // Only load messages if user is logged in
+        
         const { data, error } = await supabase
           .from('chat_history')
           .select('*')
@@ -77,7 +78,7 @@ const Coach = () => {
     };
     
     loadMessages();
-  }, [selectedTheme]);
+  }, [selectedTheme, user]);
   
   useEffect(() => {
     // Scroll to bottom whenever messages change
@@ -97,24 +98,56 @@ const Coach = () => {
     setIsLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       let aiResponse = "";
-      if (selectedTheme === "Discipline") {
-        aiResponse = "Consistency is key to building discipline. Remember that small actions repeated daily lead to significant results over time. What specific habit are you working on right now?";
+      
+      // Generate a more dynamic and personalized response based on the theme and user input
+      const userInput = input.toLowerCase();
+      
+      if (selectedTheme === "Discipline" || !selectedTheme) {
+        if (userInput.includes("struggle") || userInput.includes("hard") || userInput.includes("difficult")) {
+          aiResponse = "It's normal to struggle with building discipline. Remember that small steps consistently taken add up over time. What specific aspect are you finding most challenging?";
+        } else if (userInput.includes("morning") || userInput.includes("wake up")) {
+          aiResponse = "Morning routines are powerful for building discipline. Try setting your alarm 15 minutes earlier each day and use that time for something you enjoy - this creates a positive association with waking up.";
+        } else if (userInput.includes("procrastinate") || userInput.includes("procrastination")) {
+          aiResponse = "Procrastination is often emotional, not logical. Try breaking tasks into tiny steps and just commit to the first one. What task are you currently putting off?";
+        } else {
+          aiResponse = "Building discipline is about consistency rather than intensity. What specific habit are you trying to develop right now?";
+        }
       } else if (selectedTheme === "Focus") {
-        aiResponse = "To improve focus, try eliminating distractions from your environment. The ability to concentrate deeply is becoming increasingly rare and valuable. How is your current focus environment?";
+        if (userInput.includes("distract") || userInput.includes("attention")) {
+          aiResponse = "Our attention is constantly being pulled in different directions. Have you tried time-blocking or the Pomodoro technique (25 minutes of focus followed by a 5-minute break)?";
+        } else if (userInput.includes("phone") || userInput.includes("social media")) {
+          aiResponse = "Digital distractions are powerful. Try putting your phone in another room while working, or use apps that temporarily block distracting websites.";
+        } else {
+          aiResponse = "Deep focus is a skill that takes practice. Start with short sessions and gradually increase the duration. What's your current focus environment like?";
+        }
       } else if (selectedTheme === "Resilience") {
-        aiResponse = "Resilience grows through challenges. Each setback is an opportunity to build mental strength. What specific challenge are you facing that I can help with?";
+        if (userInput.includes("fail") || userInput.includes("mistake")) {
+          aiResponse = "Failures are feedback, not endpoints. Every successful person has a history of failures behind them. What specific situation are you dealing with?";
+        } else if (userInput.includes("stress") || userInput.includes("overwhelm")) {
+          aiResponse = "When feeling overwhelmed, focus on what you can control. Even small actions can help restore a sense of agency. What's one small thing you could do today?";
+        } else {
+          aiResponse = "Resilience grows through challenges. Each setback is an opportunity to build mental strength. What specific challenge are you facing that I can help with?";
+        }
       } else {
-        aiResponse = "Creativity flourishes when you give yourself permission to experiment without judgment. What creative ideas are you exploring currently?";
+        if (userInput.includes("idea") || userInput.includes("stuck")) {
+          aiResponse = "Creative blocks happen to everyone. Try changing your environment or approaching the problem from a completely different angle. What are you working on?";
+        } else if (userInput.includes("inspire") || userInput.includes("motivation")) {
+          aiResponse = "Inspiration often comes from combining different ideas or experiences. Try exposing yourself to content outside your usual interests. What's something new you could explore?";
+        } else {
+          aiResponse = "Creativity flourishes when you give yourself permission to experiment without judgment. What creative ideas are you exploring currently?";
+        }
       }
       
       const aiMessageObj: Message = { sender: "ai", text: aiResponse };
       setMessages(prev => [...prev, aiMessageObj]);
       
-      // Save the conversation to Supabase
-      await saveMessageToSupabase(input, aiResponse);
+      // Save the conversation to Supabase if user is logged in
+      if (user) {
+        await saveMessageToSupabase(input, aiResponse);
+      }
       
     } catch (error) {
       console.error("Error getting AI response:", error);
@@ -130,7 +163,7 @@ const Coach = () => {
         { 
           message: userMessage, 
           response: aiResponse,
-          theme: selectedTheme 
+          theme: selectedTheme || 'General'
         }
       ]);
       
@@ -140,12 +173,19 @@ const Coach = () => {
     }
   };
   
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+  
   return (
-    <div className="min-h-screen pb-20 flex flex-col">
+    <div className="min-h-screen pb-24 flex flex-col">
       <div className="p-6 flex-shrink-0">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-medium">AI Coach</h1>
-          <div className="w-10 h-10 rounded-full bg-[#121212] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-[#121212] flex items-center justify-center border border-white/5">
             <User className="text-white h-5 w-5" />
           </div>
         </div>
@@ -158,16 +198,16 @@ const Coach = () => {
               key={index}
               className={`${
                 message.sender === "user" 
-                  ? "ml-auto bg-[#333333] text-white" 
-                  : "mr-auto bg-[#191919] text-white"
-              } p-3 rounded-xl max-w-[80%] animate-fade-in shadow-sm`}
+                  ? "ml-auto bg-[#222222] text-white" 
+                  : "mr-auto bg-[#121212] text-white"
+              } p-4 rounded-xl max-w-[80%] animate-fade-in shadow-sm border border-white/5`}
             >
               <p className="text-sm">{message.text}</p>
             </div>
           ))}
           
           {isLoading && (
-            <div className="mr-auto bg-[#191919] p-3 rounded-xl max-w-[80%] animate-fade-in">
+            <div className="mr-auto bg-[#121212] p-4 rounded-xl max-w-[80%] animate-fade-in border border-white/5">
               <div className="flex space-x-2">
                 <div className="w-2 h-2 bg-white/40 rounded-full animate-pulse"></div>
                 <div className="w-2 h-2 bg-white/40 rounded-full animate-pulse delay-150"></div>
@@ -179,19 +219,19 @@ const Coach = () => {
         </div>
       </div>
       
-      <div className="fixed left-0 right-0 bottom-[72px] p-4 bg-black/80 backdrop-blur-md z-10 mx-auto max-w-[390px]">
-        <div className="flex items-center gap-2 bg-[#121212] rounded-full p-1 pr-2 border border-[#222222]">
+      <div className="fixed left-0 right-0 bottom-[72px] p-4 bg-black/90 backdrop-blur-md z-10 mx-auto max-w-[390px]">
+        <div className="flex items-center gap-2 bg-[#121212] rounded-full p-1 pr-2 border border-white/10">
           <input 
             type="text" 
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyPress}
             placeholder="Type your question..."
-            className="flex-1 bg-transparent border-none outline-none text-sm text-white px-3 py-2"
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            className="flex-1 bg-transparent border-none outline-none text-sm text-white px-4 py-3"
             disabled={isLoading}
           />
           <button 
-            className="bg-primary text-white rounded-full p-2 hover:bg-primary/90 transition-colors"
+            className="bg-white text-black rounded-full p-2.5 hover:bg-white/90 transition-colors"
             onClick={handleSend}
             disabled={isLoading}
             aria-label="Send message"
@@ -200,8 +240,6 @@ const Coach = () => {
           </button>
         </div>
       </div>
-      
-      <TabNavigation />
     </div>
   );
 };

@@ -8,6 +8,8 @@ import { AppProvider } from "./context/AppContext";
 import { ThemeBackground } from "./components/ThemeBackground";
 import { TabNavigation } from "./components/TabNavigation";
 import { useApp } from "./context/AppContext";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Quests from "./pages/Quests";
@@ -31,6 +33,7 @@ const queryClient = new QueryClient({
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useApp();
+  const location = useLocation();
   
   if (loading) {
     return <div className="flex items-center justify-center h-screen bg-black">
@@ -39,7 +42,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
   
   return <>{children}</>;
@@ -64,6 +67,24 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
+  const [sessionChecked, setSessionChecked] = useState(false);
+  
+  useEffect(() => {
+    // Check for existing session on app load
+    const checkSession = async () => {
+      await supabase.auth.getSession();
+      setSessionChecked(true);
+    };
+    
+    checkSession();
+  }, []);
+  
+  if (!sessionChecked) {
+    return <div className="flex items-center justify-center h-screen bg-black">
+      <div className="animate-spin w-8 h-8 border-t-2 border-white rounded-full"></div>
+    </div>;
+  }
+  
   return (
     <QueryClientProvider client={queryClient}>
       <AppProvider>
@@ -81,7 +102,13 @@ const App = () => {
                 {/* Public routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/survey" element={<Survey />} />
+                
+                {/* Survey route (accessible after auth) */}
+                <Route path="/survey" element={
+                  <ProtectedRoute>
+                    <Survey />
+                  </ProtectedRoute>
+                } />
                 
                 {/* Protected routes with TabNavigation */}
                 <Route path="/home" element={

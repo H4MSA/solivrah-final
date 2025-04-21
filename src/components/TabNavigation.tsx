@@ -63,7 +63,7 @@ export const TabNavigation: React.FC = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none">
-      <nav className="flex items-center justify-around w-full max-w-[390px] h-16 bg-black backdrop-blur-xl border-t border-white/5 shadow-2xl z-50 pointer-events-auto">
+      <nav className="flex items-center justify-around w-full max-w-[390px] h-[72px] bg-black/95 backdrop-blur-xl border-t border-white/5 shadow-2xl z-50 pointer-events-auto rounded-t-xl">
         {navItems.map((item) => (
           <NavItem 
             key={item.path}
@@ -74,9 +74,6 @@ export const TabNavigation: React.FC = () => {
             onClick={() => handleNavigation(item.path)}
           />
         ))}
-        
-        {/* Safe area padding for iPhone */}
-        <div className="h-8 bg-black absolute bottom-0 left-0 right-0 -z-10" />
       </nav>
     </div>
   );

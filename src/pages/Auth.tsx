@@ -1,426 +1,247 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Eye, EyeOff, Mail, Lock, User, Loader2 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { GlassCard } from "@/components/GlassCard";
-import { Mail, Phone, Lock, ArrowRight, ChevronLeft, Eye, EyeOff } from "lucide-react";
-import { FcGoogle } from "react-icons/fc";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
+import { AuthService } from "@/services/AuthService";
 import { useApp } from "@/context/AppContext";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+
+type AuthMode = "sign-in" | "sign-up" | "forgot-password";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<'login' | 'register'>('login');
-  const [method, setMethod] = useState<'email' | 'phone'>('email');
+  const { user, setUser } = useApp();
+  const [mode, setMode] = useState<AuthMode>("sign-in");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [name, setName] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [username, setUsername] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [animation, setAnimation] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   
-  const { setUser, setIsGuest, user } = useApp();
-  const { toast } = useToast();
-  
-  // Redirect if already authenticated
   useEffect(() => {
+    // If user is already logged in, redirect to home
     if (user) {
-      navigate('/home');
-    }
-  }, [user, navigate]);
-  
-  useEffect(() => {
-    // Clear any guest state
-    setIsGuest(false);
-  }, [setIsGuest]);
-  
-  const validateForm = () => {
-    setError("");
-    
-    if (mode === 'register') {
-      if (!name.trim()) {
-        setError("Name is required");
-        return false;
-      }
-      
-      if (password !== confirmPassword) {
-        setError("Passwords don't match");
-        return false;
-      }
-      
-      if (password.length < 6) {
-        setError("Password must be at least 6 characters");
-        return false;
-      }
+      navigate("/home");
     }
     
-    if (method === 'email') {
-      if (!email.includes('@') || !email.includes('.')) {
-        setError("Please enter a valid email");
-        return false;
+    // Check for existing session
+    const checkSession = async () => {
+      try {
+        const session = await AuthService.getCurrentSession();
+        if (session) {
+          setUser(session.user);
+          navigate("/home");
+        }
+      } catch (error) {
+        console.error("Session check error:", error);
       }
-    } else {
-      if (phone.length < 10) {
-        setError("Please enter a valid phone number");
-        return false;
-      }
-    }
+    };
     
-    if (!password) {
-      setError("Password is required");
-      return false;
-    }
-    
-    return true;
-  };
+    checkSession();
+  }, [user, navigate, setUser]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-    
-    setLoading(true);
     setError("");
+    setSuccessMessage("");
+    setIsLoading(true);
     
     try {
-      if (mode === 'login') {
-        // Real Supabase authentication
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: email,
-          password: password,
-        });
-        
-        if (error) throw error;
-        
-        if (data.user) {
-          toast({
-            title: "Welcome back!",
-            description: "You've successfully logged in",
-          });
-          
-          navigate('/home');
-        }
-      } else {
-        // Register new user
-        const { data, error } = await supabase.auth.signUp({
-          email: email,
-          password: password,
-          options: {
-            data: {
-              name: name,
-            },
-          },
-        });
-        
-        if (error) throw error;
-        
-        toast({
-          title: "Account created!",
-          description: "Welcome to Solivrah",
-        });
-        
-        navigate('/survey');
+      if (mode === "sign-in") {
+        await AuthService.signIn({ email, password });
+        navigate("/home");
+      } else if (mode === "sign-up") {
+        await AuthService.signUp({ email, password, username });
+        setSuccessMessage("Account created successfully! Please check your email for verification.");
+        setTimeout(() => {
+          setMode("sign-in");
+        }, 3000);
+      } else if (mode === "forgot-password") {
+        await AuthService.resetPassword(email);
+        setSuccessMessage("Password reset link sent to your email!");
       }
-    } catch (err: any) {
-      console.error("Auth error:", err);
-      setError(err.message || "Authentication failed");
-      
-      toast({
-        title: "Authentication failed",
-        description: err.message || "Please check your credentials and try again",
-        variant: "destructive",
-      });
+    } catch (error) {
+      console.error("Auth error:", error);
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("An error occurred during authentication.");
+      }
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
   
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin + '/home',
-        },
-      });
-      
-      if (error) throw error;
-      
-      // The user will be redirected to Google for authentication
-      
-    } catch (err: any) {
-      setError("Google authentication failed");
-      
-      toast({
-        title: "Google sign in failed",
-        description: "Please try again or use another method",
-        variant: "destructive",
-      });
-      setLoading(false);
-    }
-  };
-  
-  const handleGuestLogin = () => {
-    // Create a temporary guest user
-    const guestUser = {
-      id: `guest-${Date.now()}`,
-      name: "Guest User",
-    };
-    
-    setUser(guestUser);
-    setIsGuest(true);
-    
-    toast({
-      title: "Guest mode activated",
-      description: "You can explore the app without creating an account",
-    });
-    
-    navigate('/home');
-  };
-  
-  const toggleMode = () => {
-    setAnimation("animate-blur-out");
-    setTimeout(() => {
-      setMode(mode === 'login' ? 'register' : 'login');
-      setAnimation("animate-blur-in");
-    }, 300);
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
   
   return (
-    <div className="min-h-screen w-full flex flex-col justify-center items-center bg-black p-4">
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-0 w-[300px] h-[300px] bg-[#333333]/10 rounded-full blur-[100px]"></div>
-        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-[#444444]/10 rounded-full blur-[100px]"></div>
+    <div className="min-h-screen flex flex-col justify-between px-6 py-6 overflow-hidden">
+      {/* Background effects */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#333333]/10 rounded-full blur-[100px]"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[#444444]/10 rounded-full blur-[100px]"></div>
       </div>
       
-      <div className={`w-full max-w-md z-10 transition-all duration-500 ${animation}`}>
-        <div className="flex justify-center mb-6">
-          <Logo className="animate-float" />
+      <div className="flex-1 flex flex-col w-full max-w-md mx-auto z-10">
+        <div className="flex items-center mb-6">
+          <button 
+            onClick={() => navigate("/")}
+            className="p-2 rounded-full bg-[#111111]/80 border border-white/5 hover:bg-[#222222]/80 transition-all"
+          >
+            <ArrowLeft size={20} className="text-white" />
+          </button>
+          <Logo className="mx-auto" />
         </div>
         
-        <GlassCard className="backdrop-blur-lg p-6 animate-pop-in">
-          <div className="mb-6 text-center">
-            <h1 className="text-2xl font-bold text-white mb-2">
-              {mode === 'login' ? 'Welcome Back' : 'Create Account'}
-            </h1>
-            <p className="text-[#AAAAAA] text-sm">
-              {mode === 'login' 
-                ? 'Sign in to continue your journey' 
-                : 'Join Solivrah to start your journey'}
-            </p>
-          </div>
-          
-          {error && (
-            <div className="bg-red-900/30 border border-red-700 text-white px-4 py-3 rounded-lg mb-4 text-sm">
-              {error}
+        <GlassCard variant="dark" className="w-full mb-4 rounded-xl">
+          <div className="space-y-6">
+            <div className="text-center">
+              <h1 className="text-xl font-bold text-white">
+                {mode === "sign-in" ? "Welcome Back" : mode === "sign-up" ? "Create Account" : "Reset Password"}
+              </h1>
+              <p className="text-[#999999] text-sm mt-1">
+                {mode === "sign-in" 
+                  ? "Sign in to continue to your account" 
+                  : mode === "sign-up" 
+                  ? "Join Solivrah and start your journey" 
+                  : "Enter your email to receive a reset link"}
+              </p>
             </div>
-          )}
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {mode === 'register' && (
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-[#CCCCCC]">Full Name</Label>
-                <div className="relative">
-                  <Input
-                    id="name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    className="bg-[#121212] border-[#333333] focus:border-white text-white pl-4 pr-4 py-2 h-12 rounded-lg w-full transition-all"
-                    placeholder="Enter your name"
-                  />
+            
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {mode === "sign-up" && (
+                <div className="space-y-2">
+                  <label htmlFor="username" className="text-sm text-[#E0E0E0] font-medium">Username</label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#999999]">
+                      <User size={18} />
+                    </div>
+                    <input 
+                      id="username"
+                      type="text" 
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className="w-full bg-[#111111] border border-[#333333] rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-[#777777] focus:outline-none focus:border-[#444444] transition-all"
+                      placeholder="Your username"
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
-            
-            <div className="flex space-x-2 bg-[#0D0D0D] p-1 rounded-lg mb-4">
-              <button
-                type="button"
-                onClick={() => setMethod('email')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md transition-all touch-manipulation ${
-                  method === 'email' 
-                    ? 'bg-[#222222] text-white' 
-                    : 'text-[#888888] hover:text-white'
-                }`}
-              >
-                <Mail size={16} />
-                <span>Email</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setMethod('phone')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md transition-all touch-manipulation ${
-                  method === 'phone' 
-                    ? 'bg-[#222222] text-white' 
-                    : 'text-[#888888] hover:text-white'
-                }`}
-              >
-                <Phone size={16} />
-                <span>Phone</span>
-              </button>
-            </div>
-            
-            {method === 'email' ? (
+              )}
+              
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[#CCCCCC]">Email</Label>
+                <label htmlFor="email" className="text-sm text-[#E0E0E0] font-medium">Email</label>
                 <div className="relative">
-                  <Input
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#999999]">
+                    <Mail size={18} />
+                  </div>
+                  <input 
                     id="email"
-                    type="email"
+                    type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="bg-[#121212] border-[#333333] focus:border-white text-white pl-4 pr-4 py-2 h-12 rounded-lg w-full transition-all"
-                    placeholder="your@email.com"
+                    className="w-full bg-[#111111] border border-[#333333] rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-[#777777] focus:outline-none focus:border-[#444444] transition-all"
+                    placeholder="your.email@example.com"
                   />
                 </div>
               </div>
-            ) : (
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-[#CCCCCC]">Phone Number</Label>
-                <div className="relative">
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                    className="bg-[#121212] border-[#333333] focus:border-white text-white pl-4 pr-4 py-2 h-12 rounded-lg w-full transition-all"
-                    placeholder="+1 (123) 456-7890"
-                  />
+              
+              {mode !== "forgot-password" && (
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <label htmlFor="password" className="text-sm text-[#E0E0E0] font-medium">Password</label>
+                    {mode === "sign-in" && (
+                      <button 
+                        type="button"
+                        onClick={() => setMode("forgot-password")}
+                        className="text-xs text-[#999999] hover:text-white transition-colors"
+                      >
+                        Forgot password?
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#999999]">
+                      <Lock size={18} />
+                    </div>
+                    <input 
+                      id="password"
+                      type={showPassword ? "text" : "password"} 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full bg-[#111111] border border-[#333333] rounded-xl py-3 pl-10 pr-10 text-white placeholder:text-[#777777] focus:outline-none focus:border-[#444444] transition-all"
+                      placeholder="••••••••"
+                    />
+                    <button 
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999999] hover:text-white transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
-            
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-[#CCCCCC]">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="bg-[#121212] border-[#333333] focus:border-white text-white pl-4 pr-10 py-2 h-12 rounded-lg w-full transition-all"
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#888888] hover:text-white transition-colors touch-manipulation"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-            
-            {mode === 'register' && (
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-[#CCCCCC]">Confirm Password</Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    className="bg-[#121212] border-[#333333] focus:border-white text-white pl-4 pr-10 py-2 h-12 rounded-lg w-full transition-all"
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
-            )}
-            
-            {mode === 'login' && (
-              <div className="text-right">
-                <a href="#" className="text-[#CCCCCC] text-sm hover:text-white transition-colors">
-                  Forgot password?
-                </a>
-              </div>
-            )}
-            
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-white text-black py-3 rounded-xl font-medium transition-all hover:bg-[#EEEEEE] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed touch-manipulation"
-            >
-              {loading ? (
-                <>
-                  <span className="animate-pulse">Processing</span>
-                </>
-              ) : (
-                <>
-                  {mode === 'login' ? 'Sign In' : 'Create Account'} <ArrowRight />
-                </>
               )}
-            </button>
+              
+              {error && (
+                <div className="p-3 bg-red-900/20 border border-red-500/20 rounded-lg text-red-400 text-sm">
+                  {error}
+                </div>
+              )}
+              
+              {successMessage && (
+                <div className="p-3 bg-green-900/20 border border-green-500/20 rounded-lg text-green-400 text-sm">
+                  {successMessage}
+                </div>
+              )}
+              
+              <button 
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3 bg-white text-black rounded-xl font-medium flex items-center justify-center transition-all hover:bg-[#EEEEEE] active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none"
+              >
+                {isLoading ? (
+                  <Loader2 size={20} className="animate-spin" />
+                ) : (
+                  mode === "sign-in" ? "Sign In" : mode === "sign-up" ? "Create Account" : "Send Reset Link"
+                )}
+              </button>
+            </form>
             
-            {loading && (
-              <Progress 
-                value={100} 
-                className="h-1" 
-                indicatorClassName="bg-white animate-progress" 
-              />
-            )}
-          </form>
-          
-          <div className="mt-6 flex items-center justify-center">
-            <div className="border-t border-[#333333] w-full"></div>
-            <div className="mx-4 text-[#AAAAAA] text-sm">or</div>
-            <div className="border-t border-[#333333] w-full"></div>
-          </div>
-          
-          <button
-            type="button"
-            onClick={handleGoogleLogin}
-            className="mt-4 w-full flex items-center justify-center gap-3 bg-[#121212] text-white py-3 rounded-xl border border-[#333333] font-medium transition-all hover:bg-[#1A1A1A] active:scale-[0.98] touch-manipulation"
-          >
-            <FcGoogle size={20} />
-            Continue with Google
-          </button>
-          
-          <button
-            type="button"
-            onClick={handleGuestLogin}
-            className="mt-3 w-full flex items-center justify-center gap-3 bg-transparent text-white py-3 rounded-xl border border-[#333333] font-medium transition-all hover:bg-[#1A1A1A]/30 active:scale-[0.98] touch-manipulation"
-          >
-            Continue as Guest
-          </button>
-          
-          <div className="mt-6 text-center">
-            <button 
-              type="button" 
-              onClick={toggleMode}
-              className="text-white hover:underline transition-all touch-manipulation"
-            >
-              {mode === 'login' 
-                ? "Don't have an account? Sign Up" 
-                : "Already have an account? Sign In"}
-            </button>
-          </div>
-          
-          <div className="mt-4 text-center">
-            <button 
-              type="button" 
-              onClick={() => navigate('/')}
-              className="text-[#888888] text-sm hover:text-white flex items-center justify-center gap-1 mx-auto transition-colors touch-manipulation"
-            >
-              <ChevronLeft size={14} /> Back to Home
-            </button>
+            <div className="text-center text-sm text-[#999999]">
+              {mode === "sign-in" ? (
+                <p>
+                  Don't have an account?{" "}
+                  <button 
+                    onClick={() => setMode("sign-up")}
+                    className="text-white font-medium hover:underline transition-all"
+                  >
+                    Sign Up
+                  </button>
+                </p>
+              ) : (
+                <p>
+                  Already have an account?{" "}
+                  <button 
+                    onClick={() => setMode("sign-in")}
+                    className="text-white font-medium hover:underline transition-all"
+                  >
+                    Sign In
+                  </button>
+                </p>
+              )}
+            </div>
           </div>
         </GlassCard>
+      </div>
+      
+      <div className="text-center text-xs text-[#777777] mt-8 mb-2">
+        © 2025 Solivrah. All rights reserved.
       </div>
     </div>
   );

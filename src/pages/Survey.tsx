@@ -1,15 +1,15 @@
-
 import React, { useState } from "react";
 import { FiArrowRight, FiCheck, FiArrowLeft } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 import { GlassCard } from "@/components/GlassCard";
+import { supabase } from "@/integrations/supabase/client";
 
 type Challenge = "Procrastination" | "Distractions" | "Setbacks" | "Creative Block";
 
 const Survey = () => {
   const navigate = useNavigate();
-  const { setSelectedTheme } = useApp();
+  const { setSelectedTheme, user } = useApp();
   const [formData, setFormData] = useState({
     challenge: "Procrastination" as Challenge,
     goal: "",
@@ -48,8 +48,139 @@ const Survey = () => {
       // Save selected theme
       setSelectedTheme(theme);
       
-      // Simulate API call to generate roadmap with a loading animation
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Save survey response to Supabase if user is logged in
+      if (user) {
+        const { error: surveyError } = await supabase
+          .from('survey_responses')
+          .insert([
+            { 
+              user_id: user.id,
+              theme: theme,
+              goal: formData.goal,
+              biggest_struggle: formData.challenge,
+              daily_commitment: parseInt(formData.timeCommitment)
+            }
+          ]);
+          
+        if (surveyError) throw surveyError;
+        
+        // Generate quests based on theme and time commitment
+        const dailyTimeCommitment = parseInt(formData.timeCommitment);
+        
+        // Generate 7 days of quests
+        for (let day = 1; day <= 7; day++) {
+          // Example quest generation based on theme
+          let questTitle = "";
+          let questDescription = "";
+          let difficulty = "Medium";
+          let xpReward = 50;
+          let requiresPhoto = false;
+          
+          if (theme === "Discipline") {
+            if (day === 1) {
+              questTitle = "Track Your Time";
+              questDescription = "Log how you spend your time today to identify patterns and areas for improvement.";
+              xpReward = 50;
+            } else if (day === 2) {
+              questTitle = "Morning Routine";
+              questDescription = "Establish a consistent morning routine to start your day with purpose.";
+              xpReward = 75;
+            } else if (day === 3) {
+              questTitle = "No Distractions Hour";
+              questDescription = "Complete one hour of focused work without checking your phone or other distractions.";
+              xpReward = 100;
+              difficulty = "Hard";
+            } else {
+              questTitle = `Discipline Challenge: Day ${day}`;
+              questDescription = `Complete a specific discipline-building exercise tailored to your goals.`;
+              xpReward = 50 + (day * 10);
+            }
+          } else if (theme === "Focus") {
+            if (day === 1) {
+              questTitle = "Distraction-Free Zone";
+              questDescription = "Set up a dedicated workspace that minimizes distractions.";
+              xpReward = 50;
+              requiresPhoto = true;
+            } else if (day === 2) {
+              questTitle = "Pomodoro Technique";
+              questDescription = "Complete 4 pomodoro sessions (25 minutes of focus, 5 minute break).";
+              xpReward = 75;
+            } else if (day === 3) {
+              questTitle = "Digital Detox";
+              questDescription = "Spend 2 hours completely disconnected from digital devices.";
+              xpReward = 100;
+              difficulty = "Hard";
+            } else {
+              questTitle = `Focus Challenge: Day ${day}`;
+              questDescription = `Complete a specific focus-building exercise tailored to your needs.`;
+              xpReward = 50 + (day * 10);
+            }
+          } else if (theme === "Resilience") {
+            if (day === 1) {
+              questTitle = "Comfort Zone Challenge";
+              questDescription = "Do one thing today that takes you slightly out of your comfort zone.";
+              xpReward = 50;
+            } else if (day === 2) {
+              questTitle = "Gratitude Practice";
+              questDescription = "Write down three things you're grateful for, even in difficult circumstances.";
+              xpReward = 75;
+            } else if (day === 3) {
+              questTitle = "Reframe a Setback";
+              questDescription = "Identify a recent setback and write down three positive lessons or opportunities it created.";
+              xpReward = 100;
+            } else {
+              questTitle = `Resilience Challenge: Day ${day}`;
+              questDescription = `Complete a specific resilience-building exercise for your journey.`;
+              xpReward = 50 + (day * 10);
+            }
+          } else {
+            // Wildcards
+            if (day === 1) {
+              questTitle = "Creative Exploration";
+              questDescription = "Spend 30 minutes engaging in a creative activity you've never tried before.";
+              xpReward = 50;
+              requiresPhoto = true;
+            } else if (day === 2) {
+              questTitle = "Idea Generation";
+              questDescription = "Come up with 10 unconventional solutions to a problem you're facing.";
+              xpReward = 75;
+            } else if (day === 3) {
+              questTitle = "Perspective Shift";
+              questDescription = "Look at a familiar situation from three completely different perspectives.";
+              xpReward = 100;
+            } else {
+              questTitle = `Creative Challenge: Day ${day}`;
+              questDescription = `Complete a specific creativity-building exercise for your goals.`;
+              xpReward = 50 + (day * 10);
+            }
+          }
+          
+          // Adjust difficulty based on time commitment
+          if (dailyTimeCommitment < 15) {
+            difficulty = "Easy";
+            xpReward = Math.floor(xpReward * 0.8);
+          } else if (dailyTimeCommitment > 45) {
+            difficulty = "Hard";
+            xpReward = Math.floor(xpReward * 1.2);
+          }
+          
+          // Insert quest into database
+          await supabase
+            .from('quests')
+            .insert([
+              {
+                user_id: user.id,
+                title: questTitle,
+                description: questDescription,
+                theme: theme,
+                difficulty: difficulty,
+                xp: xpReward,
+                day: day,
+                requires_photo: requiresPhoto
+              }
+            ]);
+        }
+      }
       
       // Navigate to quests page
       navigate("/quests");
@@ -209,7 +340,7 @@ const Survey = () => {
       <div className="p-6 space-y-8 z-10 relative max-w-lg mx-auto">
         <h1 className="text-2xl font-bold text-center text-white animate-fade-in mt-8">Let's Get Started</h1>
         
-        <GlassCard variant="dark" className="animate-pop-in">
+        <GlassCard variant="dark" className="animate-pop-in rounded-xl">
           {renderStep()}
         </GlassCard>
         
