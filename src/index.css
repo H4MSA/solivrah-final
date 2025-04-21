@@ -97,7 +97,7 @@
 
   /* Optimize scrolling for mobile */
   body {
-    @apply overflow-x-hidden overscroll-behavior-y-contain;
+    @apply overflow-x-hidden overscroll-y-contain;
     -webkit-overflow-scrolling: touch;
   }
 
