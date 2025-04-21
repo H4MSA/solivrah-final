@@ -1,28 +1,30 @@
+
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, ListChecks, Users, MessageCircle, User } from "lucide-react";
+import { Home, Wallet, BarChart3, Store, User } from "lucide-react";
 
 interface NavItemProps {
   icon: React.ReactNode;
   label: string;
-  path: string;
   isActive: boolean;
   onClick: () => void;
 }
 
 const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive, onClick }) => {
   return (
-    <div
+    <button
       onClick={onClick}
-      className={`nav-item ${isActive ? 'nav-item-active' : 'nav-item-inactive'}`}
+      className={`flex flex-col items-center justify-center w-20 py-2 transition-all ${
+        isActive ? 'text-white scale-110' : 'text-gray-500'
+      }`}
     >
-      <div className="text-xl mb-1">
+      <div className={`relative ${isActive ? 'bg-white/10 p-3 rounded-full' : ''}`}>
         {icon}
       </div>
-      <span className="text-xs font-medium">
+      <span className="text-xs mt-1 font-medium">
         {label}
       </span>
-    </div>
+    </button>
   );
 };
 
@@ -33,22 +35,21 @@ export const TabNavigation: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const navItems = [
-    { path: "/home", label: "Home", icon: <Home size={24} /> },
-    { path: "/quests", label: "Quests", icon: <ListChecks size={24} /> },
-    { path: "/community", label: "Community", icon: <Users size={24} /> },
-    { path: "/coach", label: "Coach", icon: <MessageCircle size={24} /> },
-    { path: "/profile", label: "Profile", icon: <User size={24} /> },
+    { path: "/home", label: "Home", icon: <Home size={24} strokeWidth={1.5} /> },
+    { path: "/quests", label: "Wallet", icon: <Wallet size={24} strokeWidth={1.5} /> },
+    { path: "/community", label: "Exchange", icon: <BarChart3 size={24} strokeWidth={1.5} /> },
+    { path: "/coach", label: "Markets", icon: <Store size={24} strokeWidth={1.5} /> },
+    { path: "/profile", label: "Profile", icon: <User size={24} strokeWidth={1.5} /> },
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50">
-      <nav className="flex justify-around items-center bg-black/90 backdrop-blur-xl border-t border-white/10 py-4">
+    <div className="fixed bottom-0 left-0 right-0 z-50 pb-safe">
+      <nav className="flex justify-between items-center mx-4 mb-2 py-2 px-4 bg-black/90 backdrop-blur-xl rounded-full border border-white/10">
         {navItems.map((item) => (
           <NavItem
             key={item.path}
             icon={item.icon}
             label={item.label}
-            path={item.path}
             isActive={isActive(item.path)}
             onClick={() => navigate(item.path)}
           />
