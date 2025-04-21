@@ -42,7 +42,7 @@ export const TabNavigation: React.FC = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50">
-      <nav className="flex justify-around items-center bg-black/90 backdrop-blur-xl border-t border-white/10 px-4 py-2">
+      <nav className="flex justify-around items-center bg-black/90 backdrop-blur-xl border-t border-white/10 py-4">
         {navItems.map((item) => (
           <NavItem
             key={item.path}

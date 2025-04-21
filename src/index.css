@@ -211,11 +211,15 @@
   }
 
   .nav-item {
-    @apply flex flex-col items-center justify-center p-2 transition-all duration-200 cursor-pointer;
+    @apply flex flex-col items-center justify-center transition-all duration-200 cursor-pointer;
   }
 
   .nav-item-active {
-    @apply text-white;
+    @apply text-white relative;
+    &:after {
+      content: '';
+      @apply absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full;
+    }
   }
 
   .nav-item-inactive {

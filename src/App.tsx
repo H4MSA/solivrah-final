@@ -94,7 +94,7 @@ const App = () => {
           <ThemeBackground />
           
           {/* Fixed viewport container */}
-          <div className="fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-black overflow-hidden">
+          <div className="fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-black overflow-hidden px-4">
             <Toaster />
             <Sonner />
             
