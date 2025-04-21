@@ -18,6 +18,7 @@ import Community from "./pages/Community";
 import Profile from "./pages/Profile";
 import Survey from "./pages/Survey";
 import Auth from "./pages/Auth";
+import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -102,6 +103,7 @@ const App = () => {
                 {/* Public routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
                 
                 {/* Survey route (accessible after auth) */}
                 <Route path="/survey" element={

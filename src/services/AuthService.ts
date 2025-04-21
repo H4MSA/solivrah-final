@@ -12,6 +12,8 @@ interface SignInData {
   password: string;
 }
 
+type OAuthProvider = 'google' | 'facebook' | 'apple' | 'discord' | 'github';
+
 export const AuthService = {
   signUp: async (data: SignUpData) => {
     const { email, password, username } = data;
@@ -40,6 +42,17 @@ export const AuthService = {
     
     if (error) throw error;
     return authData;
+  },
+  
+  signInWithOAuth: async (provider: OAuthProvider) => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    
+    if (error) throw error;
   },
   
   signOut: async () => {
