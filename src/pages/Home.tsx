@@ -138,7 +138,7 @@ const Home = () => {
     { emoji: "😔", label: "Sad" }
   ];
   
-  const displayName = user?.name || "Friend";
+  const displayName = user?.user_metadata?.username || user?.email?.split('@')[0] || "Friend";
   
   return (
     <div className="min-h-screen pb-24 text-white">

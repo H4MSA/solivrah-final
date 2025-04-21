@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
+import { AuthService } from "@/services/AuthService";
 
 interface AppContextType {
   user: User | null;
@@ -15,6 +16,9 @@ interface AppContextType {
   xp: number;
   addXP: (amount: number) => void;
   incrementStreak: () => void;
+  resetProgress: () => void;
+  isGuest: boolean;
+  signOut: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType>({
@@ -29,6 +33,9 @@ const AppContext = createContext<AppContextType>({
   xp: 0,
   addXP: () => {},
   incrementStreak: () => {},
+  resetProgress: () => {},
+  isGuest: false,
+  signOut: async () => {},
 });
 
 export const useApp = () => useContext(AppContext);
@@ -40,6 +47,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedTheme, setSelectedTheme] = useState("Discipline");
   const [streak, setStreak] = useState(0);
   const [xp, setXP] = useState(0);
+  const [isGuest, setIsGuest] = useState(false);
   
   useEffect(() => {
     // Set up auth state change listener
@@ -135,6 +143,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
   
+  const resetProgress = async () => {
+    if (!user) return;
+    
+    setStreak(0);
+    setXP(0);
+    
+    try {
+      await supabase
+        .from('profiles')
+        .update({ streak: 0, xp: 0 })
+        .eq('id', user.id);
+    } catch (error) {
+      console.error("Error resetting progress:", error);
+    }
+  };
+  
+  const signOut = async () => {
+    try {
+      await AuthService.signOut();
+      setUser(null);
+      setSession(null);
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+  
   return (
     <AppContext.Provider
       value={{
@@ -149,6 +183,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         xp,
         addXP,
         incrementStreak,
+        resetProgress,
+        isGuest,
+        signOut,
       }}
     >
       {children}

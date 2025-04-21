@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { Star, Trophy, CheckCircle, Calendar, Download, Share2, Settings, Bell, Activity, Lock, Info, LogOut, RefreshCw, Users } from "lucide-react";
@@ -365,7 +364,7 @@ const Profile = () => {
   
   const level = Math.floor(xp / 1000) + 1;
   const progress = xp % 1000 / 1000 * 100;
-  const displayName = user?.name || (isGuest ? "Guest User" : "User");
+  const displayName = user?.user_metadata?.username || user?.email?.split('@')[0] || (isGuest ? "Guest User" : "User");
   const completedQuests = 0; // This would come from your state
 
   const handleLogout = async () => {

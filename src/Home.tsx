@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { TabNavigation } from "@/components/TabNavigation";
@@ -98,8 +99,8 @@ const Home = () => {
     { emoji: "😔", label: "Sad" }
   ];
   
-  // Get name from user or use "Friend"
-  const displayName = user?.name || "Friend";
+  // Get user's display name from user metadata or fallback to "Friend"
+  const displayName = user?.user_metadata?.username || user?.email?.split('@')[0] || "Friend";
   
   return (
     <div className="min-h-screen pb-24 bg-black text-white">
