@@ -50,19 +50,26 @@ const Coach = () => {
         content: input
       }];
 
+      const OPENROUTER_API_KEY = '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';
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
           'Content-Type': 'application/json',
           'HTTP-Referer': window.location.origin,
           'X-Title': 'Solivrah Quest Forge'
         },
         body: JSON.stringify({
           model: "meta/llama-4-scout:free",
-          messages
+          messages: messages,
+          temperature: 0.7,
+          max_tokens: 1000
         })
       });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
 
       const data = await response.json();
       const aiResponse = data.choices[0].message.content;
@@ -91,12 +98,18 @@ const Coach = () => {
       const { error } = await supabase.from('chat_history').insert([{
         message: userMessage,
         response: aiResponse,
-        theme: selectedTheme || 'General'
+        theme: selectedTheme || 'General',
+        user_id: user?.id,
+        timestamp: new Date().toISOString()
       }]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error saving message:', error);
+        throw error;
+      }
     } catch (error) {
       console.error('Error saving message:', error);
+      // Continue even if saving fails
     }
   };
 
@@ -135,11 +148,21 @@ const Coach = () => {
 
           {isLoading && (
             <div className="mr-auto bg-[#121212] p-4 rounded-xl max-w-[80%] animate-fade-in border border-white/5">
-              <div className="flex space-x-2">
-                <div className="w-2 h-2 bg-white/40 rounded-full animate-pulse"></div>
-                <div className="w-2 h-2 bg-white/40 rounded-full animate-pulse delay-150"></div>
-                <div className="w-2 h-2 bg-white/40 rounded-full animate-pulse delay-300"></div>
+              <div className="flex items-center space-x-3">
+                <div className="flex space-x-2">
+                  <div className="w-2 h-2 bg-white/40 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-white/40 rounded-full animate-pulse delay-150"></div>
+                  <div className="w-2 h-2 bg-white/40 rounded-full animate-pulse delay-300"></div>
+                </div>
+                <span className="text-sm text-white/50">AI is thinking...</span>
               </div>
+            </div>
+          )}
+          {messages.some(m => m.error) && (
+            <div className="mx-auto my-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <p className="text-sm text-red-400">
+                There was an error connecting to the AI. Please try again.
+              </p>
             </div>
           )}
           <div ref={messagesEndRef} />
