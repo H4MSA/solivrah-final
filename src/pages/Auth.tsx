@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, Mail, Lock, User, Loader2, AlertCircle, CheckCircle, Github } from "lucide-react";
@@ -15,7 +14,7 @@ type AuthMode = "sign-in" | "sign-up" | "forgot-password";
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, setUser } = useApp();
+  const { user, setUser, setSession, setIsGuest } = useApp();
   const [mode, setMode] = useState<AuthMode>("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,14 +23,12 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  
+
   useEffect(() => {
-    // If user is already logged in, redirect to home
     if (user) {
       navigate("/home");
     }
-    
-    // Check for existing session
+
     const checkSession = async () => {
       try {
         const session = await AuthService.getCurrentSession();
@@ -43,16 +40,16 @@ const Auth = () => {
         console.error("Session check error:", error);
       }
     };
-    
+
     checkSession();
   }, [user, navigate, setUser]);
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccessMessage("");
     setIsLoading(true);
-    
+
     try {
       if (mode === "sign-in") {
         await AuthService.signIn({ email, password });
@@ -103,11 +100,11 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
-  
+
   const handleOAuthSignIn = async (provider: 'google' | 'facebook' | 'apple' | 'discord' | 'github') => {
     setError("");
     setIsLoading(true);
-    
+
     try {
       await AuthService.signInWithOAuth(provider);
       // The redirect will happen automatically
@@ -131,11 +128,18 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
-  
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-  
+
+  const handleGuestLogin = () => {
+    setIsGuest(true);
+    setUser(null);
+    setSession(null);
+    navigate("/survey");
+  };
+
   const formVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
@@ -147,15 +151,14 @@ const Auth = () => {
       }
     }
   };
-  
+
   const itemVariants = {
     hidden: { opacity: 0, y: 10 },
     visible: { opacity: 1, y: 0 }
   };
-  
+
   return (
     <div className="min-h-screen flex flex-col justify-between px-6 py-6 overflow-hidden">
-      {/* Background effects */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <motion.div 
           initial={{ opacity: 0 }}
@@ -170,7 +173,7 @@ const Auth = () => {
           className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[#444444]/10 rounded-full blur-[100px]"
         ></motion.div>
       </div>
-      
+
       <div className="flex-1 flex flex-col w-full max-w-md mx-auto z-10">
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
@@ -186,7 +189,7 @@ const Auth = () => {
           </button>
           <Logo className="mx-auto" />
         </motion.div>
-        
+
         <GlassCard variant="dark" className="w-full mb-4 rounded-xl">
           <AnimatePresence mode="wait">
             <motion.div 
@@ -209,8 +212,7 @@ const Auth = () => {
                     : "Enter your email to receive a reset link"}
                 </p>
               </motion.div>
-              
-              {/* Form */}
+
               <motion.form onSubmit={handleSubmit} className="space-y-4">
                 {mode === "sign-up" && (
                   <motion.div variants={itemVariants} className="space-y-2">
@@ -230,7 +232,7 @@ const Auth = () => {
                     </div>
                   </motion.div>
                 )}
-                
+
                 <motion.div variants={itemVariants} className="space-y-2">
                   <label htmlFor="email" className="text-sm text-[#E0E0E0] font-medium">Email</label>
                   <div className="relative">
@@ -247,7 +249,7 @@ const Auth = () => {
                     />
                   </div>
                 </motion.div>
-                
+
                 {mode !== "forgot-password" && (
                   <motion.div variants={itemVariants} className="space-y-2">
                     <div className="flex justify-between">
@@ -284,7 +286,7 @@ const Auth = () => {
                     </div>
                   </motion.div>
                 )}
-                
+
                 {error && (
                   <motion.div 
                     initial={{ opacity: 0, height: 0 }}
@@ -298,7 +300,7 @@ const Auth = () => {
                     </div>
                   </motion.div>
                 )}
-                
+
                 {successMessage && (
                   <motion.div 
                     initial={{ opacity: 0, height: 0 }}
@@ -312,7 +314,7 @@ const Auth = () => {
                     </div>
                   </motion.div>
                 )}
-                
+
                 <motion.button 
                   variants={itemVariants}
                   type="submit"
@@ -328,14 +330,14 @@ const Auth = () => {
                   )}
                 </motion.button>
               </motion.form>
-              
+
               {mode !== "forgot-password" && (
                 <motion.div variants={itemVariants} className="relative flex items-center justify-center">
                   <div className="absolute left-0 right-0 h-px bg-[#333333]"></div>
                   <span className="px-4 bg-[#121212] text-[#777777] text-xs relative z-10">OR</span>
                 </motion.div>
               )}
-              
+
               {mode !== "forgot-password" && (
                 <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3">
                   <motion.button
@@ -349,7 +351,7 @@ const Auth = () => {
                     <FaGoogle size={16} className="text-[#EA4335]" />
                     <span className="text-sm">Google</span>
                   </motion.button>
-                  
+
                   <motion.button
                     type="button"
                     onClick={() => handleOAuthSignIn('facebook')}
@@ -361,7 +363,7 @@ const Auth = () => {
                     <FaFacebookF size={16} className="text-[#1877F2]" />
                     <span className="text-sm">Facebook</span>
                   </motion.button>
-                  
+
                   <motion.button
                     type="button"
                     onClick={() => handleOAuthSignIn('apple')}
@@ -373,7 +375,7 @@ const Auth = () => {
                     <FaApple size={16} />
                     <span className="text-sm">Apple</span>
                   </motion.button>
-                  
+
                   <motion.button
                     type="button"
                     onClick={() => handleOAuthSignIn('discord')}
@@ -387,7 +389,7 @@ const Auth = () => {
                   </motion.button>
                 </motion.div>
               )}
-              
+
               <motion.div variants={itemVariants} className="text-center text-sm text-[#999999]">
                 {mode === "sign-in" ? (
                   <p>
@@ -416,8 +418,18 @@ const Auth = () => {
             </motion.div>
           </AnimatePresence>
         </GlassCard>
+
+        <div className="flex flex-col gap-3 mt-5">
+          <button
+            onClick={handleGuestLogin}
+            className="w-full py-3 bg-black/80 border border-[#333] text-white rounded-xl font-semibold hover:bg-black hover:border-white transition-all"
+            type="button"
+          >
+            Continue as Guest
+          </button>
+        </div>
       </div>
-      
+
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

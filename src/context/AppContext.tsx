@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
@@ -18,6 +17,7 @@ interface AppContextType {
   incrementStreak: () => void;
   resetProgress: () => void;
   isGuest: boolean;
+  setIsGuest: (guest: boolean) => void;
   signOut: () => Promise<void>;
 }
 
@@ -35,6 +35,7 @@ const AppContext = createContext<AppContextType>({
   incrementStreak: () => {},
   resetProgress: () => {},
   isGuest: false,
+  setIsGuest: () => {},
   signOut: async () => {},
 });
 
@@ -48,9 +49,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [streak, setStreak] = useState(0);
   const [xp, setXP] = useState(0);
   const [isGuest, setIsGuest] = useState(false);
-  
+
   useEffect(() => {
-    // Set up auth state change listener
+    if (isGuest) {
+      setLoading(false);
+      setUser(null);
+      setSession(null);
+      return;
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event: AuthChangeEvent, session: Session | null) => {
         setSession(session);
@@ -58,24 +65,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setLoading(false);
       }
     );
-    
-    // Get current session
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-      
-      // If user is logged in, fetch their profile data
       if (session?.user) {
         fetchUserProfile(session.user.id);
       }
     });
-    
+
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
-  
+  }, [isGuest]);
+
   const fetchUserProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -95,7 +99,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.error("Error fetching user profile:", error);
     }
   };
-  
+
   const addXP = async (amount: number) => {
     if (!user) return;
     
@@ -111,7 +115,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.error("Error updating XP:", error);
     }
   };
-  
+
   const incrementStreak = async () => {
     if (!user) return;
     
@@ -127,7 +131,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.error("Error updating streak:", error);
     }
   };
-  
+
   const updateSelectedTheme = async (theme: string) => {
     setSelectedTheme(theme);
     
@@ -142,7 +146,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
   };
-  
+
   const resetProgress = async () => {
     if (!user) return;
     
@@ -158,17 +162,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.error("Error resetting progress:", error);
     }
   };
-  
+
   const signOut = async () => {
     try {
       await AuthService.signOut();
       setUser(null);
       setSession(null);
+      setIsGuest(false);
     } catch (error) {
       console.error("Error signing out:", error);
     }
   };
-  
+
   return (
     <AppContext.Provider
       value={{
@@ -185,6 +190,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         incrementStreak,
         resetProgress,
         isGuest,
+        setIsGuest,
         signOut,
       }}
     >
