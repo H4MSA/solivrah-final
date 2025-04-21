@@ -103,7 +103,15 @@ const Auth = () => {
   // Guest login: mark as guest, require survey
   const handleGuestLogin = () => {
     setIsGuest(true);
-    setUser(null);
+    // Create a temporary guest user object
+    const guestUser = {
+      id: `guest_${Date.now()}`,
+      email: null,
+      user_metadata: {
+        username: 'Guest'
+      }
+    };
+    setUser(guestUser);
     setSession(null);
     navigate("/survey");
   };

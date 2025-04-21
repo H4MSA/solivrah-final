@@ -48,8 +48,8 @@ const Survey = () => {
       // Save selected theme
       setSelectedTheme(theme);
       
-      // Save survey response to Supabase if user is logged in
-      if (user) {
+      // Save survey response to Supabase if user is logged in and not a guest
+      if (user && !user.id.startsWith('guest_')) {
         const { error: surveyError } = await supabase
           .from('survey_responses')
           .insert([
