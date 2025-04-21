@@ -101,19 +101,27 @@ const Auth = () => {
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
   // Guest login: mark as guest, require survey
-  const handleGuestLogin = () => {
-    setIsGuest(true);
-    // Create a temporary guest user object
-    const guestUser = {
-      id: `guest_${Date.now()}`,
-      email: null,
-      user_metadata: {
-        username: 'Guest'
-      }
-    };
-    setUser(guestUser);
-    setSession(null);
-    navigate("/survey");
+  const handleGuestLogin = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      setIsGuest(true);
+      const guestUser = {
+        id: `guest_${Date.now()}`,
+        email: null,
+        user_metadata: {
+          username: 'Guest'
+        }
+      };
+      await Promise.resolve(); // Ensure state updates
+      setUser(guestUser);
+      setSession(null);
+      navigate("/survey");
+    } catch (error) {
+      console.error("Guest login error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formVariants = {

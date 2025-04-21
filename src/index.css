@@ -134,7 +134,19 @@
 
   /* Page transition effect */
   .page-transition {
-    @apply duration-300 transition-opacity opacity-80;
+    @apply duration-300 transition-all;
+    animation: pageTransition 0.3s ease-out;
+  }
+}
+
+@keyframes pageTransition {
+  0% {
+    opacity: 0;
+    transform: scale(0.98) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -178,6 +190,21 @@
 
   .task-locked {
     @apply opacity-40 filter grayscale blur-[2px] pointer-events-none;
+  }
+  .hover-lift {
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+
+  .press-effect {
+    transition: transform 0.1s cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .press-effect:active {
+    transform: scale(0.97);
   }
 }
 

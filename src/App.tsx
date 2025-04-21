@@ -93,8 +93,8 @@ const App = () => {
           {/* Theme background applied to the entire app */}
           <ThemeBackground />
           
-          {/* Fixed viewport container */}
-          <div className="fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-black overflow-hidden px-4">
+          {/* Fixed viewport container with safe areas */}
+          <div className="fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-black overflow-hidden px-4 pt-safe pb-safe">
             <Toaster />
             <Sonner />
             
