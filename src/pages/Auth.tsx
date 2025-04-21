@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, EyeOff, Mail, Lock, User, Loader2, AlertCircle, CheckCircle, Github } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Mail, Lock, User, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/Logo";
 import { GlassCard } from "@/components/GlassCard";
@@ -28,7 +29,7 @@ const Auth = () => {
     if (user) {
       navigate("/home");
     }
-
+    // Check for existing session only if not logged in
     const checkSession = async () => {
       try {
         const session = await AuthService.getCurrentSession();
@@ -37,10 +38,9 @@ const Auth = () => {
           navigate("/home");
         }
       } catch (error) {
-        console.error("Session check error:", error);
+        //...
       }
     };
-
     checkSession();
   }, [user, navigate, setUser]);
 
@@ -49,27 +49,18 @@ const Auth = () => {
     setError("");
     setSuccessMessage("");
     setIsLoading(true);
-
     try {
       if (mode === "sign-in") {
         await AuthService.signIn({ email, password });
-        toast({
-          title: "Success!",
-          description: "You have been signed in.",
-          variant: "default",
-        });
+        toast({ title: "Signed in!", description: "Welcome back.", variant: "default", });
         navigate("/home");
       } else if (mode === "sign-up") {
+        // No forced confirmation: direct login after sign up
         await AuthService.signUp({ email, password, username });
-        setSuccessMessage("Account created successfully! Please check your email for verification.");
-        toast({
-          title: "Account created!",
-          description: "Please check your email for verification.",
-          variant: "default",
-        });
-        setTimeout(() => {
-          setMode("sign-in");
-        }, 3000);
+        toast({ title: "Account created!", description: "Let's get started.", variant: "default", });
+        navigate("/survey");
+        setSuccessMessage("");
+        setTimeout(() => { setMode("sign-in"); }, 3000);
       } else if (mode === "forgot-password") {
         await AuthService.resetPassword(email);
         setSuccessMessage("Password reset link sent to your email!");
@@ -80,59 +71,36 @@ const Auth = () => {
         });
       }
     } catch (error) {
-      console.error("Auth error:", error);
-      if (error instanceof Error) {
-        setError(error.message);
-        toast({
-          title: "Authentication error",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        setError("An error occurred during authentication.");
-        toast({
-          title: "Authentication error",
-          description: "An unexpected error occurred. Please try again.",
-          variant: "destructive",
-        });
-      }
+      setError(error instanceof Error ? error.message : "Authentication error.");
+      toast({
+        title: "Authentication error",
+        description: error instanceof Error ? error.message : "Unexpected error occurred.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleOAuthSignIn = async (provider: 'google' | 'facebook' | 'apple' | 'discord' | 'github') => {
+  const handleOAuthSignIn = async (provider: 'google' | 'facebook' | 'apple' | 'discord') => {
     setError("");
     setIsLoading(true);
-
     try {
       await AuthService.signInWithOAuth(provider);
-      // The redirect will happen automatically
     } catch (error) {
-      console.error(`${provider} sign-in error:`, error);
-      if (error instanceof Error) {
-        setError(error.message);
-        toast({
-          title: "Authentication error",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        setError(`An error occurred during ${provider} sign-in.`);
-        toast({
-          title: "Authentication error",
-          description: `An unexpected error occurred with ${provider} sign-in. Please try again.`,
-          variant: "destructive",
-        });
-      }
+      setError(error instanceof Error ? error.message : `An error occurred during ${provider} sign-in.`);
+      toast({
+        title: "Authentication error",
+        description: error instanceof Error ? error.message : `Unexpected error occurred with ${provider} sign-in.`,
+        variant: "destructive",
+      });
       setIsLoading(false);
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
+  // Guest login: mark as guest, require survey
   const handleGuestLogin = () => {
     setIsGuest(true);
     setUser(null);
@@ -142,276 +110,244 @@ const Auth = () => {
 
   const formVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { 
-        staggerChildren: 0.1,
-        delayChildren: 0.2
-      }
+    visible: {
+      opacity: 1, y: 0,
+      transition: { staggerChildren: 0.06, delayChildren: 0.1 }
     }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
+    hidden: { opacity: 0, y: 12 },
     visible: { opacity: 1, y: 0 }
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between px-6 py-6 overflow-hidden">
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#333333]/10 rounded-full blur-[100px]"
-        ></motion.div>
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[#444444]/10 rounded-full blur-[100px]"
-        ></motion.div>
-      </div>
-
-      <div className="flex-1 flex flex-col w-full max-w-md mx-auto z-10">
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-black px-2 py-2">
+      <div className="w-full max-w-xs mx-auto z-10 flex flex-col gap-2">
+        <motion.div
+          initial={{ opacity: 0, y: -25 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex items-center mb-6"
+          transition={{ duration: 0.33 }}
+          className="flex items-center mb-3"
         >
-          <button 
+          <button
             onClick={() => navigate("/")}
-            className="p-2 rounded-full bg-[#111111]/80 border border-white/5 hover:bg-[#222222]/80 transition-all"
+            className="p-2 rounded-full bg-[#111111] border border-white/5 hover:bg-[#222222] transition-all"
           >
             <ArrowLeft size={20} className="text-white" />
           </button>
-          <Logo className="mx-auto" />
+          <Logo className="mx-auto w-32 h-10 object-contain" />
         </motion.div>
 
-        <GlassCard variant="dark" className="w-full mb-4 rounded-xl">
+        <GlassCard
+          variant="dark"
+          className="w-full mb-4 rounded-2xl shadow-lg bg-[#161616]/90 border border-[#222] px-4 py-6"
+        >
           <AnimatePresence mode="wait">
-            <motion.div 
+            <motion.div
               key={mode}
               initial="hidden"
               animate="visible"
               exit="hidden"
               variants={formVariants}
-              className="space-y-6"
+              className="space-y-5"
             >
               <motion.div variants={itemVariants} className="text-center">
-                <h1 className="text-xl font-bold text-white">
-                  {mode === "sign-in" ? "Welcome Back" : mode === "sign-up" ? "Create Account" : "Reset Password"}
+                <h1 className="text-lg font-bold text-white">
+                  {mode === "sign-in"
+                    ? "Welcome Back"
+                    : mode === "sign-up"
+                    ? "Create Account"
+                    : "Reset Password"}
                 </h1>
                 <p className="text-[#999999] text-sm mt-1">
-                  {mode === "sign-in" 
-                    ? "Sign in to continue to your account" 
-                    : mode === "sign-up" 
-                    ? "Join Solivrah and start your journey" 
+                  {mode === "sign-in"
+                    ? "Sign in to continue to your account"
+                    : mode === "sign-up"
+                    ? "Join Solivrah and start your journey"
                     : "Enter your email to receive a reset link"}
                 </p>
               </motion.div>
 
-              <motion.form onSubmit={handleSubmit} className="space-y-4">
+              <motion.form onSubmit={handleSubmit} className="space-y-3">
                 {mode === "sign-up" && (
-                  <motion.div variants={itemVariants} className="space-y-2">
-                    <label htmlFor="username" className="text-sm text-[#E0E0E0] font-medium">Username</label>
+                  <motion.div variants={itemVariants} className="space-y-1">
+                    <label htmlFor="username" className="text-xs text-[#E0E0E0] font-medium">Username</label>
                     <div className="relative">
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#999999]">
-                        <User size={18} />
-                      </div>
-                      <input 
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#999999]"><User size={16} /></span>
+                      <input
                         id="username"
-                        type="text" 
+                        type="text"
                         value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        className="w-full bg-[#111111] border border-[#333333] rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-[#777777] focus:outline-none focus:border-[#444444] transition-all"
+                        onChange={e => setUsername(e.target.value)}
+                        className="w-full bg-[#151515] border border-[#262626] rounded-lg py-2.5 pl-9 pr-3 text-white placeholder:text-[#777] focus:outline-none focus:border-[#444] text-sm"
                         placeholder="Your username"
+                        autoComplete="username"
                       />
                     </div>
                   </motion.div>
                 )}
 
-                <motion.div variants={itemVariants} className="space-y-2">
-                  <label htmlFor="email" className="text-sm text-[#E0E0E0] font-medium">Email</label>
+                <motion.div variants={itemVariants} className="space-y-1">
+                  <label htmlFor="email" className="text-xs text-[#E0E0E0] font-medium">Email</label>
                   <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#999999]">
-                      <Mail size={18} />
-                    </div>
-                    <input 
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#999999]"><Mail size={16} /></span>
+                    <input
                       id="email"
-                      type="email" 
+                      type="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-[#111111] border border-[#333333] rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-[#777777] focus:outline-none focus:border-[#444444] transition-all"
+                      onChange={e => setEmail(e.target.value)}
+                      className="w-full bg-[#151515] border border-[#262626] rounded-lg py-2.5 pl-9 pr-3 text-white placeholder:text-[#777] focus:outline-none focus:border-[#444] text-sm"
                       placeholder="your.email@example.com"
+                      autoComplete="email"
                     />
                   </div>
                 </motion.div>
 
                 {mode !== "forgot-password" && (
-                  <motion.div variants={itemVariants} className="space-y-2">
+                  <motion.div variants={itemVariants} className="space-y-1">
                     <div className="flex justify-between">
-                      <label htmlFor="password" className="text-sm text-[#E0E0E0] font-medium">Password</label>
+                      <label htmlFor="password" className="text-xs text-[#E0E0E0] font-medium">
+                        Password
+                      </label>
                       {mode === "sign-in" && (
-                        <button 
+                        <button
                           type="button"
                           onClick={() => setMode("forgot-password")}
-                          className="text-xs text-[#999999] hover:text-white transition-colors"
+                          className="text-xs text-[#999999] hover:text-white transition"
                         >
                           Forgot password?
                         </button>
                       )}
                     </div>
                     <div className="relative">
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#999999]">
-                        <Lock size={18} />
-                      </div>
-                      <input 
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#999999]"><Lock size={16} /></span>
+                      <input
                         id="password"
-                        type={showPassword ? "text" : "password"} 
+                        type={showPassword ? "text" : "password"}
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-[#111111] border border-[#333333] rounded-xl py-3 pl-10 pr-10 text-white placeholder:text-[#777777] focus:outline-none focus:border-[#444444] transition-all"
+                        onChange={e => setPassword(e.target.value)}
+                        className="w-full bg-[#151515] border border-[#262626] rounded-lg py-2.5 pl-9 pr-9 text-white placeholder:text-[#777] focus:outline-none focus:border-[#444] text-sm"
                         placeholder="••••••••"
+                        autoComplete={mode === "sign-up" ? "new-password" : "current-password"}
                       />
-                      <button 
+                      <button
                         type="button"
                         onClick={togglePasswordVisibility}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999999] hover:text-white transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999999] hover:text-white transition"
                       >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
                   </motion.div>
                 )}
 
                 {error && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="p-3 bg-red-900/20 border border-red-500/20 rounded-lg text-red-400 text-sm"
+                    className="p-2 bg-red-900/20 border border-red-500/20 rounded-lg text-red-400 text-xs"
                   >
-                    <div className="flex items-start gap-2">
-                      <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
-                      <span>{error}</span>
-                    </div>
+                    {error}
                   </motion.div>
                 )}
 
                 {successMessage && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="p-3 bg-green-900/20 border border-green-500/20 rounded-lg text-green-400 text-sm"
+                    className="p-2 bg-green-900/20 border border-green-500/20 rounded-lg text-green-400 text-xs"
                   >
-                    <div className="flex items-start gap-2">
-                      <CheckCircle size={16} className="flex-shrink-0 mt-0.5" />
-                      <span>{successMessage}</span>
-                    </div>
+                    {successMessage}
                   </motion.div>
                 )}
 
-                <motion.button 
+                <motion.button
                   variants={itemVariants}
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3 bg-white text-black rounded-xl font-medium flex items-center justify-center transition-all hover:bg-[#EEEEEE] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  className="w-full py-2.5 bg-white text-black rounded-xl font-medium flex items-center justify-center transition hover:bg-[#EEEEEE] hover:scale-105 active:scale-95 shadow"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                 >
-                  {isLoading ? (
-                    <Loader2 size={20} className="animate-spin" />
-                  ) : (
-                    mode === "sign-in" ? "Sign In" : mode === "sign-up" ? "Create Account" : "Send Reset Link"
-                  )}
+                  {isLoading
+                    ? <Loader2 size={18} className="animate-spin" />
+                    : mode === "sign-in"
+                      ? "Sign In"
+                      : mode === "sign-up"
+                        ? "Create Account"
+                        : "Send Reset Link"}
                 </motion.button>
               </motion.form>
 
-              {mode !== "forgot-password" && (
-                <motion.div variants={itemVariants} className="relative flex items-center justify-center">
-                  <div className="absolute left-0 right-0 h-px bg-[#333333]"></div>
-                  <span className="px-4 bg-[#121212] text-[#777777] text-xs relative z-10">OR</span>
-                </motion.div>
-              )}
+              <motion.div variants={itemVariants} className="relative flex items-center justify-center">
+                <div className="absolute left-0 right-0 h-px bg-[#242426]"></div>
+                <span className="px-4 bg-[#161616] text-[#888] text-xs z-10">OR</span>
+              </motion.div>
 
               {mode !== "forgot-password" && (
-                <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3">
+                <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2">
                   <motion.button
                     type="button"
                     onClick={() => handleOAuthSignIn('google')}
-                    className="flex items-center justify-center gap-2 py-2.5 bg-[#111111] text-white rounded-lg border border-[#333333] transition-all hover:bg-[#1A1A1A] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none"
+                    className="flex items-center justify-center gap-2 py-2 bg-[#151515] text-white rounded-lg border border-[#222] transition hover:bg-[#222] hover:scale-105 active:scale-95 shadow"
                     disabled={isLoading}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
                   >
-                    <FaGoogle size={16} className="text-[#EA4335]" />
-                    <span className="text-sm">Google</span>
+                    <FaGoogle size={14} className="text-[#EA4335]" />
+                    <span className="text-xs">Google</span>
                   </motion.button>
-
                   <motion.button
                     type="button"
                     onClick={() => handleOAuthSignIn('facebook')}
-                    className="flex items-center justify-center gap-2 py-2.5 bg-[#111111] text-white rounded-lg border border-[#333333] transition-all hover:bg-[#1A1A1A] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none"
+                    className="flex items-center justify-center gap-2 py-2 bg-[#151515] text-white rounded-lg border border-[#222] transition hover:bg-[#222] hover:scale-105 active:scale-95 shadow"
                     disabled={isLoading}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
                   >
-                    <FaFacebookF size={16} className="text-[#1877F2]" />
-                    <span className="text-sm">Facebook</span>
+                    <FaFacebookF size={14} className="text-[#1877F2]" />
+                    <span className="text-xs">Facebook</span>
                   </motion.button>
-
                   <motion.button
                     type="button"
                     onClick={() => handleOAuthSignIn('apple')}
-                    className="flex items-center justify-center gap-2 py-2.5 bg-[#111111] text-white rounded-lg border border-[#333333] transition-all hover:bg-[#1A1A1A] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none"
+                    className="flex items-center justify-center gap-2 py-2 bg-[#151515] text-white rounded-lg border border-[#222] transition hover:bg-[#222] hover:scale-105 active:scale-95 shadow"
                     disabled={isLoading}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
                   >
-                    <FaApple size={16} />
-                    <span className="text-sm">Apple</span>
+                    <FaApple size={14} />
+                    <span className="text-xs">Apple</span>
                   </motion.button>
-
                   <motion.button
                     type="button"
                     onClick={() => handleOAuthSignIn('discord')}
-                    className="flex items-center justify-center gap-2 py-2.5 bg-[#111111] text-white rounded-lg border border-[#333333] transition-all hover:bg-[#1A1A1A] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none"
+                    className="flex items-center justify-center gap-2 py-2 bg-[#151515] text-white rounded-lg border border-[#222] transition hover:bg-[#222] hover:scale-105 active:scale-95 shadow"
                     disabled={isLoading}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
                   >
-                    <FaDiscord size={16} className="text-[#5865F2]" />
-                    <span className="text-sm">Discord</span>
+                    <FaDiscord size={14} className="text-[#5865F2]" />
+                    <span className="text-xs">Discord</span>
                   </motion.button>
                 </motion.div>
               )}
 
-              <motion.div variants={itemVariants} className="text-center text-sm text-[#999999]">
+              <motion.div variants={itemVariants} className="text-center text-xs text-[#99999A]">
                 {mode === "sign-in" ? (
                   <p>
-                    Don't have an account?{" "}
-                    <motion.button 
+                    {"Don't have an account? "}
+                    <button
                       onClick={() => setMode("sign-up")}
-                      className="text-white font-medium hover:underline transition-all"
-                      whileHover={{ scale: 1.05 }}
+                      className="text-white font-medium hover:underline"
                     >
                       Sign Up
-                    </motion.button>
+                    </button>
                   </p>
                 ) : (
                   <p>
-                    Already have an account?{" "}
-                    <motion.button 
+                    {"Already have an account? "}
+                    <button
                       onClick={() => setMode("sign-in")}
-                      className="text-white font-medium hover:underline transition-all"
-                      whileHover={{ scale: 1.05 }}
+                      className="text-white font-medium hover:underline"
                     >
                       Sign In
-                    </motion.button>
+                    </button>
                   </p>
                 )}
               </motion.div>
@@ -419,25 +355,17 @@ const Auth = () => {
           </AnimatePresence>
         </GlassCard>
 
-        <div className="flex flex-col gap-3 mt-5">
-          <button
-            onClick={handleGuestLogin}
-            className="w-full py-3 bg-black/80 border border-[#333] text-white rounded-xl font-semibold hover:bg-black hover:border-white transition-all"
-            type="button"
-          >
-            Continue as Guest
-          </button>
-        </div>
+        <button
+          onClick={handleGuestLogin}
+          className="w-full py-2.5 bg-black/85 border border-[#222] text-white rounded-xl font-bold hover:bg-black hover:border-white transition mt-1 shadow"
+          type="button"
+        >
+          Continue as Guest
+        </button>
       </div>
-
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="text-center text-xs text-[#777777] mt-8 mb-2"
-      >
+      <div className="text-center text-xs text-[#888] mt-5 mb-2">
         © 2025 Solivrah. All rights reserved.
-      </motion.div>
+      </div>
     </div>
   );
 };
