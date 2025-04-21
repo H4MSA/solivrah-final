@@ -10,32 +10,16 @@ interface NavItemProps {
   onClick: () => void;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive, onClick }) => {  
+const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive, onClick }) => {
   return (
-    <div 
-      className="flex flex-col items-center justify-center py-1 px-3 transition-all duration-300 cursor-pointer transform-gpu active:scale-95 touch-manipulation"
+    <div
       onClick={onClick}
-      style={{ transform: isActive ? 'translateZ(15px)' : 'translateZ(1px)' }}
+      className={`nav-item ${isActive ? 'nav-item-active' : 'nav-item-inactive'}`}
     >
-      <div 
-        className={`p-2.5 rounded-full flex items-center justify-center transition-all duration-300 ${
-          isActive ? 'scale-110 bg-[#111111] backdrop-blur-xl border border-white/15 shadow-lg' : 'scale-100 bg-transparent'
-        }`}
-        style={{ 
-          transform: isActive ? 'translateY(-8px)' : 'translateY(0)'
-        }}
-      >
-        <div className={`text-xl transition-all duration-300 ${isActive ? 'text-white' : 'text-white/50'}`}>
-          {icon}
-        </div>
+      <div className="text-xl mb-1">
+        {icon}
       </div>
-
-      <span 
-        className={`text-xs font-medium transition-all duration-300 ${
-          isActive ? 'text-white opacity-100' : 'text-white/50 opacity-70'
-        }`}
-        style={{ marginTop: isActive ? '0' : '8px' }}
-      >
+      <span className="text-xs font-medium">
         {label}
       </span>
     </div>
@@ -56,21 +40,17 @@ export const TabNavigation: React.FC = () => {
     { path: "/profile", label: "Profile", icon: <User size={24} /> },
   ];
 
-  const handleNavigation = (path: string) => {
-    navigate(path);
-  };
-
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none">
-      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[85%] max-w-[380px] flex items-center justify-around py-3 px-6 bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl z-50 shadow-2xl pointer-events-auto">
+    <div className="fixed bottom-0 left-0 right-0 z-50">
+      <nav className="flex justify-around items-center bg-black/90 backdrop-blur-xl border-t border-white/10 px-4 py-2">
         {navItems.map((item) => (
-          <NavItem 
+          <NavItem
             key={item.path}
             icon={item.icon}
-            label={item.label} 
-            path={item.path} 
-            isActive={isActive(item.path)} 
-            onClick={() => handleNavigation(item.path)}
+            label={item.label}
+            path={item.path}
+            isActive={isActive(item.path)}
+            onClick={() => navigate(item.path)}
           />
         ))}
       </nav>
