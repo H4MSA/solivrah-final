@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,32 +10,32 @@
     --background: 0 0% 0%; /* #000000 */
     --background-end: 0 0% 5%; /* #0D0D0D */
     --foreground: 0 0% 100%; /* #FFFFFF */
-    
+
     --card: 0 0% 7%; /* #121212 */
     --card-foreground: 0 0% 100%; /* #FFFFFF */
-    
+
     --popover: 0 0% 7%; /* #121212 */
     --popover-foreground: 0 0% 100%; /* #FFFFFF */
-    
+
     --primary: 0 0% 100%; /* #FFFFFF */
     --primary-foreground: 0 0% 0%; /* #000000 */
-    
+
     --secondary: 0 0% 13%; /* #222222 */
     --secondary-foreground: 0 0% 100%; /* #FFFFFF */
-    
+
     --muted: 0 0% 40%; /* #666666 */
     --muted-foreground: 0 0% 60%; /* #999999 */
-    
+
     --accent: 0 0% 13%; /* #222222 */
     --accent-foreground: 0 0% 100%; /* #FFFFFF */
-    
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    
+
     --border: 0 0% 20%; /* #333333 */
     --input: 0 0% 7%; /* #121212 */
     --ring: 0 0% 80%; /* #CCCCCC */
-    
+
     --radius: 0.8rem;
   }
 }
@@ -93,7 +92,7 @@
   * {
     @apply border-border/20;
   }
-  
+
   html {
     font-family: 'SF Pro Display', 'SF Pro', 'Inter', sans-serif;
     -webkit-tap-highlight-color: transparent;
@@ -103,13 +102,13 @@
     @apply bg-background text-foreground touch-manipulation;
     overscroll-behavior: none;
   }
-  
+
   /* Add touch feedback */
   button, a, [role="button"] {
     @apply active:scale-[0.98] transition-all touch-manipulation;
     -webkit-tap-highlight-color: transparent;
   }
-  
+
   /* Page transition effect */
   .page-transition {
     @apply duration-300 transition-opacity opacity-80;
@@ -118,33 +117,42 @@
 
 @layer utilities {
   .glass {
-    @apply bg-black/70 backdrop-blur-md border border-white/5 shadow-lg;
+    @apply bg-black/60 backdrop-blur-xl border border-white/10 shadow-lg hover:bg-black/50 transition-all duration-300;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   }
-  
+
   .glass-card {
     @apply glass rounded-xl p-5;
   }
-  
+
   .gradient-bg {
-    @apply bg-gradient-to-b from-background to-background-end;
+    @apply bg-gradient-to-b from-background via-background/90 to-background-end transition-all duration-500;
+    background-size: 200% 200%;
+    animation: gradient 8s ease infinite;
   }
-  
+
+  @keyframes gradient {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
+  }
+
   .text-gradient {
     @apply bg-gradient-to-b from-white to-white/80 bg-clip-text text-transparent;
   }
-  
+
   .circle-progress {
     @apply rounded-full flex items-center justify-center border border-white/10;
   }
-  
+
   .interactive {
     @apply transition-all duration-300 hover:scale-[1.02] active:scale-95 cursor-pointer;
   }
-  
+
   .touch-feedback {
     @apply active:scale-[0.98] transition-transform duration-200;
   }
-  
+
   .task-locked {
     @apply opacity-40 filter grayscale blur-[2px] pointer-events-none;
   }
@@ -152,11 +160,12 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-white text-black rounded-xl px-4 py-3 font-medium transition-all 
-      hover:opacity-90 active:scale-95 shadow-lg
+    @apply bg-white text-black rounded-xl px-4 py-3 font-medium transition-all duration-300
+      hover:opacity-95 hover:translate-y-[-2px] hover:shadow-xl active:scale-95 shadow-lg
       focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-background;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
-  
+
   .btn-secondary {
     @apply bg-[#222222] text-white rounded-xl px-4 py-3 font-medium transition-all 
       hover:bg-[#333333] active:scale-95 shadow-md border border-[#333333]
@@ -168,37 +177,39 @@
       hover:border-white/20 active:scale-95 shadow-md
       focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-background;
   }
-  
+
   .card-glass {
-    @apply bg-[#121212] border border-[#333333] rounded-xl p-5 transition-all duration-300 shadow-lg;
+    @apply bg-[#121212]/90 backdrop-blur-lg border border-[#333333] rounded-xl p-5 
+      transition-all duration-300 shadow-lg hover:shadow-xl hover:bg-[#151515]/90 
+      hover:border-[#444444] hover:translate-y-[-2px];
   }
-  
+
   .card-action {
     @apply bg-[#121212] rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer 
       border border-[#333333] hover:border-[#444444] hover:bg-[#181818] active:scale-95 transition-all shadow-md;
   }
-  
+
   .card-stat {
     @apply bg-[#121212] border border-[#333333] rounded-xl p-4 flex flex-col transition-all duration-300;
   }
-  
+
   .badge {
     @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[#222222] text-white shadow-sm border border-[#333333];
   }
-  
+
   .nav-item {
     @apply flex flex-col items-center justify-center p-2 rounded-md transition-all cursor-pointer;
   }
-  
+
   .nav-item-active {
     @apply text-white relative before:absolute before:bottom-0 before:left-1/2 before:-translate-x-1/2 
       before:w-1 before:h-1 before:bg-white before:rounded-full before:animate-pop-in;
   }
-  
+
   .nav-item-inactive {
     @apply text-[#808080] hover:text-white;
   }
-  
+
   .menu-item {
     @apply flex items-center gap-3 p-4 rounded-xl bg-[#121212] border border-[#333333] 
       hover:border-[#444444] transition-all cursor-pointer active:scale-[0.98];
@@ -349,7 +360,7 @@
     @apply overflow-x-hidden;
     touch-action: manipulation;
   }
-  
+
   input, button, a {
     @apply touch-manipulation;
   }
