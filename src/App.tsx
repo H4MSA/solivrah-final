@@ -99,20 +99,13 @@ const App = () => {
 
             <BrowserRouter>
               <Routes>
-                {/* Public routes */}
-                <Route path="/" element={
-                  <ProtectedRoute>
-                    <Navigate to="/home" replace />
-                  </ProtectedRoute>
+                {/* Public routes with direct home redirect */}
+                <Route path="/" element={<Navigate to="/home" replace />} />
+                <Route path="/auth" element={
+                  <Auth redirectTo="/home" />
                 } />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/auth/callback" element={<AuthCallback />} />
-
-                {/* Survey route (accessible after auth) */}
-                <Route path="/survey" element={
-                  <ProtectedRoute>
-                    <Survey />
-                  </ProtectedRoute>
+                <Route path="/auth/callback" element={
+                  <AuthCallback redirectTo="/home" />
                 } />
 
                 {/* Protected routes with TabNavigation */}
