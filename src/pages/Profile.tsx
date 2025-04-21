@@ -405,7 +405,17 @@ const Profile = () => {
   };
 
   return <div className="min-h-screen pb-24 text-white">
-      <div className="p-4 space-y-5 animate-fade-in">
+      <div className="relative">
+        <div className="h-32 bg-gradient-to-br from-purple-600/20 via-blue-500/20 to-pink-500/20 backdrop-blur">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIj48cGF0aCBkPSJNMCAyMGgxMHYxMEgwem0yMCAwaDF2MTBoLTF6bTE5IDBoMXYxMGgtMXoiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjYSkiLz48L3N2Zz4=')] opacity-50"></div>
+        </div>
+        <div className="absolute top-0 left-0 right-0 pt-12 px-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-semibold">Profile</h1>
+          </div>
+        </div>
+      </div>
+      <div className="p-4 -mt-4 space-y-5 animate-fade-in">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-xl font-semibold">{displayName}</h1>
