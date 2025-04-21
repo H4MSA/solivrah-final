@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -35,17 +34,17 @@ const queryClient = new QueryClient({
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useApp();
   const location = useLocation();
-  
+
   if (loading) {
     return <div className="flex items-center justify-center h-screen bg-black">
       <div className="animate-spin w-8 h-8 border-t-2 border-white rounded-full"></div>
     </div>;
   }
-  
+
   if (!user) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
-  
+
   return <>{children}</>;
 };
 
@@ -53,14 +52,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const showNavigation = ['/home', '/quests', '/community', '/coach', '/profile'].includes(location.pathname);
-  
+
   return (
     <>
       {/* Main content area with scroll */}
       <main className="flex-1 overflow-y-auto overflow-x-hidden">
         {children}
       </main>
-      
+
       {/* Only show TabNavigation on app pages, not on public pages */}
       {showNavigation && <TabNavigation />}
     </>
@@ -69,49 +68,53 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => {
   const [sessionChecked, setSessionChecked] = useState(false);
-  
+
   useEffect(() => {
     // Check for existing session on app load
     const checkSession = async () => {
       await supabase.auth.getSession();
       setSessionChecked(true);
     };
-    
+
     checkSession();
   }, []);
-  
+
   if (!sessionChecked) {
     return <div className="flex items-center justify-center h-screen bg-black">
       <div className="animate-spin w-8 h-8 border-t-2 border-white rounded-full"></div>
     </div>;
   }
-  
+
   return (
     <QueryClientProvider client={queryClient}>
       <AppProvider>
         <TooltipProvider>
           {/* Theme background applied to the entire app */}
           <ThemeBackground />
-          
+
           {/* Fixed viewport container with safe areas */}
           <div className="fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-black overflow-hidden px-4 pt-safe pb-safe">
             <Toaster />
             <Sonner />
-            
+
             <BrowserRouter>
               <Routes>
                 {/* Public routes */}
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <Navigate to="/home" replace />
+                  </ProtectedRoute>
+                } />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
-                
+
                 {/* Survey route (accessible after auth) */}
                 <Route path="/survey" element={
                   <ProtectedRoute>
                     <Survey />
                   </ProtectedRoute>
                 } />
-                
+
                 {/* Protected routes with TabNavigation */}
                 <Route path="/home" element={
                   <ProtectedRoute>
@@ -148,7 +151,7 @@ const App = () => {
                     </AppLayout>
                   </ProtectedRoute>
                 } />
-                
+
                 {/* Catch-all for 404s */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
