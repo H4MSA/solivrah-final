@@ -91,6 +91,19 @@
 @layer base {
   * {
     @apply border-border/20;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  /* Optimize scrolling for mobile */
+  body {
+    @apply overflow-x-hidden overscroll-behavior-y-contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Better touch feedback */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
   }
 
   html {

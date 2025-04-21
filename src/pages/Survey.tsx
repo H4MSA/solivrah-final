@@ -330,7 +330,11 @@ const Survey = () => {
   };
   
   return (
-    <div className="min-h-screen bg-black pb-6 overflow-hidden">
+    <div className="min-h-screen gradient-bg pb-6 overflow-hidden">
+  <div className="fixed inset-0 z-0">
+    <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px] animate-float-slow"></div>
+    <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] animate-float-reverse"></div>
+  </div>
       {/* Background effects */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#333333]/10 rounded-full blur-[100px]"></div>
