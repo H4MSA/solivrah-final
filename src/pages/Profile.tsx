@@ -354,6 +354,23 @@ const Profile = () => {
     signOut,
     selectedTheme
   } = useApp();
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [bannerImage, setBannerImage] = useState<string | null>(null);
+  
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'profile' | 'banner') => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (type === 'profile') {
+          setProfileImage(reader.result as string);
+        } else {
+          setBannerImage(reader.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
@@ -406,8 +423,18 @@ const Profile = () => {
 
   return <div className="min-h-screen pb-24 text-white">
       <div className="relative">
-        <div className="h-32 bg-gradient-to-br from-purple-600/20 via-blue-500/20 to-pink-500/20 backdrop-blur">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIj48cGF0aCBkPSJNMCAyMGgxMHYxMEgwem0yMCAwaDF2MTBoLTF6bTE5IDBoMXYxMGgtMXoiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjYSkiLz48L3N2Zz4=')] opacity-50"></div>
+        <div className="relative h-32 overflow-hidden rounded-b-3xl">
+          {bannerImage ? (
+            <img src={bannerImage} alt="Profile banner" className="w-full h-full object-cover" />
+          ) : (
+            <div className="h-full bg-gradient-to-br from-purple-600/20 via-blue-500/20 to-pink-500/20 backdrop-blur">
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIj48cGF0aCBkPSJNMCAyMGgxMHYxMEgwem0yMCAwaDF2MTBoLTF6bTE5IDBoMXYxMGgtMXoiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjYSkiLz48L3N2Zz4=')] opacity-50"></div>
+            </div>
+          )}
+          <label className="absolute bottom-2 right-2 p-2 rounded-full bg-black/50 cursor-pointer">
+            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, 'banner')} />
+            <Camera size={18} className="text-white" />
+          </label>
         </div>
         <div className="absolute top-0 left-0 right-0 pt-12 px-4">
           <div className="flex items-center justify-between">
@@ -426,8 +453,18 @@ const Profile = () => {
           </div>
           
           <div className="relative">
-            <div className="w-12 h-12 rounded-full bg-[#222222] border-2 border-white/10 flex items-center justify-center text-xl">
-              {displayName.charAt(0)}
+            <div className="w-16 h-16 rounded-full bg-[#222222] border-2 border-white/10 overflow-hidden">
+              {profileImage ? (
+                <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-xl">
+                  {displayName.charAt(0)}
+                </div>
+              )}
+              <label className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 cursor-pointer transition-opacity">
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, 'profile')} />
+                <Camera size={18} className="text-white" />
+              </label>
             </div>
             <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#333333] border border-black flex items-center justify-center text-xs shadow-lg cursor-pointer hover:bg-[#444444] transition-all"
                 onClick={() => setThemeOpen(true)}>

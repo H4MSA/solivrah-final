@@ -44,7 +44,7 @@ export const TabNavigation: React.FC = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 pb-safe">
-      <nav className="flex justify-between items-center mx-3 mb-2 py-1 px-2 bg-black/80 backdrop-blur-xl rounded-2xl border border-white/5">
+      <nav className="flex justify-between items-center mx-4 mb-2 py-2 px-3 bg-black/90 backdrop-blur-xl rounded-3xl border border-white/10 shadow-lg">
         {navItems.map((item) => (
           <NavItem
             key={item.path}
