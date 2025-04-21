@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -157,20 +156,8 @@ export default {
 					}
 				}
 			},
-			animation: {
-				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out',
-				'fade-in': 'fade-in 0.5s ease-out forwards',
-				'scale': 'scale 0.2s ease-out',
-				'slide-in': 'slide-in 0.3s ease-out',
-				'slide-out': 'slide-out 0.3s ease-out',
-				'pop-in': 'pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
-				'blur-in': 'blur-in 0.5s ease-out forwards',
-				'float': 'float 3s infinite ease-in-out',
-				'pulse': 'pulse 2s infinite ease-in-out'
-			},
 			fontFamily: {
-				sans: ['"SF Pro Display"', '"SF Pro"', 'Inter', 'sans-serif']
+				sans: ['"SF Pro Display"', 'system-ui', 'sans-serif']
 			}
 		}
 	},

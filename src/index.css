@@ -2,7 +2,68 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/attached_assets/SFPRODISPLAYREGULAR.OTF') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/attached_assets/SFPRODISPLAYMEDIUM.OTF') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/attached_assets/SFPRODISPLAYBOLD.OTF') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/attached_assets/SFPRODISPLAYBLACKITALIC.OTF') format('opentype');
+  font-weight: 900;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/attached_assets/SFPRODISPLAYLIGHTITALIC.OTF') format('opentype');
+  font-weight: 300;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/attached_assets/SFPRODISPLAYHEAVYITALIC.OTF') format('opentype');
+  font-weight: 800;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/attached_assets/SFPRODISPLAYSEMIBOLDITALIC.OTF') format('opentype');
+  font-weight: 600;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/attached_assets/SFPRODISPLAYTHINITALIC.OTF') format('opentype');
+  font-weight: 100;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/attached_assets/SFPRODISPLAYULTRALIGHTITALIC.OTF') format('opentype');
+  font-weight: 200;
+  font-style: italic;
+}
 
 @layer base {
   :root {
@@ -107,7 +168,7 @@
   }
 
   html {
-    font-family: 'SF Pro Display', 'SF Pro', 'Inter', sans-serif;
+    font-family: 'SF Pro Display', system-ui, sans-serif;
     -webkit-tap-highlight-color: transparent;
   }
 
