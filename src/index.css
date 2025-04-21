@@ -6,13 +6,13 @@
 
 @layer base {
   :root {
-    /* Dark elegant color scheme */
-    --background: 0 0% 0%; /* #000000 */
-    --background-end: 0 0% 5%; /* #0D0D0D */
-    --foreground: 0 0% 100%; /* #FFFFFF */
+    /* Monochromatic color scheme */
+    --background: 0 0% 0%;
+    --background-end: 0 0% 2%;
+    --foreground: 0 0% 100%;
 
-    --card: 0 0% 7%; /* #121212 */
-    --card-foreground: 0 0% 100%; /* #FFFFFF */
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 100%;
 
     --popover: 0 0% 7%; /* #121212 */
     --popover-foreground: 0 0% 100%; /* #FFFFFF */

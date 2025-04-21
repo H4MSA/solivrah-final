@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Home, ListChecks, Users, MessageCircle, User } from "lucide-react";
@@ -30,7 +29,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive, onClick }) => 
           {icon}
         </div>
       </div>
-      
+
       <span 
         className={`text-xs font-medium transition-all duration-300 ${
           isActive ? 'text-white opacity-100' : 'text-white/50 opacity-70'
@@ -46,9 +45,9 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive, onClick }) => 
 export const TabNavigation: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const isActive = (path: string) => location.pathname === path;
-  
+
   const navItems = [
     { path: "/home", label: "Home", icon: <Home size={24} /> },
     { path: "/quests", label: "Quests", icon: <ListChecks size={24} /> },
@@ -63,7 +62,7 @@ export const TabNavigation: React.FC = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none">
-      <nav className="flex items-center justify-around w-full max-w-[390px] h-[72px] bg-black/95 backdrop-blur-xl border-t border-white/5 shadow-2xl z-50 pointer-events-auto rounded-t-xl">
+      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[85%] max-w-[380px] flex items-center justify-around py-3 px-6 bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl z-50 shadow-2xl pointer-events-auto">
         {navItems.map((item) => (
           <NavItem 
             key={item.path}
