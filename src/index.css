@@ -116,6 +116,16 @@
     overscroll-behavior: none;
   }
 
+  /* Hide scrollbars while maintaining scroll functionality */
+  * {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+
   /* Add touch feedback */
   button, a, [role="button"] {
     @apply active:scale-[0.98] transition-all touch-manipulation;
