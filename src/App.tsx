@@ -93,7 +93,7 @@ const App = () => {
           <ThemeBackground />
 
           {/* Fixed viewport container with safe areas */}
-          <div className="fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-black overflow-hidden px-[calc(16px+env(safe-area-inset-left,0px))] pr-[calc(16px+env(safe-area-inset-right,0px))] pt-[calc(env(safe-area-inset-top,44px))] pb-[calc(env(safe-area-inset-bottom,34px)+65px)]">
+          <div className="fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-black overflow-hidden dynamic-island-aware">
             <Toaster />
             <Sonner />
 

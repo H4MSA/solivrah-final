@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Safe Areas & Dynamic Island */
+.dynamic-island-aware {
+  padding-left: calc(16px + env(safe-area-inset-left, 0px));
+  padding-right: calc(16px + env(safe-area-inset-right, 0px));
+  padding-top: calc(env(safe-area-inset-top, 44px) + 16px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 34px) + 65px);
+}
+
+/* Dynamic island specific adjustments */
+@supports (padding-top: env(safe-area-inset-top)) {
+  @media (min-width: 390px) and (min-height: 844px) {
+    .dynamic-island-aware {
+      padding-top: calc(env(safe-area-inset-top, 44px) + 20px);
+    }
+  }
+}
+
 @font-face {
   font-family: 'SF Pro Display';
   src: url('/attached_assets/SFPRODISPLAYREGULAR.OTF') format('opentype');
