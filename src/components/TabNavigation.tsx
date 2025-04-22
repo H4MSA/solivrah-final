@@ -3,7 +3,38 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Wallet, ArrowUpDown, LineChart, User } from 'lucide-react';
 
-const TabNavigation = () => {
+interface TabItemProps {
+  icon: React.ElementType;
+  label: string;
+  isActive: boolean;
+  onClick: () => void;
+}
+
+const TabItem = ({ icon: Icon, label, isActive, onClick }: TabItemProps) => (
+  <button
+    onClick={onClick}
+    className="flex flex-col items-center gap-1 group"
+  >
+    <Icon
+      size={20}
+      className={`${
+        isActive ? 'text-white' : 'text-white/50 group-hover:text-white/70'
+      } transition-colors`}
+    />
+    <span
+      className={`text-xs ${
+        isActive ? 'text-white' : 'text-white/50 group-hover:text-white/70'
+      } transition-colors`}
+    >
+      {label}
+    </span>
+    {isActive && (
+      <div className="absolute bottom-0 w-8 h-0.5 bg-green-500 rounded-full" />
+    )}
+  </button>
+);
+
+export const TabNavigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -62,36 +93,5 @@ const TabNavigation = () => {
     </div>
   );
 };
-
-interface TabItemProps {
-  icon: React.ElementType;
-  label: string;
-  isActive: boolean;
-  onClick: () => void;
-}
-
-const TabItem = ({ icon: Icon, label, isActive, onClick }: TabItemProps) => (
-  <button
-    onClick={onClick}
-    className="flex flex-col items-center gap-1 group"
-  >
-    <Icon
-      size={20}
-      className={`${
-        isActive ? 'text-white' : 'text-white/50 group-hover:text-white/70'
-      } transition-colors`}
-    />
-    <span
-      className={`text-xs ${
-        isActive ? 'text-white' : 'text-white/50 group-hover:text-white/70'
-      } transition-colors`}
-    >
-      {label}
-    </span>
-    {isActive && (
-      <div className="absolute bottom-0 w-8 h-0.5 bg-green-500 rounded-full" />
-    )}
-  </button>
-);
 
 export default TabNavigation;
