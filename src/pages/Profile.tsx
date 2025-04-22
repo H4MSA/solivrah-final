@@ -166,10 +166,34 @@ const ThemeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
   const { selectedTheme, setSelectedTheme } = useApp();
   
   const themes = [
-    { id: "Discipline", name: "Discipline", description: "Focus on building daily habits and routines" },
-    { id: "Focus", name: "Focus", description: "Eliminate distractions and improve concentration" },
-    { id: "Resilience", name: "Resilience", description: "Bounce back from setbacks and build mental toughness" },
-    { id: "Wildcards", name: "Creative", description: "Think outside the box and spark creativity" }
+    { 
+      id: "Discipline", 
+      name: "Discipline", 
+      description: "Focus on building daily habits and routines",
+      goal: "Complete 3 tasks from your daily routine",
+      reward: 100
+    },
+    { 
+      id: "Focus", 
+      name: "Focus", 
+      description: "Eliminate distractions and improve concentration",
+      goal: "Work for 25 minutes without interruption",
+      reward: 150
+    },
+    { 
+      id: "Resilience", 
+      name: "Resilience", 
+      description: "Bounce back from setbacks and build mental toughness",
+      goal: "Document a challenge you overcame today",
+      reward: 200
+    },
+    { 
+      id: "Wildcards", 
+      name: "Creative", 
+      description: "Think outside the box and spark creativity",
+      goal: "Try something new and document the experience",
+      reward: 125
+    }
   ];
   
   return (
