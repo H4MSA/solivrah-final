@@ -286,6 +286,27 @@
 }
 
 @layer components {
+  .profile-header {
+    @apply relative h-48 w-full overflow-hidden rounded-xl border border-white/10;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.1) 100%);
+  }
+  
+  .profile-avatar {
+    @apply absolute -bottom-12 left-4 h-24 w-24 rounded-full border-4 border-black bg-black/60 backdrop-blur-xl shadow-xl;
+  }
+
+  .profile-banner-overlay {
+    @apply absolute inset-0 bg-gradient-to-t from-black/60 to-transparent;
+  }
+
+  .profile-stats {
+    @apply grid grid-cols-3 gap-4 p-4 bg-black/40 backdrop-blur-xl rounded-xl border border-white/10;
+  }
+
+  .profile-stat {
+    @apply flex flex-col items-center p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all;
+  }
+
   .btn-primary {
     @apply bg-white text-black rounded-xl px-4 py-3 font-medium transition-all duration-300
       hover:opacity-95 hover:translate-y-[-2px] hover:shadow-xl active:scale-95 shadow-lg
