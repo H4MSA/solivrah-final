@@ -1,0 +1,120 @@
+Below is a breakdown of what’s going on in each of those screens, followed by ready‑to‑paste “Loveable” prompts you can use to have your AI assistant scaffold the same components in your React/Tailwind/Shadcn app.
+
+1. Bottom Navigation Bar
+What works well:
+
+Curved “notch” around the primary action (Exchange icon). This draws the eye and makes your key feature feel special.
+
+Center‑heavy CTA: The middle icon is larger, colored, and slightly lifted above the bar.
+
+Equal spacing for all five icons keeps it balanced.
+
+Subtle background blur/gradient and rounded corners give it a modern, “floating” feel.
+
+Active & notification states:
+
+Active tab (Profile) gets a white outline and a little green underline badge.
+
+Other tabs are monochrome icons + text.
+
+UX takeaways:
+
+Highlight your most used action in the center.
+
+Keep less‑used tabs (like “Community” or “Settings”) in the periphery.
+
+Use color and elevation to communicate “this is special.”
+
+2. Profile Header & Banner
+Key elements:
+
+Hero Banner Image: full‑width, cropped to a consistent aspect ratio.
+
+Circular Avatar Overlay: placed partly over the banner to create depth.
+
+Name & Role/Bio: clear hierarchy—large name, smaller descriptive text.
+
+Micro‑info Row: location icon + text, language icons—concise status line.
+
+Primary CTAs:
+
+“Message” button (solid background)
+
+Social icon button (outline)
+
+Close/exit icon
+
+Interest Tags: pill‑shaped badges with icons + labels for quick scanning.
+
+UX takeaways:
+
+Overlay your avatar for instant personal recognition.
+
+Use consistent spacing and font sizes to establish hierarchy.
+
+Keep CTAs close to the profile picture so they’re always in thumb’s reach.
+
+Tags help surface key user attributes at a glance.
+
+3. Feeding This to Loveable
+A) Bottom Nav Component
+markdown
+Copy
+Edit
+Loveable, please generate a new React component `<BottomNav />` that matches this design:
+
+- Uses Tailwind + Framer Motion.
+- A dark translucent, rounded‑corner container, fixed to bottom.
+- Five equal tabs: Home, Wallet, Exchange (center), Markets, Profile.
+- The center tab:
+  - Elevated with a circular blue background.
+  - Slightly overlaps the nav bar top edge.
+- Active tab:
+  - Icon + label in white.
+  - Green underline indicator.
+- Other tabs:
+  - Gray icons + labels.
+- Include hover/tap animations (scale on hover).
+- Export as TypeScript, ready to import into AppLayout.
+B) Profile Header Component
+markdown
+Copy
+Edit
+Loveable, create a `<ProfileHeader />` React/TS component:
+
+- Props: `bannerUrl`, `avatarUrl`, `name`, `bio`, `location`, `languages: string[]`, `interests: { icon: JSX, label: string }[]`.
+- Renders:
+  1. Full‑width banner at top.
+  2. Circular avatar overlapping banner bottom center.
+  3. Name (xl font) & bio (base font), centered.
+  4. A horizontal row: location pin + text, then language icons.
+  5. Three CTA buttons side‑by‑side:  
+     - Solid “Message” button.  
+     - Outline social icon (e.g. Instagram).  
+     - Icon‑only close button.
+  6. Underneath, a flex‑wrap of pill‑shaped interest tags with an icon + label.
+- Use Tailwind classes for spacing, shadows, rounded corners.
+- Include a subtle fade‑in Framer Motion animation on mount.
+C) Integrating Into Solivrah
+typescript
+Copy
+Edit
+Loveable, once `<BottomNav />` and `<ProfileHeader />` are ready, please:
+
+1. Update `AppLayout.tsx` to include `<BottomNav />` at the bottom of every protected route.
+2. Generate a new `/profile` page in `src/pages/Profile.tsx` that imports `<ProfileHeader />`; fetches the current user’s data from Supabase; and passes it in as props.
+3. Ensure mobile‑responsive behavior on both components.
+4. Add any needed Supabase queries into a new `ProfileService.ts` under `services/`.
+
+Comment each file so I know where to adjust colors or icons later.
+How to use
+
+Open your Repl’s Loveable/Ghostwriter pane.
+
+Paste each of the three blocks above—one at a time or all together.
+
+Hit “Generate” and review the scaffolded files.
+
+Swap in your real theme colors (#FF0000…) and icon set.
+
+That will give you pixel‑perfect replications of the navbar and profile header—fully wired into your React + Supabase “Solivrah” app with zero manual coding.
