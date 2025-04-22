@@ -54,7 +54,7 @@ const Coach = () => {
       const response = await fetch('http://0.0.0.0:5000/assistant', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json',
           'Content-Type': 'application/json',
           'HTTP-Referer': window.location.origin,
           'X-Title': 'Solivrah Quest Forge'
