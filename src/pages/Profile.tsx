@@ -8,6 +8,7 @@ import { ProfileStats } from "@/components/ProfileStats";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { CameraUpload } from "@/components/CameraUpload";
 
 const ProfileSection = ({
   title,
@@ -102,9 +103,9 @@ const CalendarModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
   const { streak } = useApp();
   const currentDate = new Date();
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-  
+
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-2xl p-6 shadow-xl">
@@ -114,19 +115,19 @@ const CalendarModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
             View your daily activity and streaks
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="mt-4">
           <div className="grid grid-cols-7 gap-1 mb-2">
             {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
               <div key={i} className="text-center text-xs text-white/50">{day}</div>
             ))}
           </div>
-          
+
           <div className="grid grid-cols-7 gap-1">
             {days.map((day) => {
               const isToday = day === currentDate.getDate();
               const isActive = day <= currentDate.getDate();
-              
+
               return (
                 <div 
                   key={day}
@@ -141,7 +142,7 @@ const CalendarModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
               );
             })}
           </div>
-          
+
           <div className="mt-6 flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-white"></div>
@@ -164,7 +165,7 @@ const CalendarModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
 
 const ThemeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const { selectedTheme, setSelectedTheme } = useApp();
-  
+
   const themes = [
     { 
       id: "Discipline", 
@@ -195,7 +196,7 @@ const ThemeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
       reward: 125
     }
   ];
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-2xl p-6 shadow-xl">
@@ -205,7 +206,7 @@ const ThemeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
             Choose your focus area
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-3 mt-4">
           {themes.map((theme) => (
             <div 
@@ -238,13 +239,13 @@ const ThemeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
 const ExportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const { toast } = useToast();
   const { xp, streak, user } = useApp();
-  
+
   const handleExport = (format: 'pdf' | 'csv' | 'json') => {
     toast({
       title: "Export Initiated",
       description: `Your data is being exported as ${format.toUpperCase()}`,
     });
-    
+
     setTimeout(() => {
       toast({
         title: "Export Complete",
@@ -253,7 +254,7 @@ const ExportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
       onClose();
     }, 1500);
   };
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-2xl p-6 shadow-xl">
@@ -263,7 +264,7 @@ const ExportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
             Download your progress and achievements
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-3 mt-4">
           <button 
             className="w-full p-4 rounded-xl bg-[#222222]/80 border border-white/10 text-left hover:bg-[#222222] transition-all"
@@ -272,7 +273,7 @@ const ExportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
             <div className="font-medium">Progress Report (PDF)</div>
             <div className="text-sm text-white/70">Complete report with statistics and achievements</div>
           </button>
-          
+
           <button 
             className="w-full p-4 rounded-xl bg-[#222222]/80 border border-white/10 text-left hover:bg-[#222222] transition-all"
             onClick={() => handleExport('csv')}
@@ -280,7 +281,7 @@ const ExportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
             <div className="font-medium">Raw Data (CSV)</div>
             <div className="text-sm text-white/70">Spreadsheet format for your own analysis</div>
           </button>
-          
+
           <button 
             className="w-full p-4 rounded-xl bg-[#222222]/80 border border-white/10 text-left hover:bg-[#222222] transition-all"
             onClick={() => handleExport('json')}
@@ -296,7 +297,7 @@ const ExportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
 
 const ShareModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const { toast } = useToast();
-  
+
   const handleShare = (platform: string) => {
     toast({
       title: "Shared Successfully",
@@ -304,7 +305,7 @@ const ShareModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
     });
     onClose();
   };
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-2xl p-6 shadow-xl">
@@ -314,7 +315,7 @@ const ShareModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
             Let others know about your journey
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="grid grid-cols-2 gap-3 mt-4">
           <button 
             className="p-4 rounded-xl bg-[#1877F2] text-white flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-all"
@@ -323,7 +324,7 @@ const ShareModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
             <span className="text-xl">f</span>
             <span>Facebook</span>
           </button>
-          
+
           <button 
             className="p-4 rounded-xl bg-[#1DA1F2] text-white flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-all"
             onClick={() => handleShare('Twitter')}
@@ -331,7 +332,7 @@ const ShareModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
             <span className="text-xl">𝕏</span>
             <span>Twitter</span>
           </button>
-          
+
           <button 
             className="p-4 rounded-xl bg-[#0A66C2] text-white flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-all"
             onClick={() => handleShare('LinkedIn')}
@@ -339,7 +340,7 @@ const ShareModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
             <span className="text-xl">in</span>
             <span>LinkedIn</span>
           </button>
-          
+
           <button 
             className="p-4 rounded-xl bg-[#25D366] text-white flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-all"
             onClick={() => handleShare('WhatsApp')}
@@ -348,7 +349,7 @@ const ShareModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
             <span>WhatsApp</span>
           </button>
         </div>
-        
+
         <div className="mt-3">
           <button 
             className="w-full p-4 rounded-xl border border-white/10 flex items-center justify-center gap-2 hover:bg-white/5 transition-all"
@@ -385,7 +386,7 @@ const Profile = () => {
   const [themeOpen, setThemeOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-  
+
   const level = Math.floor(xp / 1000) + 1;
   const progress = xp % 1000 / 1000 * 100;
   const displayName = user?.user_metadata?.username || user?.email?.split('@')[0] || (isGuest ? "Guest User" : "User");
@@ -399,28 +400,28 @@ const Profile = () => {
       description: "You have been successfully logged out",
     });
   };
-  
+
   const toggleNotifications = () => {
     toast({
       title: "Notifications Updated",
       description: "Your notification preferences have been updated",
     });
   };
-  
+
   const openActivityLog = () => {
     toast({
       title: "Activity Log",
       description: "Your activity history will be displayed here",
     });
   };
-  
+
   const openPrivacySettings = () => {
     toast({
       title: "Privacy Settings",
       description: "Privacy and security settings will be displayed here",
     });
   };
-  
+
   const openAboutPage = () => {
     toast({
       title: "About Solivrah",
@@ -440,7 +441,7 @@ const Profile = () => {
               // TODO: Implement banner image upload to storage
             }}
           />
-          
+
           {/* Profile Info Overlay */}
           <div className="absolute -bottom-16 left-0 right-0 px-4">
             <div className="flex items-end gap-4">
@@ -452,7 +453,7 @@ const Profile = () => {
                   // TODO: Implement profile image upload to storage
                 }}
               />
-              
+
               {/* User Info */}
               <div className="flex-1 mb-2">
                 <h1 className="text-2xl font-bold text-white">{displayName}</h1>
@@ -468,7 +469,7 @@ const Profile = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Actions */}
               <div className="flex gap-2 mb-2">
                 <button 
@@ -486,20 +487,20 @@ const Profile = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex gap-2 border-b border-white/10 pb-2">
           <TabButton label="Overview" active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} />
           <TabButton label="Achievements" active={activeTab === 'achievements'} onClick={() => setActiveTab('achievements')} />
           <TabButton label="Stats" active={activeTab === 'stats'} onClick={() => setActiveTab('stats')} />
         </div>
-        
+
         {activeTab === 'overview' && <>
             <div className="flex gap-3">
               <StatCard icon={<Star />} value={streak} label="Day Streak" />
               <StatCard icon={<Trophy />} value={xp} label="Total XP" />
               <StatCard icon={<CheckCircle />} value={completedQuests} label="Completed" />
             </div>
-            
+
             <ProfileSection title="Level Progress">
               <GlassCard variant="subtle" className="relative p-4">
                 <div className="flex justify-between mb-2">
@@ -508,20 +509,20 @@ const Profile = () => {
                     <RefreshCw size={14} />
                   </button>
                 </div>
-                
+
                 <div className="h-2.5 bg-[#111111] rounded-full overflow-hidden mb-2 border border-white/5">
                   <div className="h-full bg-gradient-to-r from-white/80 to-white/70" style={{
                 width: `${progress}%`,
                 transition: 'width 1s ease-in-out'
               }}></div>
                 </div>
-                
+
                 <div className="text-xs text-white/70 text-right">
                   {1000 - xp % 1000} XP to Level {level + 1}
                 </div>
               </GlassCard>
             </ProfileSection>
-            
+
             <ProfileSection title="Badges">
               <div className="flex justify-between mb-3">
                 <div className="grid grid-cols-4 gap-3">
@@ -531,14 +532,14 @@ const Profile = () => {
                   <Badge icon={<Users size={20} />} label="Social" isEarned={false} />
                 </div>
               </div>
-              
+
               <div className="flex gap-3 py-[21px]">
                 <ActionButton icon={<Calendar size={20} />} label="Calendar" onClick={() => setCalendarOpen(true)} />
                 <ActionButton icon={<Download size={20} />} label="Export" onClick={() => setExportOpen(true)} />
                 <ActionButton icon={<Share2 size={20} />} label="Share" onClick={() => setShareOpen(true)} />
               </div>
             </ProfileSection>
-            
+
             <ProfileSection title="Settings">
               <div className="space-y-2">
                 <SettingsItem 
@@ -547,32 +548,32 @@ const Profile = () => {
                   value={selectedTheme} 
                   onClick={() => setThemeOpen(true)} 
                 />
-                
+
                 <SettingsItem 
                   icon={<Bell size={18} />} 
                   label="Notifications" 
                   value="On" 
                   onClick={toggleNotifications} 
                 />
-                
+
                 <SettingsItem 
                   icon={<Activity size={18} />} 
                   label="Activity Log" 
                   onClick={openActivityLog} 
                 />
-                
+
                 <SettingsItem 
                   icon={<Lock size={18} />} 
                   label="Privacy & Security" 
                   onClick={openPrivacySettings} 
                 />
-                
+
                 <SettingsItem 
                   icon={<Info size={18} />} 
                   label="About Solivrah" 
                   onClick={openAboutPage} 
                 />
-                
+
                 <button 
                   className="w-full py-3 rounded-xl bg-[#1A1A1A]/80 border border-white/10 text-white flex items-center justify-center gap-2 hover:bg-[#222222]/80 active:scale-[0.98] transition-all duration-300 mt-5"
                   onClick={handleLogout}
@@ -580,17 +581,17 @@ const Profile = () => {
                   <LogOut size={18} />
                   <span>Log Out</span>
                 </button>
-                
+
                 <ProfileReset />
               </div>
             </ProfileSection>
           </>}
-        
+
         {activeTab === 'achievements' && <ProfileAchievements />}
-        
+
         {activeTab === 'stats' && <ProfileStats />}
       </div>
-      
+
       <CalendarModal isOpen={calendarOpen} onClose={() => setCalendarOpen(false)} />
       <ThemeModal isOpen={themeOpen} onClose={() => setThemeOpen(false)} />
       <ExportModal isOpen={exportOpen} onClose={() => setExportOpen(false)} />
