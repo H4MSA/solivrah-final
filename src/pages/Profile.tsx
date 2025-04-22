@@ -406,22 +406,55 @@ const Profile = () => {
 
   return <div className="min-h-screen pb-24 text-white">
       <div className="p-4 space-y-5 animate-fade-in">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-semibold">{displayName}</h1>
-            <div className="flex items-center gap-2 text-white/70 text-sm">
-              <Star size={14} />
-              <span>{streak} day streak • Level {level}</span>
-            </div>
+        <div className="relative mb-20 animate-fade-in">
+          {/* Banner */}
+          <div className="h-48 w-full rounded-xl bg-gradient-to-b from-white/10 to-black/20 backdrop-blur-sm border border-white/10 overflow-hidden">
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:24px_24px] opacity-30"></div>
           </div>
           
-          <div className="relative">
-            <div className="w-12 h-12 rounded-full bg-[#222222] border-2 border-white/10 flex items-center justify-center text-xl">
-              {displayName.charAt(0)}
-            </div>
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#333333] border border-black flex items-center justify-center text-xs shadow-lg cursor-pointer hover:bg-[#444444] transition-all"
-                onClick={() => setThemeOpen(true)}>
-              <Settings size={14} />
+          {/* Profile Info Overlay */}
+          <div className="absolute -bottom-16 left-0 right-0 px-4">
+            <div className="flex items-end gap-4">
+              {/* Profile Picture */}
+              <div className="relative group">
+                <div className="w-24 h-24 rounded-full bg-[#222222] border-4 border-black shadow-2xl flex items-center justify-center text-3xl font-bold group-hover:scale-105 transition-all">
+                  {displayName.charAt(0)}
+                </div>
+                <button className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[#333333] border-2 border-black shadow-xl flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-[#444444] transition-all">
+                  <Camera size={14} />
+                </button>
+              </div>
+              
+              {/* User Info */}
+              <div className="flex-1 mb-2">
+                <h1 className="text-2xl font-bold text-white">{displayName}</h1>
+                <div className="flex items-center gap-3 text-white/70">
+                  <div className="flex items-center gap-1">
+                    <Star size={14} className="text-yellow-500" />
+                    <span>{streak} day streak</span>
+                  </div>
+                  <div className="w-1 h-1 rounded-full bg-white/30"></div>
+                  <div className="flex items-center gap-1">
+                    <Trophy size={14} className="text-white/70" />
+                    <span>Level {level}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Actions */}
+              <div className="flex gap-2 mb-2">
+                <button 
+                  onClick={() => setThemeOpen(true)}
+                  className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+                >
+                  <Settings size={18} />
+                </button>
+                <button 
+                  className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+                >
+                  <Camera size={18} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
