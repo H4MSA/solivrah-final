@@ -51,7 +51,7 @@ const Coach = () => {
       }];
 
       const OPENROUTER_API_KEY = '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';
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetch('http://0.0.0.0:5000/assistant', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
