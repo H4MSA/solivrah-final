@@ -30,6 +30,20 @@
   font-style: italic;
 }
 
+/* TabNavigation styles */
+.nav-item {
+  @apply flex flex-col items-center justify-center gap-1 p-2 relative cursor-pointer transition-all duration-300;
+}
+
+.nav-item-active {
+  @apply text-white;
+}
+
+.nav-item-inactive {
+  @apply text-white/60 hover:text-white/80;
+}
+
+
 @font-face {
   font-family: 'SF Pro Display';
   src: url('/attached_assets/SFPRODISPLAYLIGHTITALIC.OTF') format('opentype');
