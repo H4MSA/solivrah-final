@@ -30,4 +30,4 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd src/api && node index.ts"
+args = "cd src/api && npx ts-node index.ts"
