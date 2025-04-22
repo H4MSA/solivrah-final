@@ -507,13 +507,33 @@
 
 /* Mobile-specific optimizations */
 @media (max-width: 640px) {
-  html, body {
-    @apply overflow-x-hidden;
+  html {
+    @apply overflow-hidden;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    height: 100vh;
+    /* Handle iOS Safari viewport height */
+    height: -webkit-fill-available;
+  }
+
+  body {
+    @apply overflow-x-hidden min-h-screen;
+    touch-action: manipulation;
+    /* Handle iOS Safari viewport height */
+    min-height: -webkit-fill-available;
   }
 
   input, button, a {
     @apply touch-manipulation;
+  }
+
+  /* Dynamic island area (iPhone 14 Pro and above) */
+  @supports (padding-top: env(safe-area-inset-top)) {
+    @media (min-width: 390px) and (min-height: 844px) {
+      .dynamic-island-aware {
+        padding-top: calc(env(safe-area-inset-top, 44px) + 16px);
+      }
+    }
   }
 }
 
