@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Home, ListChecks, Users, MessageCircle, User } from "lucide-react";
@@ -15,24 +14,19 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive, onClick }) => 
   return (
     <div
       onClick={onClick}
-      className={`flex flex-col items-center justify-center gap-1 p-2 ${
-        isActive ? 'text-white' : 'text-white/60'
-      }`}
+      className={`nav-item ${isActive ? 'nav-item-active' : 'nav-item-inactive'}`}
     >
-      <div className="text-xl">
+      <div className="text-xl mb-1">
         {icon}
       </div>
       <span className="text-xs font-medium">
         {label}
       </span>
-      {isActive && (
-        <div className="absolute bottom-0 w-8 h-0.5 bg-green-500 rounded-full" />
-      )}
     </div>
   );
 };
 
-export const TabNavigation = () => {
+export const TabNavigation: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -63,5 +57,3 @@ export const TabNavigation = () => {
     </div>
   );
 };
-
-export default TabNavigation;
