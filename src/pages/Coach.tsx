@@ -54,16 +54,12 @@ const Coach = () => {
       const response = await fetch('http://0.0.0.0:5000/assistant', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Content-Type': 'application/json',
-          'HTTP-Referer': window.location.origin,
-          'X-Title': 'Solivrah Quest Forge'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: "meta/llama-4-scout:free",
-          messages: messages,
-          temperature: 0.7,
-          max_tokens: 1000
+          userId: user?.id || 'anonymous',
+          message: input,
+          mood: selectedMood || 'neutral'
         })
       });
 
