@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
-import { Star, Trophy, CheckCircle, Calendar, Download, Share2, Settings, Bell, Activity, Lock, Info, LogOut, RefreshCw, Users } from "lucide-react";
+import { Star, Trophy, CheckCircle, Calendar, Download, Share2, Settings, Bell, Activity, Lock, Info, LogOut, RefreshCw, Users, Camera } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { ProfileReset } from "@/components/ProfileReset";
 import { ProfileAchievements } from "@/components/ProfileAchievements";
