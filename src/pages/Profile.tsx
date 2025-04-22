@@ -428,26 +428,30 @@ const Profile = () => {
     });
   };
 
-  return <div className="min-h-screen pb-24 text-white">
-      <div className="p-4 space-y-5 animate-fade-in">
+  return <div className="min-h-screen pb-[calc(24px+env(safe-area-inset-bottom))] text-white">
+      <div className="p-4 pt-[calc(env(safe-area-inset-top))] space-y-5 animate-fade-in">
         <div className="relative mb-20 animate-fade-in">
           {/* Banner */}
-          <div className="h-48 w-full rounded-xl bg-gradient-to-b from-white/10 to-black/20 backdrop-blur-sm border border-white/10 overflow-hidden">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:24px_24px] opacity-30"></div>
-          </div>
+          <CameraUpload 
+            type="banner"
+            onImageCapture={(file) => {
+              // Handle banner image upload
+              console.log("Banner image:", file);
+              // TODO: Implement banner image upload to storage
+            }}
+          />
           
           {/* Profile Info Overlay */}
           <div className="absolute -bottom-16 left-0 right-0 px-4">
             <div className="flex items-end gap-4">
               {/* Profile Picture */}
-              <div className="relative group">
-                <div className="w-24 h-24 rounded-full bg-[#222222] border-4 border-black shadow-2xl flex items-center justify-center text-3xl font-bold group-hover:scale-105 transition-all">
-                  {displayName.charAt(0)}
-                </div>
-                <button className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[#333333] border-2 border-black shadow-xl flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-[#444444] transition-all">
-                  <Camera size={14} />
-                </button>
-              </div>
+              <CameraUpload 
+                onImageCapture={(file) => {
+                  // Handle profile image upload
+                  console.log("Profile image:", file);
+                  // TODO: Implement profile image upload to storage
+                }}
+              />
               
               {/* User Info */}
               <div className="flex-1 mb-2">
