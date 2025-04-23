@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useRef } from "react";
-import { Send, User } from "lucide-react";
+import { Send, User, Smile, Meh, Frown, ChevronDown, ChevronUp } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -20,6 +21,7 @@ const Coach = () => {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedMood, setSelectedMood] = useState<string>("neutral");
+  const [showMoodSelector, setShowMoodSelector] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -120,19 +122,93 @@ const Coach = () => {
     }
   };
 
+  const getMoodIcon = (mood: string) => {
+    switch (mood) {
+      case 'happy':
+        return <Smile className="text-amber-400" />;
+      case 'sad':
+        return <Frown className="text-blue-400" />;
+      case 'neutral':
+      default:
+        return <Meh className="text-white/70" />;
+    }
+  };
+
   return (
-    <div className="min-h-screen pb-24 flex flex-col">
-      <div className="p-6 flex-shrink-0">
+    <div className="min-h-screen pb-24 flex flex-col bg-black">
+      <div className="p-6 flex-shrink-0 border-b border-white/10 backdrop-blur-md bg-black/70 z-10 sticky top-0">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-medium">AI Coach</h1>
-          <div className="w-10 h-10 rounded-full bg-[#121212] flex items-center justify-center border border-white/5">
-            <User className="text-white h-5 w-5" />
+          <h1 className="text-xl font-medium text-gradient">AI Coach</h1>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setShowMoodSelector(!showMoodSelector)}
+              className="flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-[#121212] hover:bg-[#1A1A1A] border border-white/10 transition-all duration-300 text-sm"
+            >
+              <span>Mood</span>
+              {getMoodIcon(selectedMood)}
+              {showMoodSelector ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            </button>
+            
+            <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center border border-white/10 hover:border-white/20 transition-all hover:bg-[#222222]">
+              <User className="text-white h-5 w-5" />
+            </div>
           </div>
         </div>
+
+        {showMoodSelector && (
+          <div className="absolute right-6 mt-2 bg-[#1A1A1A] border border-white/10 rounded-xl p-2 shadow-xl backdrop-blur-lg z-20 transform origin-top animate-fade-in">
+            <div className="grid grid-cols-3 gap-2">
+              <button 
+                onClick={() => {
+                  setSelectedMood('happy');
+                  setShowMoodSelector(false);
+                }}
+                className={`flex flex-col items-center p-3 rounded-lg transition-all duration-300 ${
+                  selectedMood === 'happy' 
+                    ? 'bg-[#222222] border border-white/15' 
+                    : 'hover:bg-[#222222]/50'
+                }`}
+              >
+                <Smile size={22} className="text-amber-400 mb-1" />
+                <span className="text-xs font-medium">Happy</span>
+              </button>
+              
+              <button 
+                onClick={() => {
+                  setSelectedMood('neutral');
+                  setShowMoodSelector(false);
+                }}
+                className={`flex flex-col items-center p-3 rounded-lg transition-all duration-300 ${
+                  selectedMood === 'neutral' 
+                    ? 'bg-[#222222] border border-white/15' 
+                    : 'hover:bg-[#222222]/50'
+                }`}
+              >
+                <Meh size={22} className="text-white mb-1" />
+                <span className="text-xs font-medium">Neutral</span>
+              </button>
+              
+              <button 
+                onClick={() => {
+                  setSelectedMood('sad');
+                  setShowMoodSelector(false);
+                }}
+                className={`flex flex-col items-center p-3 rounded-lg transition-all duration-300 ${
+                  selectedMood === 'sad' 
+                    ? 'bg-[#222222] border border-white/15' 
+                    : 'hover:bg-[#222222]/50'
+                }`}
+              >
+                <Frown size={22} className="text-blue-400 mb-1" />
+                <span className="text-xs font-medium">Sad</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 pb-4 chat-container">
-        <div className="space-y-4">
+        <div className="space-y-4 py-4">
           {messages.map((message, index) => (
             <div 
               key={index}
@@ -140,9 +216,15 @@ const Coach = () => {
                 message.sender === "user" 
                   ? "ml-auto bg-[#222222] text-white" 
                   : "mr-auto bg-[#121212] text-white"
-              } p-4 rounded-xl max-w-[80%] animate-fade-in shadow-sm border border-white/5`}
+              } p-4 rounded-xl max-w-[80%] animate-fade-in shadow-sm border ${
+                message.sender === "user" 
+                  ? "border-white/10" 
+                  : message.error 
+                    ? "border-red-500/20" 
+                    : "border-white/5"
+              }`}
             >
-              <p className="text-sm">{message.text}</p>
+              <p className="text-sm leading-relaxed">{message.text}</p>
             </div>
           ))}
 
@@ -158,6 +240,7 @@ const Coach = () => {
               </div>
             </div>
           )}
+          
           {messages.some(m => m.error) && (
             <div className="mx-auto my-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
               <p className="text-sm text-red-400">
@@ -165,25 +248,28 @@ const Coach = () => {
               </p>
             </div>
           )}
+          
           <div ref={messagesEndRef} />
         </div>
       </div>
 
-      <div className="fixed left-0 right-0 bottom-[72px] p-4 bg-black/90 backdrop-blur-md z-10 mx-auto max-w-[390px]">
-        <div className="flex items-center gap-2 bg-[#121212] rounded-full p-1 pr-2 border border-white/10">
+      <div className="fixed left-0 right-0 bottom-[72px] p-4 bg-black/90 backdrop-blur-lg z-10 mx-auto max-w-[430px]">
+        <div className="flex items-center gap-2 bg-[#121212] rounded-full p-1 pr-2 border border-white/10 hover:border-white/20 transition-all shadow-lg">
           <input 
             type="text" 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyPress}
-            placeholder="Type your question..."
+            placeholder="Ask me anything..."
             className="flex-1 bg-transparent border-none outline-none text-sm text-white px-4 py-3"
             disabled={isLoading}
           />
           <button 
-            className="bg-white text-black rounded-full p-2.5 hover:bg-white/90 transition-colors"
+            className={`bg-white text-black rounded-full p-2.5 transition-all ${
+              input.trim() ? 'hover:bg-white/90 active:scale-95' : 'opacity-50 cursor-not-allowed'
+            }`}
             onClick={handleSend}
-            disabled={isLoading}
+            disabled={isLoading || !input.trim()}
             aria-label="Send message"
           >
             <Send size={16} />
