@@ -151,8 +151,8 @@ const Home = () => {
       
       {showCamera && (
         <CameraUpload 
-          onClose={() => setShowCamera(false)} 
           onCapture={handleCameraCapture}
+          onClose={() => setShowCamera(false)}
           title="Capture a Moment"
         />
       )}

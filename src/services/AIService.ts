@@ -64,7 +64,10 @@ export class AIService {
           role: "user",
           content: [
             { type: "text", text: `Verify if this image shows completion of quest ${questId}. Respond with only "verified" or "invalid".` },
-            { type: "image_url", image_url: imageUrl }
+            { 
+              type: "image_url", 
+              image_url: { url: imageUrl } 
+            }
           ],
         },
       ],

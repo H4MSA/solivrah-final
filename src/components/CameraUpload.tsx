@@ -1,14 +1,22 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Camera, ImageIcon } from 'lucide-react';
+import { Camera, ImageIcon, X } from 'lucide-react';
 
 interface CameraUploadProps {
-  onImageCapture: (file: File) => void;
+  onCapture: (file: File) => void;
+  onClose?: () => void;
+  title?: string;
   type?: 'banner' | 'profile';
   currentImage?: string;
 }
 
-export const CameraUpload = ({ onImageCapture, type = 'profile', currentImage }: CameraUploadProps) => {
+export const CameraUpload = ({ 
+  onCapture, 
+  onClose, 
+  title = "Take a photo", 
+  type = 'profile', 
+  currentImage 
+}: CameraUploadProps) => {
   const [error, setError] = useState<string>('');
   const [hasPermission, setHasPermission] = useState<boolean>(false);
   const [previewUrl, setPreviewUrl] = useState<string | undefined>(currentImage);
@@ -40,7 +48,7 @@ export const CameraUpload = ({ onImageCapture, type = 'profile', currentImage }:
     }
 
     setPreviewUrl(URL.createObjectURL(file));
-    onImageCapture(file);
+    onCapture(file);
   };
 
   const handleCameraClick = () => {
@@ -52,67 +60,71 @@ export const CameraUpload = ({ onImageCapture, type = 'profile', currentImage }:
   };
 
   return (
-    <div className="relative w-full h-full">
-      <input
-        type="file"
-        accept="image/*"
-        capture="environment"
-        onChange={handleFileChange}
-        className="hidden"
-        ref={fileInputRef}
-      />
-      
-      {type === 'banner' ? (
-        <div className="relative w-full h-48 group">
-          {previewUrl ? (
-            <div className="absolute inset-0 rounded-xl overflow-hidden">
-              <img src={previewUrl} alt="Banner" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <button onClick={handleCameraClick} className="text-white">
-                  <Camera className="w-6 h-6" />
-                </button>
-              </div>
-            </div>
-          ) : (
-            <button 
-              onClick={handleCameraClick}
-              className="w-full h-full rounded-xl border-2 border-dashed border-white/20 flex items-center justify-center gap-2 group-hover:border-white/40 transition-all"
-            >
-              <ImageIcon className="w-6 h-6 text-white/60" />
-              <span className="text-white/60">Add Banner Image</span>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+      <div className="bg-[#121212] border border-white/10 rounded-2xl p-4 w-full max-w-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-medium text-white">{title}</h3>
+          {onClose && (
+            <button onClick={onClose} className="p-1 rounded-full bg-[#222] hover:bg-[#333] transition-colors">
+              <X size={20} />
             </button>
           )}
         </div>
-      ) : (
-        <div className="relative group">
-          {previewUrl ? (
-            <div className="relative w-24 h-24">
-              <img 
-                src={previewUrl} 
-                alt="Profile" 
-                className="w-24 h-24 rounded-full object-cover border-4 border-black"
-              />
+        
+        <input
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFileChange}
+          className="hidden"
+          ref={fileInputRef}
+        />
+        
+        {previewUrl ? (
+          <div className="relative w-full aspect-square rounded-xl overflow-hidden mb-4">
+            <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
               <button 
-                onClick={handleCameraClick}
-                className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[#333333] border-2 border-black shadow-xl flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-[#444444] transition-all"
+                onClick={handleCameraClick} 
+                className="bg-white/20 backdrop-blur-sm p-3 rounded-full"
               >
-                <Camera className="w-4 h-4" />
+                <Camera className="w-6 h-6 text-white" />
               </button>
             </div>
-          ) : (
+          </div>
+        ) : (
+          <button 
+            onClick={handleCameraClick}
+            className="w-full aspect-square rounded-xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-3 hover:border-white/40 transition-all mb-4"
+          >
+            <Camera className="w-10 h-10 text-white/60" />
+            <span className="text-white/60">Tap to take a photo</span>
+          </button>
+        )}
+        
+        {error && (
+          <p className="text-red-500 text-sm mb-4">{error}</p>
+        )}
+        
+        <div className="flex gap-3">
+          {onClose && (
             <button 
-              onClick={handleCameraClick}
-              className="w-24 h-24 rounded-full bg-[#222222] border-4 border-black shadow-2xl flex items-center justify-center text-3xl font-bold group-hover:bg-[#333333] transition-all"
+              onClick={onClose}
+              className="flex-1 py-2.5 bg-[#222] text-white rounded-xl border border-white/10 hover:bg-[#333] transition-colors"
             >
-              <Camera className="w-8 h-8 text-white/70" />
+              Cancel
+            </button>
+          )}
+          {previewUrl && (
+            <button 
+              onClick={onClose || (() => {})}
+              className="flex-1 py-2.5 bg-white text-black rounded-xl font-medium"
+            >
+              Use Photo
             </button>
           )}
         </div>
-      )}
-      
-      {error && (
-        <p className="text-red-500 text-xs mt-2">{error}</p>
-      )}
+      </div>
     </div>
   );
 };

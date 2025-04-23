@@ -111,7 +111,13 @@ const Auth = () => {
         email: null,
         user_metadata: {
           username: 'Guest'
-        }
+        },
+        // Adding required properties to match User type
+        app_metadata: {},
+        aud: 'guest',
+        created_at: new Date().toISOString(),
+        role: null,
+        updated_at: new Date().toISOString()
       };
       await Promise.resolve(); // Ensure state updates
       setUser(guestUser);

@@ -8,6 +8,7 @@ interface Message {
   sender: "user" | "ai";
   text: string;
   timestamp?: string;
+  error?: boolean;
 }
 
 const Coach = () => {
@@ -17,6 +18,7 @@ const Coach = () => {
     { sender: "ai", text: `Hi, I'm your AI Coach for ${selectedTheme || 'personal development'}. How can I help you today?` },
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedMood, setSelectedMood] = useState<string>("neutral");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -82,7 +84,8 @@ const Coach = () => {
       console.error("Error getting AI response:", error);
       setMessages(prev => [...prev, { 
         sender: "ai", 
-        text: "I'm having trouble connecting right now. Please try again later." 
+        text: "I'm having trouble connecting right now. Please try again later.",
+        error: true
       }]);
     } finally {
       setIsLoading(false);
