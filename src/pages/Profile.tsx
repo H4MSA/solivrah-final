@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { Star, Trophy, CheckCircle, Calendar, Download, Share2, Settings, Bell, Activity, Lock, Info, LogOut, RefreshCw, Users, Camera } from "lucide-react";
@@ -435,7 +436,7 @@ const Profile = () => {
           {/* Banner */}
           <CameraUpload 
             type="banner"
-            onImageCapture={(file) => {
+            onCapture={(file) => {
               // Handle banner image upload
               console.log("Banner image:", file);
               // TODO: Implement banner image upload to storage
@@ -447,7 +448,7 @@ const Profile = () => {
             <div className="flex items-end gap-4">
               {/* Profile Picture */}
               <CameraUpload 
-                onImageCapture={(file) => {
+                onCapture={(file) => {
                   // Handle profile image upload
                   console.log("Profile image:", file);
                   // TODO: Implement profile image upload to storage
