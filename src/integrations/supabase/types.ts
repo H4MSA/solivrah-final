@@ -9,7 +9,138 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      chat_history: {
+        Row: {
+          id: string
+          message: string
+          response: string
+          theme: string | null
+          timestamp: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          message: string
+          response: string
+          theme?: string | null
+          timestamp?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          message?: string
+          response?: string
+          theme?: string | null
+          timestamp?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          id: string
+          streak: number | null
+          theme: string | null
+          updated_at: string | null
+          xp: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          streak?: number | null
+          theme?: string | null
+          updated_at?: string | null
+          xp?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          streak?: number | null
+          theme?: string | null
+          updated_at?: string | null
+          xp?: number | null
+        }
+        Relationships: []
+      }
+      quests: {
+        Row: {
+          completed: boolean | null
+          completed_at: string | null
+          created_at: string | null
+          day: number
+          description: string
+          difficulty: string | null
+          id: string
+          requires_photo: boolean | null
+          theme: string
+          title: string
+          user_id: string
+          verification_status: string | null
+          xp: number | null
+        }
+        Insert: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          day: number
+          description: string
+          difficulty?: string | null
+          id?: string
+          requires_photo?: boolean | null
+          theme: string
+          title: string
+          user_id: string
+          verification_status?: string | null
+          xp?: number | null
+        }
+        Update: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          day?: number
+          description?: string
+          difficulty?: string | null
+          id?: string
+          requires_photo?: boolean | null
+          theme?: string
+          title?: string
+          user_id?: string
+          verification_status?: string | null
+          xp?: number | null
+        }
+        Relationships: []
+      }
+      survey_responses: {
+        Row: {
+          biggest_struggle: string
+          created_at: string | null
+          daily_commitment: number
+          goal: string
+          id: string
+          theme: string
+          user_id: string
+        }
+        Insert: {
+          biggest_struggle: string
+          created_at?: string | null
+          daily_commitment: number
+          goal: string
+          id?: string
+          theme: string
+          user_id: string
+        }
+        Update: {
+          biggest_struggle?: string
+          created_at?: string | null
+          daily_commitment?: number
+          goal?: string
+          id?: string
+          theme?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

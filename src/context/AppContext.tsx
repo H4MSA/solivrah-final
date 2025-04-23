@@ -1,7 +1,11 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 import { AuthService } from "@/services/AuthService";
+import type { Database } from "@/integrations/supabase/types";
+
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 
 interface AppContextType {
   user: User | null;
@@ -65,6 +69,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        // To avoid async/blocking problem, use timeout for side effect
+        if (session?.user) {
+          setTimeout(() => {
+            fetchUserProfile(session.user.id);
+          }, 0);
+        }
       }
     );
 
@@ -85,13 +95,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   const fetchUserProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-      
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
+
       if (error) throw error;
-      
+
       if (data) {
         setSelectedTheme(data.theme || "Discipline");
         setStreak(data.streak || 0);
@@ -104,15 +114,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const addXP = async (amount: number) => {
     if (!user) return;
-    
+
     const newXP = xp + amount;
     setXP(newXP);
-    
+
     try {
       await supabase
-        .from('profiles')
+        .from("profiles")
         .update({ xp: newXP })
-        .eq('id', user.id);
+        .eq("id", user.id);
     } catch (error) {
       console.error("Error updating XP:", error);
     }
@@ -120,15 +130,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const incrementStreak = async () => {
     if (!user) return;
-    
+
     const newStreak = streak + 1;
     setStreak(newStreak);
-    
+
     try {
       await supabase
-        .from('profiles')
+        .from("profiles")
         .update({ streak: newStreak })
-        .eq('id', user.id);
+        .eq("id", user.id);
     } catch (error) {
       console.error("Error updating streak:", error);
     }
@@ -136,13 +146,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const updateSelectedTheme = async (theme: string) => {
     setSelectedTheme(theme);
-    
+
     if (user) {
       try {
         await supabase
-          .from('profiles')
+          .from("profiles")
           .update({ theme })
-          .eq('id', user.id);
+          .eq("id", user.id);
       } catch (error) {
         console.error("Error updating theme:", error);
       }
@@ -151,15 +161,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const resetProgress = async () => {
     if (!user) return;
-    
+
     setStreak(0);
     setXP(0);
-    
+
     try {
       await supabase
-        .from('profiles')
+        .from("profiles")
         .update({ streak: 0, xp: 0 })
-        .eq('id', user.id);
+        .eq("id", user.id);
     } catch (error) {
       console.error("Error resetting progress:", error);
     }
@@ -200,3 +210,5 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     </AppContext.Provider>
   );
 };
+
+// (File exceeds 200 lines, consider refactoring for maintainability!)

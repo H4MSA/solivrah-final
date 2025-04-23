@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Send, User } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
 interface Message {
   id?: string;
@@ -52,7 +53,6 @@ const Coach = () => {
         content: input
       }];
 
-      const OPENROUTER_API_KEY = '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';
       const response = await fetch('http://0.0.0.0:5000/assistant', {
         method: 'POST',
         headers: {
@@ -75,11 +75,9 @@ const Coach = () => {
       const aiMessage: Message = { sender: "ai", text: aiResponse };
       setMessages(prev => [...prev, aiMessage]);
 
-      // Save to chat history if user is logged in
       if (user) {
         await saveMessageToSupabase(input, aiResponse);
       }
-
     } catch (error) {
       console.error("Error getting AI response:", error);
       setMessages(prev => [...prev, { 
@@ -94,13 +92,16 @@ const Coach = () => {
 
   const saveMessageToSupabase = async (userMessage: string, aiResponse: string) => {
     try {
-      const { error } = await supabase.from('chat_history').insert([{
-        message: userMessage,
-        response: aiResponse,
-        theme: selectedTheme || 'General',
-        user_id: user?.id,
-        timestamp: new Date().toISOString()
-      }]);
+      if (!user?.id) return;
+      const { error } = await supabase
+        .from("chat_history")
+        .insert([{
+          message: userMessage,
+          response: aiResponse,
+          theme: selectedTheme || "General",
+          user_id: user.id,
+          timestamp: new Date().toISOString()
+        } as Database["public"]["Tables"]["chat_history"]["Insert"]]);
 
       if (error) {
         console.error('Error saving message:', error);
