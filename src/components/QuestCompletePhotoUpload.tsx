@@ -5,6 +5,7 @@ import { CameraUpload } from "@/components/CameraUpload";
 import { Camera, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useApp } from "@/context/AppContext";
 
 interface QuestCompletePhotoUploadProps {
   questId: string;
@@ -21,6 +22,7 @@ export const QuestCompletePhotoUpload: React.FC<QuestCompletePhotoUploadProps> =
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user, addXP } = useApp();
 
   const handleCapture = async (file: File) => {
     setShowCamera(false);
@@ -28,58 +30,59 @@ export const QuestCompletePhotoUpload: React.FC<QuestCompletePhotoUploadProps> =
     setPreviewUrl(URL.createObjectURL(file));
     
     try {
-      // Generate a unique filename
-      const timestamp = Date.now();
-      const fileExt = file.name.split('.').pop();
-      const fileName = `quest-${questId}-${timestamp}.${fileExt}`;
+      // Get user's auth token for API request
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
       
-      // Create a storage bucket if it doesn't exist (first time only)
-      const { data: bucketData, error: bucketError } = await supabase.storage.getBucket('quest-photos');
-      
-      if (bucketError && bucketError.message.includes('does not exist')) {
-        await supabase.storage.createBucket('quest-photos', {
-          public: false,
-          fileSizeLimit: 5242880 // 5MB
-        });
+      if (!token) {
+        throw new Error("Authentication required");
       }
       
-      // Upload the file
-      const { data, error } = await supabase.storage
-        .from('quest-photos')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-        
-      if (error) throw error;
+      // Create form data for file upload
+      const formData = new FormData();
+      formData.append('photo', file);
+      formData.append('questId', questId);
       
-      // Get URL for the uploaded file
-      const { data: urlData } = await supabase.storage
-        .from('quest-photos')
-        .createSignedUrl(fileName, 60 * 60 * 24); // 24 hour expiry
-      
-      // Update the quest verification status and add photo URL
-      const { error: updateError } = await supabase
-        .from('quests')
-        .update({ 
-          verification_status: 'submitted',
-          verification_photo_url: urlData?.signedUrl
-        })
-        .eq('id', questId);
-      
-      if (updateError) throw updateError;
-      
-      toast({
-        title: "Photo submitted!",
-        description: "Your quest verification photo has been uploaded.",
+      // Submit to our verification API
+      const response = await fetch('/api/verify-photo', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
       });
       
-      onSuccess();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Verification request failed');
+      }
+      
+      const result = await response.json();
+      
+      if (result.status === 'verified') {
+        toast({
+          title: "Quest Complete!",
+          description: "Your photo has been verified. You earned XP for this quest!",
+        });
+        
+        // Update local XP (the backend has already updated it in the database)
+        if (result.xp) {
+          addXP(result.xp);
+        }
+        
+        onSuccess();
+      } else {
+        toast({
+          title: "Verification Failed",
+          description: "Your photo doesn't seem to show completion of this quest. Please try again with a different photo.",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
-      console.error("Error uploading photo:", error);
+      console.error("Error verifying photo:", error);
       toast({
         title: "Upload Failed",
-        description: "There was a problem uploading your photo. Please try again.",
+        description: error instanceof Error ? error.message : "There was a problem uploading your photo. Please try again.",
         variant: "destructive"
       });
     } finally {
