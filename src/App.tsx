@@ -43,18 +43,44 @@ const SessionHandler = ({ children }: { children: React.ReactNode }) => {
         console.log("Auth state changed:", event);
         setSession(session);
         setUser(session?.user ?? null);
+        
+        // Store session in localStorage for persistence between page refreshes
+        if (session) {
+          localStorage.setItem('authSession', JSON.stringify(session));
+        } else {
+          localStorage.removeItem('authSession');
+        }
       }
     );
 
     // Check for existing session
     const checkSession = async () => {
       try {
+        // First try to get from localStorage for faster initial load
+        const storedSession = localStorage.getItem('authSession');
+        if (storedSession) {
+          const parsedSession = JSON.parse(storedSession);
+          setSession(parsedSession);
+          setUser(parsedSession?.user ?? null);
+        }
+        
+        // Then verify with Supabase
         const { data: { session } } = await supabase.auth.getSession();
         console.log("Initial session check:", session?.user?.email || "No session");
-        setSession(session);
-        setUser(session?.user ?? null);
+        
+        if (session) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          localStorage.setItem('authSession', JSON.stringify(session));
+        } else {
+          // If Supabase says no session, clear localStorage
+          localStorage.removeItem('authSession');
+          setSession(null);
+          setUser(null);
+        }
       } catch (error) {
         console.error("Session check error:", error);
+        localStorage.removeItem('authSession');
       } finally {
         setChecking(false);
       }
@@ -155,7 +181,7 @@ const App = () => {
           <ThemeBackground />
 
           {/* Fixed viewport container with safe areas */}
-          <div className="fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-black overflow-hidden dynamic-island-aware">
+          <div className="fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-transparent overflow-hidden dynamic-island-aware">
             <Toaster />
             <Sonner />
 

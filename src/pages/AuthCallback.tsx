@@ -42,18 +42,37 @@ const AuthCallback = () => {
             .maybeSingle();
             
           if (profile) {
-            // Existing user - go to home page
-            toast({
-              title: "Welcome back!",
-              description: "Great to see you again. Let's continue your journey.",
-              duration: 3000,
-            });
-            
-            // Force navigation to home page
-            console.log("Redirecting existing user to /home");
-            setTimeout(() => {
-              navigate("/home", { replace: true });
-            }, 500);
+            // Check if user has completed survey
+            const { data: surveyData, error: surveyError } = await supabase
+              .from('survey_responses')
+              .select('*')
+              .eq('user_id', data.session.user.id)
+              .maybeSingle();
+
+            if (surveyError) {
+              console.error("Error checking survey data:", surveyError);
+            }
+
+            if (surveyData) {
+              // User has completed survey, go to home
+              toast({
+                title: "Welcome back!",
+                description: "Great to see you again. Let's continue your journey.",
+                duration: 3000,
+              });
+              
+              // Force navigation to home page
+              console.log("Redirecting existing user with completed survey to /home");
+              setTimeout(() => {
+                navigate("/home", { replace: true });
+              }, 500);
+            } else {
+              // User exists but hasn't completed survey
+              console.log("Redirecting existing user without survey to /survey");
+              setTimeout(() => {
+                navigate("/survey", { replace: true });
+              }, 500);
+            }
           } else {
             // New user - go to survey
             toast({

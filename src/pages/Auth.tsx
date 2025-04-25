@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { AuthService } from "@/services/AuthService";
@@ -24,7 +23,7 @@ const Auth = () => {
   const { setIsGuest } = useApp();
   
   // Get return URL from state or default to home
-  const returnUrl = (location.state as { returnUrl?: string })?.returnUrl || "/home";
+  const returnUrl = (location.state as { returnUrl?: string })?.returnUrl || "/survey";
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +62,7 @@ const Auth = () => {
           title: "Welcome back!",
           description: "You've successfully signed in.",
         });
-        navigate(returnUrl);
+        navigate("/survey");
       } else {
         // Password reset
         await AuthService.resetPassword(email);
@@ -120,7 +119,7 @@ const Auth = () => {
       title: "Guest mode active",
       description: "You can explore the app, but your data won't be saved.",
     });
-    navigate("/home");
+    navigate("/survey");
   };
   
   const formVariants = {
@@ -449,6 +448,17 @@ const Auth = () => {
   
   return (
     <div className="min-h-screen flex flex-col p-6 relative">
+      {/* Enhanced Background with grid and gradient effects */}
+      <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-[#0A0A0A] bg-grid-white/[0.02]"></div>
+        <div className="absolute inset-0">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/[0.03] rounded-full blur-[100px] animate-float-slow"></div>
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-white/[0.04] rounded-full blur-[100px] animate-float-reverse"></div>
+        </div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:44px_44px]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000000_100%)] opacity-70"></div>
+      </div>
+      
       {/* Logo */}
       <div className="flex justify-center mb-4">
         <Logo className="h-12" />
@@ -456,7 +466,10 @@ const Auth = () => {
       
       {/* Auth container */}
       <div className="flex-1 flex flex-col items-center justify-center w-full max-w-md mx-auto">
-        <GlassCard variant="dark" className="w-full p-6 md:p-8">
+        <GlassCard 
+          variant="elevated" 
+          className="w-full p-6 md:p-8 backdrop-blur-xl bg-black/40 border border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.2)]"
+        >
           <AnimatePresence mode="wait">
             {renderForm()}
           </AnimatePresence>

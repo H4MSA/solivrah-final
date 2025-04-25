@@ -1,603 +1,395 @@
 
-import React, { useState } from "react";
-import { GlassCard } from "@/components/GlassCard";
-import { Star, Trophy, CheckCircle, Calendar, Download, Share2, Settings, Bell, Activity, Lock, Info, LogOut, RefreshCw, Users, Camera } from "lucide-react";
-import { useApp } from "@/context/AppContext";
-import { ProfileReset } from "@/components/ProfileReset";
-import { ProfileAchievements } from "@/components/ProfileAchievements";
-import { ProfileStats } from "@/components/ProfileStats";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { CameraUpload } from "@/components/CameraUpload";
-
-const ProfileSection = ({
-  title,
-  children
-}: {
-  title: string;
-  children: React.ReactNode;
-}) => <div className="mb-6">
-    <h2 className="text-lg font-semibold mb-3">{title}</h2>
-    {children}
-  </div>;
-
-const StatCard = ({
-  icon,
-  value,
-  label
-}: {
-  icon: React.ReactNode;
-  value: number;
-  label: string;
-}) => <div className="flex-1 bg-[#1A1A1A]/80 backdrop-blur-xl border border-white/10 rounded-xl p-3 flex flex-col items-center justify-center gap-1 transition-all hover:bg-[#222222]/80 hover:border-white/15 transform-gpu" style={{
-  transform: 'translateZ(5px)'
-}}>
-    <div className="text-2xl text-white mb-1">{icon}</div>
-    <div className="text-2xl font-semibold">{value}</div>
-    <div className="text-xs text-white/70">{label}</div>
-  </div>;
-
-const Badge = ({
-  icon,
-  label,
-  isEarned = true
-}: {
-  icon: React.ReactNode;
-  label: string;
-  isEarned?: boolean;
-}) => <div className={`flex flex-col items-center gap-1 ${!isEarned ? 'opacity-40' : ''}`}>
-    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${isEarned ? 'bg-[#222222] border border-white/15' : 'bg-[#1A1A1A] border border-white/5'}`}>
-      {icon}
-    </div>
-    <span className="text-xs font-medium">{label}</span>
-  </div>;
-
-const ActionButton = ({
-  icon,
-  label,
-  onClick
-}: {
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-}) => <button className="flex-1 bg-[#1A1A1A]/70 backdrop-blur-xl border border-white/10 rounded-xl p-3 flex flex-col items-center justify-center gap-1 hover:bg-[#222222]/80 hover:border-white/15 active:scale-[0.98] transition-all transform-gpu touch-manipulation" onClick={onClick} style={{
-  transform: 'translateZ(4px)'
-}}>
-    <div className="text-xl text-white">{icon}</div>
-    <span className="text-xs font-medium">{label}</span>
-  </button>;
-
-const SettingsItem = ({
-  icon,
-  label,
-  value,
-  onClick
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value?: string;
-  onClick: () => void;
-}) => <div className="py-3 px-4 rounded-xl bg-[#1A1A1A]/70 backdrop-blur-xl border border-white/10 flex items-center justify-between hover:bg-[#222222]/80 hover:border-white/15 active:scale-[0.98] transition-all cursor-pointer transform-gpu mb-2 touch-manipulation" onClick={onClick} style={{
-  transform: 'translateZ(4px)'
-}}>
-    <div className="flex items-center gap-3">
-      <div className="text-white">{icon}</div>
-      <span className="font-medium">{label}</span>
-    </div>
-    {value && <div className="text-sm text-white/70">{value}</div>}
-  </div>;
-
-const TabButton = ({
-  label,
-  active,
-  onClick
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) => <button className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${active ? 'bg-[#222222] text-white' : 'bg-transparent text-white/60 hover:text-white/80'}`} onClick={onClick}>
-    {label}
-  </button>;
-
-const CalendarModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const { streak } = useApp();
-  const currentDate = new Date();
-  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-
-  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-2xl p-6 shadow-xl">
-        <DialogHeader>
-          <DialogTitle className="text-xl">Activity Calendar</DialogTitle>
-          <DialogDescription className="text-white/70">
-            View your daily activity and streaks
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="mt-4">
-          <div className="grid grid-cols-7 gap-1 mb-2">
-            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-              <div key={i} className="text-center text-xs text-white/50">{day}</div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-7 gap-1">
-            {days.map((day) => {
-              const isToday = day === currentDate.getDate();
-              const isActive = day <= currentDate.getDate();
-
-              return (
-                <div 
-                  key={day}
-                  className={`
-                    aspect-square flex items-center justify-center rounded-full text-sm
-                    ${isToday ? 'bg-white text-black font-bold' : 
-                      isActive ? 'bg-[#333333] text-white' : 'bg-[#222222]/50 text-white/30'}
-                  `}
-                >
-                  {day}
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="mt-6 flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-white"></div>
-              <span>Today</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[#333333]"></div>
-              <span>Active Day</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Star size={12} className="text-yellow-400" />
-              <span>{streak} Day Streak</span>
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-const ThemeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const { selectedTheme, setSelectedTheme } = useApp();
-
-  const themes = [
-    { 
-      id: "Discipline", 
-      name: "Discipline", 
-      description: "Focus on building daily habits and routines",
-      goal: "Complete 3 tasks from your daily routine",
-      reward: 100
-    },
-    { 
-      id: "Focus", 
-      name: "Focus", 
-      description: "Eliminate distractions and improve concentration",
-      goal: "Work for 25 minutes without interruption",
-      reward: 150
-    },
-    { 
-      id: "Resilience", 
-      name: "Resilience", 
-      description: "Bounce back from setbacks and build mental toughness",
-      goal: "Document a challenge you overcame today",
-      reward: 200
-    },
-    { 
-      id: "Wildcards", 
-      name: "Creative", 
-      description: "Think outside the box and spark creativity",
-      goal: "Try something new and document the experience",
-      reward: 125
-    }
-  ];
-
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-2xl p-6 shadow-xl">
-        <DialogHeader>
-          <DialogTitle className="text-xl">Theme Preferences</DialogTitle>
-          <DialogDescription className="text-white/70">
-            Choose your focus area
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-3 mt-4">
-          {themes.map((theme) => (
-            <div 
-              key={theme.id}
-              className={`p-4 rounded-xl cursor-pointer transition-all duration-300 ${
-                selectedTheme === theme.id 
-                  ? 'bg-[#333333] border-2 border-white/20' 
-                  : 'bg-[#222222]/50 border border-white/10 hover:bg-[#222222]'
-              }`}
-              onClick={() => {
-                setSelectedTheme(theme.id);
-                onClose();
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium">{theme.name}</h3>
-                {selectedTheme === theme.id && (
-                  <div className="w-4 h-4 rounded-full bg-white"></div>
-                )}
-              </div>
-              <p className="text-sm text-white/70 mt-1">{theme.description}</p>
-            </div>
-          ))}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-const ExportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const { toast } = useToast();
-  const { xp, streak, user } = useApp();
-
-  const handleExport = (format: 'pdf' | 'csv' | 'json') => {
-    toast({
-      title: "Export Initiated",
-      description: `Your data is being exported as ${format.toUpperCase()}`,
-    });
-
-    setTimeout(() => {
-      toast({
-        title: "Export Complete",
-        description: "Your data has been exported successfully",
-      });
-      onClose();
-    }, 1500);
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-2xl p-6 shadow-xl">
-        <DialogHeader>
-          <DialogTitle className="text-xl">Export Your Data</DialogTitle>
-          <DialogDescription className="text-white/70">
-            Download your progress and achievements
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-3 mt-4">
-          <button 
-            className="w-full p-4 rounded-xl bg-[#222222]/80 border border-white/10 text-left hover:bg-[#222222] transition-all"
-            onClick={() => handleExport('pdf')}
-          >
-            <div className="font-medium">Progress Report (PDF)</div>
-            <div className="text-sm text-white/70">Complete report with statistics and achievements</div>
-          </button>
-
-          <button 
-            className="w-full p-4 rounded-xl bg-[#222222]/80 border border-white/10 text-left hover:bg-[#222222] transition-all"
-            onClick={() => handleExport('csv')}
-          >
-            <div className="font-medium">Raw Data (CSV)</div>
-            <div className="text-sm text-white/70">Spreadsheet format for your own analysis</div>
-          </button>
-
-          <button 
-            className="w-full p-4 rounded-xl bg-[#222222]/80 border border-white/10 text-left hover:bg-[#222222] transition-all"
-            onClick={() => handleExport('json')}
-          >
-            <div className="font-medium">Complete Backup (JSON)</div>
-            <div className="text-sm text-white/70">Full data backup for safekeeping</div>
-          </button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-const ShareModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const { toast } = useToast();
-
-  const handleShare = (platform: string) => {
-    toast({
-      title: "Shared Successfully",
-      description: `Your progress has been shared on ${platform}`,
-    });
-    onClose();
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-2xl p-6 shadow-xl">
-        <DialogHeader>
-          <DialogTitle className="text-xl">Share Your Progress</DialogTitle>
-          <DialogDescription className="text-white/70">
-            Let others know about your journey
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="grid grid-cols-2 gap-3 mt-4">
-          <button 
-            className="p-4 rounded-xl bg-[#1877F2] text-white flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-all"
-            onClick={() => handleShare('Facebook')}
-          >
-            <span className="text-xl">f</span>
-            <span>Facebook</span>
-          </button>
-
-          <button 
-            className="p-4 rounded-xl bg-[#1DA1F2] text-white flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-all"
-            onClick={() => handleShare('Twitter')}
-          >
-            <span className="text-xl">𝕏</span>
-            <span>Twitter</span>
-          </button>
-
-          <button 
-            className="p-4 rounded-xl bg-[#0A66C2] text-white flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-all"
-            onClick={() => handleShare('LinkedIn')}
-          >
-            <span className="text-xl">in</span>
-            <span>LinkedIn</span>
-          </button>
-
-          <button 
-            className="p-4 rounded-xl bg-[#25D366] text-white flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-all"
-            onClick={() => handleShare('WhatsApp')}
-          >
-            <span className="text-xl">W</span>
-            <span>WhatsApp</span>
-          </button>
-        </div>
-
-        <div className="mt-3">
-          <button 
-            className="w-full p-4 rounded-xl border border-white/10 flex items-center justify-center gap-2 hover:bg-white/5 transition-all"
-            onClick={() => {
-              navigator.clipboard.writeText("https://app.solivrah.com/share/" + Math.random().toString(36).substring(2, 8));
-              toast({
-                title: "Link Copied",
-                description: "Share link has been copied to clipboard",
-              });
-              onClose();
-            }}
-          >
-            <span>Copy Link</span>
-          </button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
+import React, { useState } from 'react';
+import { useApp } from '@/context/AppContext';
+import { GlassCard } from '@/components/GlassCard';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { motion } from 'framer-motion';
+import { Camera, Settings, Edit, LogOut, UserCircle, Award, ChevronRight, Send, Moon, Sun, BarChart } from 'lucide-react';
+import { ProfileReset } from '@/components/ProfileReset';
+import { ProfileStats } from '@/components/ProfileStats';
+import { ProfileAchievements } from '@/components/ProfileAchievements';
+import { useToast } from '@/hooks/use-toast';
+import { CameraUpload } from '@/components/CameraUpload';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Profile = () => {
-  const {
-    streak,
-    xp,
-    user,
-    isGuest,
-    signOut,
-    selectedTheme
-  } = useApp();
-  const navigate = useNavigate();
+  const { user, xp, streak, signOut, selectedTheme, setSelectedTheme, resetProfile } = useApp();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('overview');
-  const [calendarOpen, setCalendarOpen] = useState(false);
-  const [themeOpen, setThemeOpen] = useState(false);
-  const [exportOpen, setExportOpen] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
-
-  const level = Math.floor(xp / 1000) + 1;
-  const progress = xp % 1000 / 1000 * 100;
-  const displayName = user?.user_metadata?.username || user?.email?.split('@')[0] || (isGuest ? "Guest User" : "User");
-  const completedQuests = 0; // This would come from your state
-
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/auth');
-    toast({
-      title: "Logged Out",
-      description: "You have been successfully logged out",
-    });
+  const [activeTab, setActiveTab] = useState("stats");
+  const [showProfileUpload, setShowProfileUpload] = useState(false);
+  const [showBannerUpload, setShowBannerUpload] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [bannerImageUrl, setBannerImageUrl] = useState<string | null>(null);
+  const [isResetting, setIsResetting] = useState(false);
+  
+  // Profile themes
+  const themes = [
+    { id: "Discipline", name: "Discipline", color: "from-red-400/20 to-red-700/10" },
+    { id: "Focus", name: "Focus", color: "from-purple-400/20 to-purple-700/10" },
+    { id: "Resilience", name: "Resilience", color: "from-green-400/20 to-green-700/10" },
+    { id: "Wildcards", name: "Wildcards", color: "from-amber-400/20 to-amber-700/10" }
+  ];
+  
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed out successfully",
+        description: "We hope to see you again soon!",
+      });
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast({
+        variant: "destructive",
+        title: "Error signing out",
+        description: "There was a problem signing you out. Please try again.",
+      });
+    }
   };
 
-  const toggleNotifications = () => {
-    toast({
-      title: "Notifications Updated",
-      description: "Your notification preferences have been updated",
-    });
+  const handleResetProfile = async () => {
+    setIsResetting(true);
+    try {
+      await resetProfile();
+      toast({
+        title: "Profile reset successful",
+        description: "Your progress has been reset.",
+      });
+    } catch (error) {
+      console.error("Error resetting profile:", error);
+      toast({
+        variant: "destructive",
+        title: "Reset failed",
+        description: "There was a problem resetting your profile.",
+      });
+    } finally {
+      setIsResetting(false);
+    }
+  };
+  
+  const handleProfileImageChange = async (file: File | null) => {
+    if (!file || !user) return;
+    
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `profile-images/${user.id}-${Date.now()}.${fileExt}`;
+      
+      // Upload image to storage
+      const { error: uploadError } = await supabase.storage
+        .from('profile-images')
+        .upload(filePath, file);
+        
+      if (uploadError) throw uploadError;
+      
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('profile-images')
+        .getPublicUrl(filePath);
+        
+      setProfileImageUrl(urlData.publicUrl);
+      
+      toast({
+        title: "Profile image updated",
+        description: "Your new profile image has been set.",
+      });
+      
+      setShowProfileUpload(false);
+    } catch (error) {
+      console.error("Error uploading profile image:", error);
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: "There was a problem uploading your image.",
+      });
+    }
+  };
+  
+  const handleBannerImageChange = async (file: File | null) => {
+    if (!file || !user) return;
+    
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `banner-images/${user.id}-${Date.now()}.${fileExt}`;
+      
+      // Upload image to storage
+      const { error: uploadError } = await supabase.storage
+        .from('profile-images')
+        .upload(filePath, file);
+        
+      if (uploadError) throw uploadError;
+      
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('profile-images')
+        .getPublicUrl(filePath);
+        
+      setBannerImageUrl(urlData.publicUrl);
+      
+      toast({
+        title: "Banner image updated",
+        description: "Your new banner image has been set.",
+      });
+      
+      setShowBannerUpload(false);
+    } catch (error) {
+      console.error("Error uploading banner image:", error);
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: "There was a problem uploading your image.",
+      });
+    }
   };
 
-  const openActivityLog = () => {
-    toast({
-      title: "Activity Log",
-      description: "Your activity history will be displayed here",
-    });
+  // Animation variants for sections
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
   };
-
-  const openPrivacySettings = () => {
-    toast({
-      title: "Privacy Settings",
-      description: "Privacy and security settings will be displayed here",
-    });
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 300, damping: 24 }
+    }
   };
-
-  const openAboutPage = () => {
-    toast({
-      title: "About Solivrah",
-      description: "Information about Solivrah and its mission",
-    });
-  };
-
-  return <div className="min-h-screen pb-[calc(24px+env(safe-area-inset-bottom))] text-white">
-      <div className="p-4 pt-[calc(env(safe-area-inset-top))] space-y-5 animate-fade-in">
-        <div className="relative mb-20 animate-fade-in">
-          {/* Banner */}
-          <CameraUpload 
-            type="banner"
-            onCapture={(file) => {
-              // Handle banner image upload
-              console.log("Banner image:", file);
-              // TODO: Implement banner image upload to storage
-            }}
-          />
-
-          {/* Profile Info Overlay */}
-          <div className="absolute -bottom-16 left-0 right-0 px-4">
-            <div className="flex items-end gap-4">
-              {/* Profile Picture */}
-              <CameraUpload 
-                onCapture={(file) => {
-                  // Handle profile image upload
-                  console.log("Profile image:", file);
-                  // TODO: Implement profile image upload to storage
-                }}
-              />
-
-              {/* User Info */}
-              <div className="flex-1 mb-2">
-                <h1 className="text-2xl font-bold text-white">{displayName}</h1>
-                <div className="flex items-center gap-3 text-white/70">
-                  <div className="flex items-center gap-1">
-                    <Star size={14} className="text-yellow-500" />
-                    <span>{streak} day streak</span>
-                  </div>
-                  <div className="w-1 h-1 rounded-full bg-white/30"></div>
-                  <div className="flex items-center gap-1">
-                    <Trophy size={14} className="text-white/70" />
-                    <span>Level {level}</span>
-                  </div>
+  
+  return (
+    <div className="pb-20">
+      {/* Profile Header */}
+      <div className="profile-header relative h-48 overflow-hidden rounded-xl border border-white/10">
+        {/* Banner Image or Gradient */}
+        <div className={`absolute inset-0 bg-gradient-to-tr ${
+          themes.find(t => t.id === selectedTheme)?.color || "from-purple-400/20 to-purple-700/10"
+        }`}>
+          {bannerImageUrl ? (
+            <img
+              src={bannerImageUrl}
+              alt="Profile Banner"
+              className="w-full h-full object-cover opacity-70"
+            />
+          ) : (
+            <div className="w-full h-full">
+              <div className="absolute inset-0 bg-grid-white/[0.02]"></div>
+              
+              {/* Theme-specific decorative elements */}
+              {selectedTheme === "Discipline" && (
+                <div className="absolute inset-0 flex items-center justify-center opacity-10">
+                  <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
                 </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2 mb-2">
-                <button 
-                  onClick={() => setThemeOpen(true)}
-                  className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
-                >
-                  <Settings size={18} />
-                </button>
-                <button 
-                  className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
-                >
-                  <Camera size={18} />
-                </button>
-              </div>
+              )}
+              
+              {selectedTheme === "Focus" && (
+                <div className="absolute inset-0 flex items-center justify-center opacity-10">
+                  <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                  </svg>
+                </div>
+              )}
+              
+              {selectedTheme === "Resilience" && (
+                <div className="absolute inset-0 flex items-center justify-center opacity-10">
+                  <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                  </svg>
+                </div>
+              )}
+              
+              {selectedTheme === "Wildcards" && (
+                <div className="absolute inset-0 flex items-center justify-center opacity-10">
+                  <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                </div>
+              )}
             </div>
-          </div>
+          )}
         </div>
-
-        <div className="flex gap-2 border-b border-white/10 pb-2">
-          <TabButton label="Overview" active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} />
-          <TabButton label="Achievements" active={activeTab === 'achievements'} onClick={() => setActiveTab('achievements')} />
-          <TabButton label="Stats" active={activeTab === 'stats'} onClick={() => setActiveTab('stats')} />
+        
+        {/* Banner Overlay Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+        
+        {/* Edit Banner Button */}
+        <button
+          onClick={() => setShowBannerUpload(true)}
+          className="absolute top-4 right-4 bg-black/40 p-2 rounded-full backdrop-blur-sm border border-white/10 hover:bg-black/60 transition-all"
+        >
+          <Edit size={16} className="text-white" />
+        </button>
+        
+        {/* Profile Avatar Container */}
+        <div className="profile-avatar absolute -bottom-12 left-4 h-24 w-24 rounded-full border-4 border-black">
+          <Avatar className="h-full w-full">
+            {profileImageUrl ? (
+              <AvatarImage src={profileImageUrl} alt="Profile" className="object-cover" />
+            ) : (
+              <AvatarFallback className="bg-black text-white text-xl">
+                {user?.email?.charAt(0).toUpperCase() || <UserCircle size={28} />}
+              </AvatarFallback>
+            )}
+          </Avatar>
+          
+          {/* Edit Profile Photo Button */}
+          <button
+            onClick={() => setShowProfileUpload(true)}
+            className="absolute bottom-0 right-0 bg-black/80 p-1.5 rounded-full backdrop-blur-sm border border-white/10 hover:bg-black/60 transition-all"
+          >
+            <Camera size={14} className="text-white" />
+          </button>
         </div>
-
-        {activeTab === 'overview' && <>
-            <div className="flex gap-3">
-              <StatCard icon={<Star />} value={streak} label="Day Streak" />
-              <StatCard icon={<Trophy />} value={xp} label="Total XP" />
-              <StatCard icon={<CheckCircle />} value={completedQuests} label="Completed" />
-            </div>
-
-            <ProfileSection title="Level Progress">
-              <GlassCard variant="subtle" className="relative p-4">
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm text-white/70">Level {level}</span>
-                  <button className="p-1 bg-[#1A1A1A] rounded-full border border-white/10 hover:bg-[#222222] active:scale-95 transition-all">
-                    <RefreshCw size={14} />
-                  </button>
-                </div>
-
-                <div className="h-2.5 bg-[#111111] rounded-full overflow-hidden mb-2 border border-white/5">
-                  <div className="h-full bg-gradient-to-r from-white/80 to-white/70" style={{
-                width: `${progress}%`,
-                transition: 'width 1s ease-in-out'
-              }}></div>
-                </div>
-
-                <div className="text-xs text-white/70 text-right">
-                  {1000 - xp % 1000} XP to Level {level + 1}
+      </div>
+      
+      {/* Profile Header Info */}
+      <div className="mt-16 px-4 mb-6">
+        <h2 className="text-xl font-bold text-white">
+          {user?.email?.split('@')[0] || "Guest User"}
+        </h2>
+        <p className="text-white/60 text-sm mt-1">
+          {selectedTheme} Journey • {xp} XP
+        </p>
+      </div>
+      
+      {/* Profile Content */}
+      <Tabs defaultValue="stats" className="px-4">
+        <TabsList className="grid grid-cols-3 mb-6 bg-black/40 backdrop-blur-md border border-white/10 rounded-lg">
+          <TabsTrigger value="stats" className="data-[state=active]:bg-white/10">Stats</TabsTrigger>
+          <TabsTrigger value="achievements" className="data-[state=active]:bg-white/10">Achievements</TabsTrigger>
+          <TabsTrigger value="settings" className="data-[state=active]:bg-white/10">Settings</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="stats" className="mt-0">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div variants={itemVariants}>
+              <ProfileStats xp={xp} streak={streak} />
+            </motion.div>
+          </motion.div>
+        </TabsContent>
+        
+        <TabsContent value="achievements" className="mt-0">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div variants={itemVariants}>
+              <ProfileAchievements />
+            </motion.div>
+          </motion.div>
+        </TabsContent>
+        
+        <TabsContent value="settings" className="mt-0">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-4"
+          >
+            {/* Theme Selection */}
+            <motion.div variants={itemVariants}>
+              <GlassCard className="p-5">
+                <h3 className="text-lg font-medium text-white mb-4">Theme Preference</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {themes.map((theme) => (
+                    <button
+                      key={theme.id}
+                      onClick={() => setSelectedTheme(theme.id)}
+                      className={`p-4 rounded-xl transition-all flex items-center justify-center ${
+                        selectedTheme === theme.id 
+                          ? "bg-white text-black font-medium"
+                          : "bg-black/40 text-white/80 border border-white/10"
+                      }`}
+                    >
+                      {theme.name}
+                    </button>
+                  ))}
                 </div>
               </GlassCard>
-            </ProfileSection>
+            </motion.div>
 
-            <ProfileSection title="Badges">
-              <div className="flex justify-between mb-3">
-                <div className="grid grid-cols-4 gap-3">
-                  <Badge icon={<Trophy size={20} />} label="Early Adopter" />
-                  <Badge icon={<Star size={20} />} label="7-Day Streak" isEarned={false} />
-                  <Badge icon={<CheckCircle size={20} />} label="First Quest" isEarned={false} />
-                  <Badge icon={<Users size={20} />} label="Social" isEarned={false} />
+            {/* Account Section */}
+            <motion.div variants={itemVariants}>
+              <GlassCard className="p-5">
+                <h3 className="text-lg font-medium text-white mb-4">Account</h3>
+                <div className="space-y-3">
+                  {user ? (
+                    <>
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-white/5">
+                        <div className="flex items-center">
+                          <Send size={18} className="text-white/70 mr-3" />
+                          <span className="text-white/90">Email</span>
+                        </div>
+                        <span className="text-white/60 text-sm max-w-[180px] truncate">{user.email}</span>
+                      </div>
+                      
+                      <Button 
+                        onClick={handleSignOut}
+                        className="w-full bg-[#1A1A1A] text-white hover:bg-[#2a2a2a] focus:ring-white/10"
+                      >
+                        <LogOut size={16} className="mr-2" />
+                        Sign Out
+                      </Button>
+                    </>
+                  ) : (
+                    <div className="p-3 rounded-lg bg-white/5">
+                      <p className="text-white/70">Currently in guest mode</p>
+                    </div>
+                  )}
                 </div>
-              </div>
+              </GlassCard>
+            </motion.div>
+            
+            {/* Reset Profile Section */}
+            <motion.div variants={itemVariants}>
+              <ProfileReset onReset={handleResetProfile} isLoading={isResetting} />
+            </motion.div>
+          </motion.div>
+        </TabsContent>
+      </Tabs>
 
-              <div className="flex gap-3 py-[21px]">
-                <ActionButton icon={<Calendar size={20} />} label="Calendar" onClick={() => setCalendarOpen(true)} />
-                <ActionButton icon={<Download size={20} />} label="Export" onClick={() => setExportOpen(true)} />
-                <ActionButton icon={<Share2 size={20} />} label="Share" onClick={() => setShareOpen(true)} />
-              </div>
-            </ProfileSection>
-
-            <ProfileSection title="Settings">
-              <div className="space-y-2">
-                <SettingsItem 
-                  icon={<Settings size={18} />} 
-                  label="Theme Preferences" 
-                  value={selectedTheme} 
-                  onClick={() => setThemeOpen(true)} 
-                />
-
-                <SettingsItem 
-                  icon={<Bell size={18} />} 
-                  label="Notifications" 
-                  value="On" 
-                  onClick={toggleNotifications} 
-                />
-
-                <SettingsItem 
-                  icon={<Activity size={18} />} 
-                  label="Activity Log" 
-                  onClick={openActivityLog} 
-                />
-
-                <SettingsItem 
-                  icon={<Lock size={18} />} 
-                  label="Privacy & Security" 
-                  onClick={openPrivacySettings} 
-                />
-
-                <SettingsItem 
-                  icon={<Info size={18} />} 
-                  label="About Solivrah" 
-                  onClick={openAboutPage} 
-                />
-
-                <button 
-                  className="w-full py-3 rounded-xl bg-[#1A1A1A]/80 border border-white/10 text-white flex items-center justify-center gap-2 hover:bg-[#222222]/80 active:scale-[0.98] transition-all duration-300 mt-5"
-                  onClick={handleLogout}
-                >
-                  <LogOut size={18} />
-                  <span>Log Out</span>
-                </button>
-
-                <ProfileReset />
-              </div>
-            </ProfileSection>
-          </>}
-
-        {activeTab === 'achievements' && <ProfileAchievements />}
-
-        {activeTab === 'stats' && <ProfileStats />}
-      </div>
-
-      <CalendarModal isOpen={calendarOpen} onClose={() => setCalendarOpen(false)} />
-      <ThemeModal isOpen={themeOpen} onClose={() => setThemeOpen(false)} />
-      <ExportModal isOpen={exportOpen} onClose={() => setExportOpen(false)} />
-      <ShareModal isOpen={shareOpen} onClose={() => setShareOpen(false)} />
-    </div>;
+      {/* Profile Image Upload Modal */}
+      {showProfileUpload && (
+        <CameraUpload
+          onClose={() => setShowProfileUpload(false)}
+          onCapture={handleProfileImageChange}
+          title="Update Profile Photo"
+        />
+      )}
+      
+      {/* Banner Image Upload Modal */}
+      {showBannerUpload && (
+        <CameraUpload
+          onClose={() => setShowBannerUpload(false)}
+          onCapture={handleBannerImageChange}
+          title="Update Banner Image"
+          aspectRatio="16:9"
+        />
+      )}
+    </div>
+  );
 };
 
 export default Profile;

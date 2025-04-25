@@ -1,265 +1,278 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Camera, ImageIcon, X, Upload } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, Camera, Upload, Check } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { GlassCard } from '@/components/GlassCard';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 
 interface CameraUploadProps {
-  onCapture: (file: File) => void;
-  onClose?: () => void;
+  onClose: () => void;
+  onCapture: (file: File | null) => void;
   title?: string;
-  type?: 'banner' | 'profile';
-  currentImage?: string;
+  aspectRatio?: string; // e.g. "1:1" or "16:9"
 }
 
-export const CameraUpload = ({ 
-  onCapture, 
-  onClose, 
-  title = "Take a photo", 
-  type = 'profile', 
-  currentImage 
-}: CameraUploadProps) => {
-  const [error, setError] = useState<string>('');
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | undefined>(currentImage);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+export const CameraUpload: React.FC<CameraUploadProps> = ({
+  onClose,
+  onCapture,
+  title = "Take Photo",
+  aspectRatio = "1:1"
+}) => {
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [isCapturing, setIsCapturing] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
-  const [isCameraActive, setIsCameraActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-
-  useEffect(() => {
-    return () => {
-      // Clean up stream when component unmounts
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, [stream]);
-
-  const checkCameraPermission = async () => {
+  
+  const aspectRatioValue = aspectRatio === "16:9" ? 9/16 : 1;
+  
+  const startCamera = async () => {
+    setIsCapturing(true);
     try {
-      // First check if media devices are supported
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setError('Camera access is not supported in your browser');
-        setHasPermission(false);
-        return;
+        throw new Error("Camera access not supported by your browser");
       }
       
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: {
-          facingMode: 'environment', // Prefer back camera on mobile devices
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { 
+          facingMode: "environment",
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
       });
       
-      setHasPermission(true);
-      setStream(mediaStream);
-      
       if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        setIsCameraActive(true);
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
       }
-      
-      setError('');
-    } catch (err: any) {
-      console.error('Camera permission error:', err);
-      
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        setError('Camera permission denied. Please enable camera access in your browser settings.');
-      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-        setError('No camera found. Please make sure your device has a camera.');
-      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
-        setError('Camera is already in use by another application.');
-      } else if (err.name === 'OverconstrainedError' || err.name === 'ConstraintNotSatisfiedError') {
-        setError('Camera constraints not satisfied. Please try again with different settings.');
-      } else {
-        setError(`Camera error: ${err.message || 'Unknown error'}`);
-      }
-      
-      setHasPermission(false);
+    } catch (error) {
+      console.error("Error accessing camera:", error);
+      toast({
+        variant: "destructive",
+        title: "Camera Error",
+        description: "Unable to access your camera. Check permissions or try uploading a file instead."
+      });
+      setIsCapturing(false);
     }
   };
-
+  
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+      tracks.forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setIsCapturing(false);
+  };
+  
   const takePicture = () => {
-    if (!canvasRef.current || !videoRef.current || !stream) return;
-    
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    
-    // Set canvas size to match video dimensions
-    const { videoWidth, videoHeight } = video;
-    canvas.width = videoWidth;
-    canvas.height = videoHeight;
-    
-    // Draw video frame to canvas and convert to file
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
-    
-    // Convert canvas to blob
-    canvas.toBlob((blob) => {
-      if (blob) {
-        const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
-        setPreviewUrl(URL.createObjectURL(blob));
-        onCapture(file);
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      
+      // Set canvas dimensions to match video
+      const videoAspectRatio = video.videoWidth / video.videoHeight;
+      let width = video.videoWidth;
+      let height = video.videoHeight;
+      
+      // Adjust canvas size based on desired aspect ratio
+      if (aspectRatio === "1:1") {
+        // For square, use the smaller dimension
+        const size = Math.min(width, height);
+        width = size;
+        height = size;
+      }
+      // For 16:9, we'll use the video's native ratio if it's close enough
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      // Calculate centering for crop
+      const sx = (video.videoWidth - width) / 2;
+      const sy = (video.videoHeight - height) / 2;
+      
+      const context = canvas.getContext('2d');
+      if (context) {
+        // Draw the current video frame onto the canvas with cropping
+        context.drawImage(
+          video, 
+          sx, sy, width, height, // Source crop
+          0, 0, width, height // Destination (no crop)
+        );
         
-        // Stop camera
+        // Convert to data URL
+        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        setCapturedImage(imageDataUrl);
         stopCamera();
       }
-    }, 'image/jpeg', 0.8);
-  };
-
-  const stopCamera = () => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
-      setIsCameraActive(false);
     }
   };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setError('');
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      setError('Please select an image file');
-      return;
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setCapturedImage(event.target.result as string);
+        }
+      };
+      
+      reader.readAsDataURL(file);
     }
-
-    setPreviewUrl(URL.createObjectURL(file));
-    onCapture(file);
   };
-
-  const handleCameraClick = () => {
-    if (isCameraActive) {
-      takePicture();
-    } else if (hasPermission === true) {
-      checkCameraPermission(); // Re-initialize camera
-    } else if (hasPermission === false) {
-      // If permission was previously denied, suggest file upload instead
-      toast({
-        title: "Camera access denied",
-        description: "Using file upload instead. Please allow camera access in your settings for direct capture.",
+  
+  const handleConfirm = () => {
+    if (!capturedImage) return;
+    
+    // Convert data URL to File object
+    fetch(capturedImage)
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], "captured-image.jpg", { type: "image/jpeg" });
+        onCapture(file);
+      })
+      .catch(err => {
+        console.error("Error converting image:", err);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "There was a problem processing your image."
+        });
       });
-      fileInputRef.current?.click();
-    } else {
-      checkCameraPermission();
-    }
   };
-
-  const handleFileUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-
+  
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="bg-[#121212] border border-white/10 rounded-2xl p-4 w-full max-w-sm">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-white">{title}</h3>
-          {onClose && (
-            <button onClick={onClose} className="p-1 rounded-full bg-[#222] hover:bg-[#333] transition-colors">
-              <X size={20} />
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-5"
+    >
+      <GlassCard className="w-full max-w-md overflow-hidden">
+        <div className="p-5 border-b border-white/10">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-medium text-white">{title}</h2>
+            <button 
+              onClick={onClose}
+              className="p-2 rounded-full hover:bg-white/10"
+            >
+              <X size={20} className="text-white" />
             </button>
-          )}
+          </div>
         </div>
         
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="hidden"
-          ref={fileInputRef}
-        />
-        
-        {isCameraActive ? (
-          <div className="relative w-full aspect-square rounded-xl overflow-hidden mb-4">
-            <video 
-              ref={videoRef} 
-              autoPlay 
-              playsInline 
+        <div className={`aspect-${aspectRatio} bg-black relative overflow-hidden`}>
+          {/* Canvas for taking snapshot (hidden) */}
+          <canvas ref={canvasRef} className="hidden"></canvas>
+          
+          {capturedImage ? (
+            // Captured image preview
+            <img 
+              src={capturedImage} 
+              alt="Captured" 
               className="w-full h-full object-cover"
             />
-            <canvas ref={canvasRef} className="hidden" />
-            <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-              <button 
-                onClick={takePicture} 
-                className="bg-white rounded-full p-3 shadow-lg"
-              >
-                <div className="w-12 h-12 rounded-full border-4 border-white" />
-              </button>
+          ) : isCapturing ? (
+            // Live camera preview
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            // Placeholder when not capturing
+            <div className="w-full h-full flex items-center justify-center bg-[#121212]">
+              <Camera size={64} className="text-white/30" />
             </div>
-          </div>
-        ) : previewUrl ? (
-          <div className="relative w-full aspect-square rounded-xl overflow-hidden mb-4">
-            <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-              <button 
-                onClick={handleCameraClick} 
-                className="bg-white/20 backdrop-blur-sm p-3 rounded-full"
-              >
-                <Camera className="w-6 h-6 text-white" />
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="mb-4 space-y-4">
-            <button 
-              onClick={handleCameraClick}
-              className="w-full aspect-square rounded-xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-3 hover:border-white/40 transition-all"
-            >
-              <Camera className="w-10 h-10 text-white/60" />
-              <span className="text-white/60">Tap to take a photo</span>
-            </button>
-            
-            <div className="relative flex items-center">
-              <div className="flex-grow h-px bg-white/20"></div>
-              <span className="mx-4 text-white/60 text-sm">OR</span>
-              <div className="flex-grow h-px bg-white/20"></div>
-            </div>
-            
-            <button 
-              onClick={handleFileUploadClick}
-              className="w-full py-4 rounded-xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-2 hover:border-white/40 transition-all"
-            >
-              <Upload className="w-6 h-6 text-white/60" />
-              <span className="text-white/60 text-sm">Upload from device</span>
-            </button>
-          </div>
-        )}
-        
-        {error && (
-          <p className="text-red-500 text-sm mb-4">{error}</p>
-        )}
-        
-        <div className="flex gap-3">
-          {onClose && (
-            <button 
-              onClick={() => {
-                stopCamera();
-                onClose();
-              }}
-              className="flex-1 py-2.5 bg-[#222] text-white rounded-xl border border-white/10 hover:bg-[#333] transition-colors"
-            >
-              Cancel
-            </button>
           )}
-          {previewUrl && (
-            <button 
-              onClick={() => {
-                stopCamera();
-                if (onClose) onClose();
-              }}
-              className="flex-1 py-2.5 bg-white text-black rounded-xl font-medium"
-            >
-              Use Photo
-            </button>
+          
+          {/* Camera grid overlay */}
+          {isCapturing && !capturedImage && (
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="w-full h-full grid grid-cols-3 grid-rows-3">
+                {[...Array(9)].map((_, i) => (
+                  <div key={i} className="border border-white/20"></div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
-      </div>
-    </div>
+        
+        <div className="p-5 space-y-4">
+          {capturedImage ? (
+            // Controls for captured image
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => {
+                  setCapturedImage(null);
+                  startCamera();
+                }}
+                variant="outline"
+                className="flex-1 bg-white/5 hover:bg-white/10 border-white/10 text-white"
+              >
+                Retake
+              </Button>
+              <Button 
+                onClick={handleConfirm}
+                className="flex-1 bg-white text-black hover:bg-white/90"
+              >
+                <Check size={18} className="mr-2" />
+                Confirm
+              </Button>
+            </div>
+          ) : (
+            // Controls for camera/upload
+            <div className="flex gap-3">
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                variant="outline"
+                className="flex-1 bg-white/5 hover:bg-white/10 border-white/10 text-white"
+              >
+                <Upload size={18} className="mr-2" />
+                Upload
+              </Button>
+              
+              {!isCapturing ? (
+                <Button 
+                  onClick={startCamera}
+                  className="flex-1 bg-white text-black hover:bg-white/90"
+                >
+                  <Camera size={18} className="mr-2" />
+                  Use Camera
+                </Button>
+              ) : (
+                <Button 
+                  onClick={takePicture}
+                  className="flex-1 bg-white text-black hover:bg-white/90"
+                >
+                  <Camera size={18} className="mr-2" />
+                  Capture
+                </Button>
+              )}
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </div>
+          )}
+          
+          <p className="text-white/50 text-xs text-center">
+            {capturedImage 
+              ? "You can confirm or retake the photo"
+              : "Take a photo or upload from your device"}
+          </p>
+        </div>
+      </GlassCard>
+    </motion.div>
   );
 };
