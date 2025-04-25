@@ -76,8 +76,17 @@ export const GlassCard: React.FC<GlassCardProps> = ({
     setIsPressed(false);
   };
 
-  // Fix: properly type the motion.div props
-  const motionProps: any = {
+  // Fix the type issues with motion.div props
+  const motionProps: {
+    initial: boolean;
+    style: React.CSSProperties;
+    animate: Record<string, any>;
+    transition: {
+      type: string;
+      stiffness: number;
+      damping: number;
+    };
+  } = {
     initial: false,
     style: {
       boxShadow: getDepthStyle(),

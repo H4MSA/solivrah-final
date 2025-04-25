@@ -142,7 +142,6 @@ const Profile = () => {
     }
   };
 
-  // Animation variants for sections
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -164,9 +163,7 @@ const Profile = () => {
   
   return (
     <div className="pb-20">
-      {/* Profile Header */}
       <div className="profile-header relative h-48 overflow-hidden rounded-xl border border-white/10">
-        {/* Banner Image or Gradient */}
         <div className={`absolute inset-0 bg-gradient-to-tr ${
           themes.find(t => t.id === selectedTheme)?.color || "from-purple-400/20 to-purple-700/10"
         }`}>
@@ -180,7 +177,6 @@ const Profile = () => {
             <div className="w-full h-full">
               <div className="absolute inset-0 bg-grid-white/[0.02]"></div>
               
-              {/* Theme-specific decorative elements */}
               {selectedTheme === "Discipline" && (
                 <div className="absolute inset-0 flex items-center justify-center opacity-10">
                   <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white">
@@ -225,10 +221,8 @@ const Profile = () => {
           )}
         </div>
         
-        {/* Banner Overlay Gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
         
-        {/* Edit Banner Button */}
         <button
           onClick={() => setShowBannerUpload(true)}
           className="absolute top-4 right-4 bg-black/40 p-2 rounded-full backdrop-blur-sm border border-white/10 hover:bg-black/60 transition-all"
@@ -236,7 +230,6 @@ const Profile = () => {
           <Edit size={16} className="text-white" />
         </button>
         
-        {/* Profile Avatar Container */}
         <div className="profile-avatar absolute -bottom-12 left-4 h-24 w-24 rounded-full border-4 border-black">
           <Avatar className="h-full w-full">
             {profileImageUrl ? (
@@ -248,7 +241,6 @@ const Profile = () => {
             )}
           </Avatar>
           
-          {/* Edit Profile Photo Button */}
           <button
             onClick={() => setShowProfileUpload(true)}
             className="absolute bottom-0 right-0 bg-black/80 p-1.5 rounded-full backdrop-blur-sm border border-white/10 hover:bg-black/60 transition-all"
@@ -258,7 +250,6 @@ const Profile = () => {
         </div>
       </div>
       
-      {/* Profile Header Info */}
       <div className="mt-16 px-4 mb-6">
         <h2 className="text-xl font-bold text-white">
           {user?.email?.split('@')[0] || "Guest User"}
@@ -268,7 +259,6 @@ const Profile = () => {
         </p>
       </div>
       
-      {/* Profile Content */}
       <Tabs defaultValue="stats" className="px-4">
         <TabsList className="grid grid-cols-3 mb-6 bg-black/40 backdrop-blur-md border border-white/10 rounded-lg">
           <TabsTrigger value="stats" className="data-[state=active]:bg-white/10">Stats</TabsTrigger>
@@ -283,7 +273,7 @@ const Profile = () => {
             animate="visible"
           >
             <motion.div variants={itemVariants}>
-              <ProfileStats xp={xp} streak={streak} />
+              <ProfileStats />
             </motion.div>
           </motion.div>
         </TabsContent>
@@ -307,7 +297,6 @@ const Profile = () => {
             animate="visible"
             className="space-y-4"
           >
-            {/* Theme Selection */}
             <motion.div variants={itemVariants}>
               <GlassCard className="p-5">
                 <h3 className="text-lg font-medium text-white mb-4">Theme Preference</h3>
@@ -329,7 +318,6 @@ const Profile = () => {
               </GlassCard>
             </motion.div>
 
-            {/* Account Section */}
             <motion.div variants={itemVariants}>
               <GlassCard className="p-5">
                 <h3 className="text-lg font-medium text-white mb-4">Account</h3>
@@ -361,7 +349,6 @@ const Profile = () => {
               </GlassCard>
             </motion.div>
             
-            {/* Reset Profile Section */}
             <motion.div variants={itemVariants}>
               <ProfileReset 
                 onReset={handleResetProfile} 
@@ -372,7 +359,6 @@ const Profile = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Profile Image Upload Modal */}
       {showProfileUpload && (
         <CameraUpload
           onClose={() => setShowProfileUpload(false)}
@@ -381,7 +367,6 @@ const Profile = () => {
         />
       )}
       
-      {/* Banner Image Upload Modal */}
       {showBannerUpload && (
         <CameraUpload
           onClose={() => setShowBannerUpload(false)}

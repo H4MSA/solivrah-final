@@ -1,4 +1,3 @@
-
 import React from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { 
@@ -13,8 +12,17 @@ import {
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 
-export const ProfileStats = () => {
-  const { streak, xp } = useApp();
+interface ProfileStatsProps {
+  xp?: number;
+  streak?: number;
+}
+
+export const ProfileStats: React.FC<ProfileStatsProps> = ({ xp: propXp, streak: propStreak }) => {
+  const { streak: contextStreak, xp: contextXp } = useApp();
+  
+  // Use props if provided, otherwise fall back to context values
+  const streak = propStreak !== undefined ? propStreak : contextStreak;
+  const xp = propXp !== undefined ? propXp : contextXp;
   
   // Example stats
   const stats = [
