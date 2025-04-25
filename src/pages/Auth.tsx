@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, EyeOff, Mail, Lock, User, Loader2 } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Mail, Lock, User, Loader2, Phone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/Logo";
 import { GlassCard } from "@/components/GlassCard";
 import { AuthService } from "@/services/AuthService";
 import { useApp } from "@/context/AppContext";
-import { FaGoogle, FaApple, FaDiscord, FaFacebookF } from "react-icons/fa";
+import { FaGoogle } from "react-icons/fa";
 import { useToast } from "@/hooks/use-toast";
 
 type AuthMode = "sign-in" | "sign-up" | "forgot-password";
@@ -20,6 +20,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [phone, setPhone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -29,38 +30,53 @@ const Auth = () => {
     if (user) {
       navigate("/home");
     }
+    
     // Check for existing session only if not logged in
     const checkSession = async () => {
       try {
         const session = await AuthService.getCurrentSession();
         if (session) {
           setUser(session.user);
+          setSession(session);
           navigate("/home");
         }
       } catch (error) {
-        //...
+        console.error("Session check error:", error);
       }
     };
+    
     checkSession();
-  }, [user, navigate, setUser]);
+  }, [user, navigate, setUser, setSession]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccessMessage("");
     setIsLoading(true);
+    
     try {
       if (mode === "sign-in") {
-        await AuthService.signIn({ email, password });
-        toast({ title: "Signed in!", description: "Welcome back.", variant: "default", });
-        navigate("/home");
+        const { session, user } = await AuthService.signIn({ email, password });
+        
+        if (session) {
+          setSession(session);
+          setUser(user);
+          toast({ title: "Signed in!", description: "Welcome back.", variant: "default" });
+          navigate("/home");
+        } else {
+          throw new Error("Failed to authenticate");
+        }
       } else if (mode === "sign-up") {
-        // No forced confirmation: direct login after sign up
         await AuthService.signUp({ email, password, username });
-        toast({ title: "Account created!", description: "Let's get started.", variant: "default", });
-        navigate("/survey");
-        setSuccessMessage("");
-        setTimeout(() => { setMode("sign-in"); }, 3000);
+        toast({ title: "Account created!", description: "Let's get started.", variant: "default" });
+        
+        // Attempt to log in immediately after signup
+        const { session, user } = await AuthService.signIn({ email, password });
+        if (session) {
+          setSession(session);
+          setUser(user);
+          navigate("/survey");
+        }
       } else if (mode === "forgot-password") {
         await AuthService.resetPassword(email);
         setSuccessMessage("Password reset link sent to your email!");
@@ -71,6 +87,7 @@ const Auth = () => {
         });
       }
     } catch (error) {
+      console.error("Auth error:", error);
       setError(error instanceof Error ? error.message : "Authentication error.");
       toast({
         title: "Authentication error",
@@ -82,7 +99,7 @@ const Auth = () => {
     }
   };
 
-  const handleOAuthSignIn = async (provider: 'google' | 'facebook' | 'apple' | 'discord') => {
+  const handleOAuthSignIn = async (provider: 'google') => {
     setError("");
     setIsLoading(true);
     try {
@@ -91,7 +108,7 @@ const Auth = () => {
       setError(error instanceof Error ? error.message : `An error occurred during ${provider} sign-in.`);
       toast({
         title: "Authentication error",
-        description: error instanceof Error ? error.message : `Unexpected error occurred with ${provider} sign-in.`,
+        description: error instanceof Error ? error.message : `Unexpected error with ${provider} sign-in.`,
         variant: "destructive",
       });
       setIsLoading(false);
@@ -112,14 +129,13 @@ const Auth = () => {
         user_metadata: {
           username: 'Guest'
         },
-        // Adding required properties to match User type
         app_metadata: {},
         aud: 'guest',
         created_at: new Date().toISOString(),
         role: null,
         updated_at: new Date().toISOString()
       };
-      await Promise.resolve(); // Ensure state updates
+      
       setUser(guestUser);
       setSession(null);
       navigate("/survey");
@@ -310,42 +326,15 @@ const Auth = () => {
               </motion.div>
 
               {mode !== "forgot-password" && (
-                <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2">
+                <motion.div variants={itemVariants} className="flex justify-center">
                   <motion.button
                     type="button"
                     onClick={() => handleOAuthSignIn('google')}
-                    className="flex items-center justify-center gap-2 py-2 bg-[#151515] text-white rounded-lg border border-[#222] transition hover:bg-[#222] hover:scale-105 active:scale-95 shadow"
+                    className="flex items-center justify-center gap-2 py-2 px-4 w-full bg-[#151515] text-white rounded-lg border border-[#222] transition hover:bg-[#222] hover:scale-105 active:scale-95 shadow"
                     disabled={isLoading}
                   >
                     <FaGoogle size={14} className="text-[#EA4335]" />
-                    <span className="text-xs">Google</span>
-                  </motion.button>
-                  <motion.button
-                    type="button"
-                    onClick={() => handleOAuthSignIn('facebook')}
-                    className="flex items-center justify-center gap-2 py-2 bg-[#151515] text-white rounded-lg border border-[#222] transition hover:bg-[#222] hover:scale-105 active:scale-95 shadow"
-                    disabled={isLoading}
-                  >
-                    <FaFacebookF size={14} className="text-[#1877F2]" />
-                    <span className="text-xs">Facebook</span>
-                  </motion.button>
-                  <motion.button
-                    type="button"
-                    onClick={() => handleOAuthSignIn('apple')}
-                    className="flex items-center justify-center gap-2 py-2 bg-[#151515] text-white rounded-lg border border-[#222] transition hover:bg-[#222] hover:scale-105 active:scale-95 shadow"
-                    disabled={isLoading}
-                  >
-                    <FaApple size={14} />
-                    <span className="text-xs">Apple</span>
-                  </motion.button>
-                  <motion.button
-                    type="button"
-                    onClick={() => handleOAuthSignIn('discord')}
-                    className="flex items-center justify-center gap-2 py-2 bg-[#151515] text-white rounded-lg border border-[#222] transition hover:bg-[#222] hover:scale-105 active:scale-95 shadow"
-                    disabled={isLoading}
-                  >
-                    <FaDiscord size={14} className="text-[#5865F2]" />
-                    <span className="text-xs">Discord</span>
+                    <span className="text-sm">Continue with Google</span>
                   </motion.button>
                 </motion.div>
               )}

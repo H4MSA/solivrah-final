@@ -57,108 +57,62 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   const [streak, setStreak] = useState(0);
   const [xp, setXP] = useState(0);
   const [isGuest, setIsGuest] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(false);
 
-  // Fix login/auth state management
+  // User profile loading effect - separated from auth state management
   useEffect(() => {
-    if (isGuest) {
-      setLoading(false);
-      setUser(null);
-      setSession(null);
-      return;
-    }
-
-    // Set up auth state listener FIRST (critical for avoiding auth deadlocks)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event: AuthChangeEvent, session: Session | null) => {
-        console.log("Auth state changed:", event, session?.user?.email);
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-
-        // To avoid async/blocking problem, use setTimeout for side effects
-        if (session?.user) {
-          setTimeout(() => {
-            fetchUserProfile(session.user.id);
-          }, 0);
-        }
-
-        // Show toast notification based on event
-        if (event === 'SIGNED_IN') {
-          toast({
-            title: "Welcome back!",
-            description: `You're now signed in${session?.user?.email ? ` as ${session.user.email}` : ''}`,
-          });
-        } else if (event === 'SIGNED_OUT') {
-          toast({
-            title: "Signed out",
-            description: "You've been signed out successfully",
-          });
-        } else if (event === 'USER_UPDATED') {
-          toast({
-            title: "Profile updated",
-            description: "Your profile has been updated",
-          });
-        }
-      }
-    );
-
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("Initial session check:", session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-      }
-    }).catch(error => {
-      console.error("Error getting session:", error);
-      setLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [isGuest]);
-
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      console.log("Fetching profile for user:", userId);
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error fetching user profile:", error);
-        throw error;
-      }
-
-      if (data) {
-        console.log("Profile data loaded:", data);
-        setSelectedTheme(data.theme || "Discipline");
-        setStreak(data.streak || 0);
-        setXP(data.xp || 0);
-      } else {
-        console.log("No profile found, creating new profile");
-        // Profile might not exist if RLS is preventing access or it genuinely doesn't exist
-        // Let's try to create it
-        const { error: insertError } = await supabase
+    if (isGuest || !user?.id || profileLoading) return;
+    
+    const loadUserProfile = async () => {
+      try {
+        setProfileLoading(true);
+        console.log("Fetching profile for user:", user.id);
+        const { data, error } = await supabase
           .from("profiles")
-          .insert([{ id: userId, theme: "Discipline", streak: 0, xp: 0 }]);
-          
-        if (insertError) {
-          console.error("Error creating profile:", insertError);
+          .select("*")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error("Error fetching user profile:", error);
+          return;
         }
+
+        if (data) {
+          console.log("Profile data loaded:", data);
+          setSelectedTheme(data.theme || "Discipline");
+          setStreak(data.streak || 0);
+          setXP(data.xp || 0);
+        } else {
+          console.log("No profile found, creating new profile");
+          // Profile might not exist if RLS is preventing access or it genuinely doesn't exist
+          const { error: insertError } = await supabase
+            .from("profiles")
+            .insert([{ id: user.id, theme: "Discipline", streak: 0, xp: 0 }]);
+            
+          if (insertError) {
+            console.error("Error creating profile:", insertError);
+          }
+        }
+      } catch (error) {
+        console.error("Error in fetchUserProfile:", error);
+      } finally {
+        setProfileLoading(false);
       }
-    } catch (error) {
-      console.error("Error in fetchUserProfile:", error);
+    };
+
+    loadUserProfile();
+  }, [user, isGuest]);
+
+  // Clear loading state when user state is set
+  useEffect(() => {
+    if (user !== null || isGuest) {
+      setLoading(false);
     }
-  };
+  }, [user, isGuest]);
 
   const addXP = async (amount: number) => {
-    if (!user) return;
+    if (!user || isGuest) return;
 
     const newXP = xp + amount;
     setXP(newXP);
@@ -180,7 +134,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const incrementStreak = async () => {
-    if (!user) return;
+    if (!user || isGuest) return;
 
     const newStreak = streak + 1;
     setStreak(newStreak);
@@ -204,7 +158,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   const updateSelectedTheme = async (theme: string) => {
     setSelectedTheme(theme);
 
-    if (user) {
+    if (user && !isGuest) {
       try {
         await supabase
           .from("profiles")
@@ -217,7 +171,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const resetProgress = async () => {
-    if (!user) return;
+    if (!user || isGuest) return;
 
     setStreak(0);
     setXP(0);

@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { Session, User } from '@supabase/supabase-js';
 
 interface SignUpData {
   email: string;
@@ -12,10 +13,15 @@ interface SignInData {
   password: string;
 }
 
-type OAuthProvider = 'google' | 'facebook' | 'apple' | 'discord' | 'github';
+type OAuthProvider = 'google';
+
+interface AuthResponse {
+  session: Session | null;
+  user: User | null;
+}
 
 export const AuthService = {
-  signUp: async (data: SignUpData) => {
+  signUp: async (data: SignUpData): Promise<AuthResponse> => {
     const { email, password, username } = data;
     
     // Validation
@@ -39,10 +45,13 @@ export const AuthService = {
       throw error;
     }
     
-    return authData;
+    return {
+      session: authData.session,
+      user: authData.user
+    };
   },
   
-  signIn: async (data: SignInData) => {
+  signIn: async (data: SignInData): Promise<AuthResponse> => {
     const { email, password } = data;
     
     // Validation
@@ -61,14 +70,17 @@ export const AuthService = {
         throw error;
       }
       
-      return authData;
+      return {
+        session: authData.session,
+        user: authData.user
+      };
     } catch (error) {
       console.error("Sign in error:", error);
       throw error;
     }
   },
   
-  signInWithOAuth: async (provider: OAuthProvider) => {
+  signInWithOAuth: async (provider: OAuthProvider): Promise<void> => {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -82,7 +94,7 @@ export const AuthService = {
         throw error;
       }
       
-      return data;
+      return;
     } catch (error) {
       console.error(`${provider} OAuth error:`, error);
       throw error;

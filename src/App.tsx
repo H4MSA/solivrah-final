@@ -1,12 +1,12 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { AppProvider } from "./context/AppContext";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { AppProvider, useApp } from "./context/AppContext";
 import { ThemeBackground } from "./components/ThemeBackground";
 import { TabNavigation } from "./components/TabNavigation";
-import { useApp } from "./context/AppContext";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
@@ -30,9 +30,49 @@ const queryClient = new QueryClient({
   },
 });
 
+const SessionHandler = ({ children }: { children: React.ReactNode }) => {
+  const { setUser, setSession } = useApp();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    // Set up auth state listener FIRST (critical for avoiding auth deadlocks)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log("Auth state changed:", event);
+        setSession(session);
+        setUser(session?.user ?? null);
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Initial session check:", session?.user?.email);
+      setSession(session);
+      setUser(session?.user ?? null);
+      setChecking(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [setUser, setSession, navigate]);
+
+  if (checking) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-black">
+        <div className="animate-spin w-8 h-8 border-t-2 border-white rounded-full"></div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+};
+
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useApp();
+  const { user, loading, isGuest } = useApp();
   const location = useLocation();
 
   if (loading) {
@@ -41,8 +81,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     </div>;
   }
 
-  if (!user) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+  if (!user && !isGuest) {
+    // Save the attempted URL for redirecting after login
+    const returnUrl = location.pathname !== "/auth" ? location.pathname : "/home";
+    return <Navigate to="/auth" state={{ returnUrl }} replace />;
   }
 
   return <>{children}</>;
@@ -67,24 +109,6 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
-  const [sessionChecked, setSessionChecked] = useState(false);
-
-  useEffect(() => {
-    // Check for existing session on app load
-    const checkSession = async () => {
-      await supabase.auth.getSession();
-      setSessionChecked(true);
-    };
-
-    checkSession();
-  }, []);
-
-  if (!sessionChecked) {
-    return <div className="flex items-center justify-center h-screen bg-black">
-      <div className="animate-spin w-8 h-8 border-t-2 border-white rounded-full"></div>
-    </div>;
-  }
-
   return (
     <QueryClientProvider client={queryClient}>
       <AppProvider>
@@ -98,59 +122,61 @@ const App = () => {
             <Sonner />
 
             <BrowserRouter>
-              <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/auth/callback" element={<AuthCallback />} />
+              <SessionHandler>
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
 
-                {/* Survey route (accessible after auth) */}
-                <Route path="/survey" element={
-                  <ProtectedRoute>
-                    <Survey />
-                  </ProtectedRoute>
-                } />
+                  {/* Survey route (accessible after auth) */}
+                  <Route path="/survey" element={
+                    <ProtectedRoute>
+                      <Survey />
+                    </ProtectedRoute>
+                  } />
 
-                {/* Protected routes with TabNavigation */}
-                <Route path="/home" element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <Home />
-                    </AppLayout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/quests" element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <Quests />
-                    </AppLayout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/coach" element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <Coach />
-                    </AppLayout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/community" element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <Community />
-                    </AppLayout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/profile" element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <Profile />
-                    </AppLayout>
-                  </ProtectedRoute>
-                } />
+                  {/* Protected routes with TabNavigation */}
+                  <Route path="/home" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <Home />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/quests" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <Quests />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/coach" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <Coach />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/community" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <Community />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/profile" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <Profile />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
 
-                {/* Catch-all for 404s */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+                  {/* Catch-all for 404s */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </SessionHandler>
             </BrowserRouter>
           </div>
         </TooltipProvider>
