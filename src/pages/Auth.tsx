@@ -1,381 +1,475 @@
 
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, EyeOff, Mail, Lock, User, Loader2, Phone } from "lucide-react";
+import React, { useState } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { AuthService } from "@/services/AuthService";
+import { Eye, EyeOff, Mail, Lock, ChevronLeft } from "lucide-react";
+import { GlassCard } from "@/components/GlassCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/Logo";
-import { GlassCard } from "@/components/GlassCard";
-import { AuthService } from "@/services/AuthService";
-import { useApp } from "@/context/AppContext";
-import { FaGoogle } from "react-icons/fa";
 import { useToast } from "@/hooks/use-toast";
+import { useApp } from "@/context/AppContext";
 
-type AuthMode = "sign-in" | "sign-up" | "forgot-password";
+type AuthMode = "login" | "signup" | "reset";
 
 const Auth = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const { user, setUser, setSession, setIsGuest } = useApp();
-  const [mode, setMode] = useState<AuthMode>("sign-in");
+  const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
-  const [phone, setPhone] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { toast } = useToast();
+  const { setIsGuest } = useApp();
+  
+  // Get return URL from state or default to home
+  const returnUrl = (location.state as { returnUrl?: string })?.returnUrl || "/home";
 
-  useEffect(() => {
-    if (user) {
-      navigate("/home");
-    }
-    
-    // Check for existing session only if not logged in
-    const checkSession = async () => {
-      try {
-        const session = await AuthService.getCurrentSession();
-        if (session) {
-          setUser(session.user);
-          setSession(session);
-          navigate("/home");
-        }
-      } catch (error) {
-        console.error("Session check error:", error);
-      }
-    };
-    
-    checkSession();
-  }, [user, navigate, setUser, setSession]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccessMessage("");
-    setIsLoading(true);
+    setLoading(true);
     
     try {
-      if (mode === "sign-in") {
-        const { session, user } = await AuthService.signIn({ email, password });
-        
-        if (session) {
-          setSession(session);
-          setUser(user);
-          toast({ title: "Signed in!", description: "Welcome back.", variant: "default" });
-          navigate("/home");
-        } else {
-          throw new Error("Failed to authenticate");
-        }
-      } else if (mode === "sign-up") {
-        await AuthService.signUp({ email, password, username });
-        toast({ title: "Account created!", description: "Let's get started.", variant: "default" });
-        
-        // Attempt to log in immediately after signup
-        const { session, user } = await AuthService.signIn({ email, password });
-        if (session) {
-          setSession(session);
-          setUser(user);
-          navigate("/survey");
-        }
-      } else if (mode === "forgot-password") {
-        await AuthService.resetPassword(email);
-        setSuccessMessage("Password reset link sent to your email!");
-        toast({
-          title: "Reset link sent!",
-          description: "Check your email for instructions.",
-          variant: "default",
-        });
+      // Input validation
+      if (!email.trim()) {
+        throw new Error("Email is required");
       }
-    } catch (error) {
-      console.error("Auth error:", error);
-      setError(error instanceof Error ? error.message : "Authentication error.");
-      toast({
-        title: "Authentication error",
-        description: error instanceof Error ? error.message : "Unexpected error occurred.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleOAuthSignIn = async (provider: 'google') => {
-    setError("");
-    setIsLoading(true);
-    try {
-      await AuthService.signInWithOAuth(provider);
-    } catch (error) {
-      setError(error instanceof Error ? error.message : `An error occurred during ${provider} sign-in.`);
-      toast({
-        title: "Authentication error",
-        description: error instanceof Error ? error.message : `Unexpected error with ${provider} sign-in.`,
-        variant: "destructive",
-      });
-      setIsLoading(false);
-    }
-  };
-
-  const togglePasswordVisibility = () => setShowPassword(!showPassword);
-
-  // Guest login: mark as guest, require survey
-  const handleGuestLogin = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      setIsGuest(true);
-      const guestUser = {
-        id: `guest_${Date.now()}`,
-        email: null,
-        user_metadata: {
-          username: 'Guest'
-        },
-        app_metadata: {},
-        aud: 'guest',
-        created_at: new Date().toISOString(),
-        role: null,
-        updated_at: new Date().toISOString()
-      };
       
-      setUser(guestUser);
-      setSession(null);
-      navigate("/survey");
+      if (mode !== "reset" && !password.trim()) {
+        throw new Error("Password is required");
+      }
+      
+      if (mode === "signup") {
+        // Signup checks
+        if (password.length < 6) {
+          throw new Error("Password must be at least 6 characters");
+        }
+        
+        if (password !== confirmPassword) {
+          throw new Error("Passwords do not match");
+        }
+        
+        await AuthService.signUp({ email, password });
+        toast({
+          title: "Account created successfully!",
+          description: "Welcome to your personal growth journey.",
+        });
+        navigate("/survey");
+      } else if (mode === "login") {
+        // Login
+        await AuthService.signIn({ email, password });
+        toast({
+          title: "Welcome back!",
+          description: "You've successfully signed in.",
+        });
+        navigate(returnUrl);
+      } else {
+        // Password reset
+        await AuthService.resetPassword(email);
+        toast({
+          title: "Reset email sent",
+          description: "Check your inbox for instructions to reset your password.",
+        });
+        setMode("login");
+      }
     } catch (error) {
-      console.error("Guest login error:", error);
+      let message = "An unexpected error occurred";
+      
+      if (error instanceof Error) {
+        message = error.message;
+        
+        // Handle common Supabase error messages with more user-friendly language
+        if (message.includes("User already registered")) {
+          message = "This email is already registered. Please sign in instead.";
+        } else if (message.includes("Email not confirmed")) {
+          message = "Please verify your email before signing in.";
+        } else if (message.includes("Invalid login credentials")) {
+          message = "Incorrect email or password. Please try again.";
+        }
+      }
+      
+      toast({
+        title: "Authentication error",
+        description: message,
+        variant: "destructive",
+      });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
+  const handleGoogleAuth = async () => {
+    try {
+      setLoading(true);
+      await AuthService.signInWithOAuth("google");
+      // No toast needed, will redirect to callback
+    } catch (error) {
+      toast({
+        title: "Google sign-in failed",
+        description: error instanceof Error ? error.message : "Please try again later",
+        variant: "destructive",
+      });
+      setLoading(false);
+    }
+  };
+  
+  const handleGuestMode = () => {
+    setIsGuest(true);
+    toast({
+      title: "Guest mode active",
+      description: "You can explore the app, but your data won't be saved.",
+    });
+    navigate("/home");
+  };
+  
   const formVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1, y: 0,
-      transition: { staggerChildren: 0.06, delayChildren: 0.1 }
+    hidden: { opacity: 0, x: 20 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.3 } },
+    exit: { opacity: 0, x: -20, transition: { duration: 0.2 } }
+  };
+
+  const renderForm = () => {
+    switch (mode) {
+      case "login":
+        return (
+          <motion.form 
+            key="login"
+            variants={formVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onSubmit={handleEmailAuth}
+            className="space-y-4"
+          >
+            <h1 className="text-2xl font-bold text-white mb-1">Welcome Back</h1>
+            <p className="text-white/60 text-sm mb-4">Sign in to continue your journey</p>
+            
+            <div className="space-y-4">
+              <div>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 w-5 h-5" />
+                  <input
+                    type="email"
+                    placeholder="Email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3.5 bg-[#121212] border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
+                    autoComplete="email"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 w-5 h-5" />
+                  <input 
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-10 pr-12 py-3.5 bg-[#121212] border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
+                    autoComplete="current-password"
+                  />
+                  <button 
+                    type="button"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white"
+                    onClick={() => setShowPassword(!showPassword)}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+                <div className="flex justify-end mt-1">
+                  <button
+                    type="button"
+                    onClick={() => setMode("reset")}
+                    className="text-sm text-white/50 hover:text-white"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 bg-white text-black rounded-xl font-medium transition-all hover:bg-white/90 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <span className="flex justify-center items-center">
+                  <span className="h-5 w-5 border-2 border-black/30 border-t-black rounded-full animate-spin mr-2"></span>
+                  Signing in...
+                </span>
+              ) : (
+                "Sign In"
+              )}
+            </button>
+            
+            <div className="relative flex items-center py-2">
+              <div className="flex-grow border-t border-white/10"></div>
+              <span className="flex-shrink mx-3 text-white/40 text-sm">or continue with</span>
+              <div className="flex-grow border-t border-white/10"></div>
+            </div>
+            
+            <button
+              type="button"
+              onClick={handleGoogleAuth}
+              disabled={loading}
+              className="w-full flex justify-center items-center gap-2 py-3.5 bg-[#121212] border border-white/10 hover:bg-[#222] text-white rounded-xl font-medium transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24">
+                <path
+                  fill="currentColor"
+                  d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27c3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10c5.35 0 9.25-3.67 9.25-9.09c0-1.15-.15-1.81-.15-1.81Z"
+                />
+              </svg>
+              Google
+            </button>
+            
+            <button 
+              type="button"
+              onClick={handleGuestMode}
+              className="w-full bg-transparent hover:bg-white/5 text-white/70 py-3.5 rounded-xl font-medium transition-all"
+            >
+              Continue as Guest
+            </button>
+            
+            <div className="text-center">
+              <p className="text-white/50">
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => setMode("signup")}
+                  className="text-white hover:underline font-medium"
+                >
+                  Sign Up
+                </button>
+              </p>
+            </div>
+          </motion.form>
+        );
+
+      case "signup":
+        return (
+          <motion.form
+            key="signup"
+            variants={formVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onSubmit={handleEmailAuth}
+            className="space-y-4"
+          >
+            <div className="flex items-center mb-2">
+              <button
+                type="button"
+                onClick={() => setMode("login")}
+                className="p-1 -ml-1 rounded-full hover:bg-white/10"
+              >
+                <ChevronLeft className="w-5 h-5 text-white" />
+              </button>
+              <h1 className="text-2xl font-bold text-white ml-1">Create Account</h1>
+            </div>
+            <p className="text-white/60 text-sm mb-4">Start your personal growth journey today</p>
+            
+            <div className="space-y-4">
+              <div>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 w-5 h-5" />
+                  <input
+                    type="email"
+                    placeholder="Email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3.5 bg-[#121212] border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
+                    autoComplete="email"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 w-5 h-5" />
+                  <input 
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Create password (min 6 characters)"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-10 pr-12 py-3.5 bg-[#121212] border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
+                    autoComplete="new-password"
+                  />
+                  <button 
+                    type="button"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white"
+                    onClick={() => setShowPassword(!showPassword)}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+              </div>
+              
+              <div>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 w-5 h-5" />
+                  <input 
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Confirm password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3.5 bg-[#121212] border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
+                    autoComplete="new-password"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <button
+              type="submit"
+              disabled={loading || !email || !password || !confirmPassword}
+              className="w-full py-3.5 bg-white text-black rounded-xl font-medium transition-all hover:bg-white/90 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <span className="flex justify-center items-center">
+                  <span className="h-5 w-5 border-2 border-black/30 border-t-black rounded-full animate-spin mr-2"></span>
+                  Creating account...
+                </span>
+              ) : (
+                "Create Account"
+              )}
+            </button>
+            
+            <div className="relative flex items-center py-2">
+              <div className="flex-grow border-t border-white/10"></div>
+              <span className="flex-shrink mx-3 text-white/40 text-sm">or sign up with</span>
+              <div className="flex-grow border-t border-white/10"></div>
+            </div>
+            
+            <button
+              type="button"
+              onClick={handleGoogleAuth}
+              disabled={loading}
+              className="w-full flex justify-center items-center gap-2 py-3.5 bg-[#121212] border border-white/10 hover:bg-[#222] text-white rounded-xl font-medium transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24">
+                <path
+                  fill="currentColor"
+                  d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27c3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10c5.35 0 9.25-3.67 9.25-9.09c0-1.15-.15-1.81-.15-1.81Z"
+                />
+              </svg>
+              Google
+            </button>
+            
+            <div className="text-center">
+              <p className="text-white/50">
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => setMode("login")}
+                  className="text-white hover:underline font-medium"
+                >
+                  Sign In
+                </button>
+              </p>
+            </div>
+          </motion.form>
+        );
+
+      case "reset":
+        return (
+          <motion.form
+            key="reset"
+            variants={formVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onSubmit={handleEmailAuth}
+            className="space-y-4"
+          >
+            <div className="flex items-center mb-2">
+              <button
+                type="button"
+                onClick={() => setMode("login")}
+                className="p-1 -ml-1 rounded-full hover:bg-white/10"
+              >
+                <ChevronLeft className="w-5 h-5 text-white" />
+              </button>
+              <h1 className="text-2xl font-bold text-white ml-1">Reset Password</h1>
+            </div>
+            <p className="text-white/60 text-sm mb-4">Enter your email to receive reset instructions</p>
+            
+            <div className="space-y-4">
+              <div>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 w-5 h-5" />
+                  <input
+                    type="email"
+                    placeholder="Email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3.5 bg-[#121212] border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
+                    autoComplete="email"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <button
+              type="submit"
+              disabled={loading || !email}
+              className="w-full py-3.5 bg-white text-black rounded-xl font-medium transition-all hover:bg-white/90 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <span className="flex justify-center items-center">
+                  <span className="h-5 w-5 border-2 border-black/30 border-t-black rounded-full animate-spin mr-2"></span>
+                  Sending reset email...
+                </span>
+              ) : (
+                "Send Reset Instructions"
+              )}
+            </button>
+            
+            <div className="text-center">
+              <p className="text-white/50">
+                <button
+                  type="button"
+                  onClick={() => setMode("login")}
+                  className="text-white hover:underline font-medium"
+                >
+                  Back to Sign In
+                </button>
+              </p>
+            </div>
+          </motion.form>
+        );
     }
   };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 12 },
-    visible: { opacity: 1, y: 0 }
-  };
-
+  
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-black px-2 py-2">
-      <div className="w-full max-w-xs mx-auto z-10 flex flex-col gap-2">
-        <motion.div
-          initial={{ opacity: 0, y: -25 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.33 }}
-          className="flex items-center mb-3"
-        >
-          <button
-            onClick={() => navigate("/")}
-            className="p-2 rounded-full bg-[#111111] border border-white/5 hover:bg-[#222222] transition-all"
-          >
-            <ArrowLeft size={20} className="text-white" />
-          </button>
-          <Logo className="mx-auto w-32 h-10 object-contain" />
-        </motion.div>
-
-        <GlassCard
-          variant="dark"
-          className="w-full mb-4 rounded-2xl shadow-lg bg-[#161616]/90 border border-[#222] px-4 py-6"
-        >
+    <div className="min-h-screen flex flex-col p-6 relative">
+      {/* Logo */}
+      <div className="flex justify-center mb-4">
+        <Logo className="h-12" />
+      </div>
+      
+      {/* Auth container */}
+      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-md mx-auto">
+        <GlassCard variant="dark" className="w-full p-6 md:p-8">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={mode}
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              variants={formVariants}
-              className="space-y-5"
-            >
-              <motion.div variants={itemVariants} className="text-center">
-                <h1 className="text-lg font-bold text-white">
-                  {mode === "sign-in"
-                    ? "Welcome Back"
-                    : mode === "sign-up"
-                    ? "Create Account"
-                    : "Reset Password"}
-                </h1>
-                <p className="text-[#999999] text-sm mt-1">
-                  {mode === "sign-in"
-                    ? "Sign in to continue to your account"
-                    : mode === "sign-up"
-                    ? "Join Solivrah and start your journey"
-                    : "Enter your email to receive a reset link"}
-                </p>
-              </motion.div>
-
-              <motion.form onSubmit={handleSubmit} className="space-y-3">
-                {mode === "sign-up" && (
-                  <motion.div variants={itemVariants} className="space-y-1">
-                    <label htmlFor="username" className="text-xs text-[#E0E0E0] font-medium">Username</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#999999]"><User size={16} /></span>
-                      <input
-                        id="username"
-                        type="text"
-                        value={username}
-                        onChange={e => setUsername(e.target.value)}
-                        className="w-full bg-[#151515] border border-[#262626] rounded-lg py-2.5 pl-9 pr-3 text-white placeholder:text-[#777] focus:outline-none focus:border-[#444] text-sm"
-                        placeholder="Your username"
-                        autoComplete="username"
-                      />
-                    </div>
-                  </motion.div>
-                )}
-
-                <motion.div variants={itemVariants} className="space-y-1">
-                  <label htmlFor="email" className="text-xs text-[#E0E0E0] font-medium">Email</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#999999]"><Mail size={16} /></span>
-                    <input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      className="w-full bg-[#151515] border border-[#262626] rounded-lg py-2.5 pl-9 pr-3 text-white placeholder:text-[#777] focus:outline-none focus:border-[#444] text-sm"
-                      placeholder="your.email@example.com"
-                      autoComplete="email"
-                    />
-                  </div>
-                </motion.div>
-
-                {mode !== "forgot-password" && (
-                  <motion.div variants={itemVariants} className="space-y-1">
-                    <div className="flex justify-between">
-                      <label htmlFor="password" className="text-xs text-[#E0E0E0] font-medium">
-                        Password
-                      </label>
-                      {mode === "sign-in" && (
-                        <button
-                          type="button"
-                          onClick={() => setMode("forgot-password")}
-                          className="text-xs text-[#999999] hover:text-white transition"
-                        >
-                          Forgot password?
-                        </button>
-                      )}
-                    </div>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#999999]"><Lock size={16} /></span>
-                      <input
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        className="w-full bg-[#151515] border border-[#262626] rounded-lg py-2.5 pl-9 pr-9 text-white placeholder:text-[#777] focus:outline-none focus:border-[#444] text-sm"
-                        placeholder="••••••••"
-                        autoComplete={mode === "sign-up" ? "new-password" : "current-password"}
-                      />
-                      <button
-                        type="button"
-                        onClick={togglePasswordVisibility}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999999] hover:text-white transition"
-                      >
-                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="p-2 bg-red-900/20 border border-red-500/20 rounded-lg text-red-400 text-xs"
-                  >
-                    {error}
-                  </motion.div>
-                )}
-
-                {successMessage && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="p-2 bg-green-900/20 border border-green-500/20 rounded-lg text-green-400 text-xs"
-                  >
-                    {successMessage}
-                  </motion.div>
-                )}
-
-                <motion.button
-                  variants={itemVariants}
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full py-2.5 bg-white text-black rounded-xl font-medium flex items-center justify-center transition hover:bg-[#EEEEEE] hover:scale-105 active:scale-95 shadow"
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  {isLoading
-                    ? <Loader2 size={18} className="animate-spin" />
-                    : mode === "sign-in"
-                      ? "Sign In"
-                      : mode === "sign-up"
-                        ? "Create Account"
-                        : "Send Reset Link"}
-                </motion.button>
-              </motion.form>
-
-              <motion.div variants={itemVariants} className="relative flex items-center justify-center">
-                <div className="absolute left-0 right-0 h-px bg-[#242426]"></div>
-                <span className="px-4 bg-[#161616] text-[#888] text-xs z-10">OR</span>
-              </motion.div>
-
-              {mode !== "forgot-password" && (
-                <motion.div variants={itemVariants} className="flex justify-center">
-                  <motion.button
-                    type="button"
-                    onClick={() => handleOAuthSignIn('google')}
-                    className="flex items-center justify-center gap-2 py-2 px-4 w-full bg-[#151515] text-white rounded-lg border border-[#222] transition hover:bg-[#222] hover:scale-105 active:scale-95 shadow"
-                    disabled={isLoading}
-                  >
-                    <FaGoogle size={14} className="text-[#EA4335]" />
-                    <span className="text-sm">Continue with Google</span>
-                  </motion.button>
-                </motion.div>
-              )}
-
-              <motion.div variants={itemVariants} className="text-center text-xs text-[#99999A]">
-                {mode === "sign-in" ? (
-                  <p>
-                    {"Don't have an account? "}
-                    <button
-                      onClick={() => setMode("sign-up")}
-                      className="text-white font-medium hover:underline"
-                    >
-                      Sign Up
-                    </button>
-                  </p>
-                ) : (
-                  <p>
-                    {"Already have an account? "}
-                    <button
-                      onClick={() => setMode("sign-in")}
-                      className="text-white font-medium hover:underline"
-                    >
-                      Sign In
-                    </button>
-                  </p>
-                )}
-              </motion.div>
-            </motion.div>
+            {renderForm()}
           </AnimatePresence>
         </GlassCard>
-
-        <button
-          onClick={handleGuestLogin}
-          className="w-full py-2.5 bg-black/85 border border-[#222] text-white rounded-xl font-bold hover:bg-black hover:border-white transition mt-1 shadow"
-          type="button"
-        >
-          Continue as Guest
-        </button>
-      </div>
-      <div className="text-center text-xs text-[#888] mt-5 mb-2">
-        © 2025 Solivrah. All rights reserved.
+        
+        <div className="text-center mt-6">
+          <p className="text-white/50 text-xs">
+            By continuing, you agree to our{" "}
+            <Link to="#" className="text-white/70 hover:text-white underline">Terms of Service</Link>
+            {" "}and{" "}
+            <Link to="#" className="text-white/70 hover:text-white underline">Privacy Policy</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

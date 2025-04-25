@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useApp } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, ArrowLeft, CheckCircle, FileQuestion, Target, Clock, HelpCircle, PenLine } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle, FileQuestion, Target, Clock, HelpCircle, PenLine, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 import { useToast } from "@/hooks/use-toast";
@@ -13,13 +13,13 @@ type Theme = "Discipline" | "Focus" | "Resilience" | "Wildcards";
 
 const themes = [
   { value: "Discipline", label: "Discipline", 
-    description: "Building consistent habits and self-control" },
+    description: "Master self-control and build lasting habits" },
   { value: "Focus", label: "Focus", 
-    description: "Improving concentration and mental clarity" },
+    description: "Enhance concentration and mental clarity" },
   { value: "Resilience", label: "Resilience", 
-    description: "Developing mental toughness and adaptability" },
+    description: "Develop mental toughness and adaptability" },
   { value: "Wildcards", label: "Wildcards", 
-    description: "Unexpected challenges to push your boundaries" }
+    description: "Embrace unexpected challenges that expand your comfort zone" }
 ];
 
 const COMMON_CHALLENGES = [
@@ -59,27 +59,27 @@ const Survey = () => {
     switch (selectedTheme) {
       case 'Discipline':
         return [
-          "Build a daily morning routine",
-          "Complete a 30-day fitness challenge",
-          "Learn to meditate for 10 minutes daily"
+          "Build a morning ritual that sets me up for success",
+          "Complete a 30-day fitness challenge without missing a day",
+          "Establish a consistent meditation practice"
         ];
       case 'Focus':
         return [
-          "Complete deep work sessions without distractions",
-          "Reduce screen time by 50%",
-          "Master a new skill through deliberate practice"
+          "Master deep work sessions without digital distractions",
+          "Reduce screen time by 50% and redirect to meaningful activities",
+          "Improve my ability to stay present during conversations"
         ];
       case 'Resilience':
         return [
-          "Learn to handle criticism constructively",
-          "Practice daily gratitude journaling",
-          "Take on a personal challenge outside my comfort zone"
+          "Learn to handle criticism constructively without emotional reactions",
+          "Develop a daily gratitude practice to shift my perspective",
+          "Build confidence by tackling one fear each week"
         ];
       case 'Wildcards':
         return [
-          "Try something new every week for a month",
-          "Connect with one new person every week",
-          "Document a 30-day transformation journey"
+          "Try something completely new every week for a month",
+          "Connect meaningfully with one new person each week",
+          "Document a 30-day personal transformation challenge"
         ];
       default:
         return [];
@@ -108,23 +108,23 @@ const Survey = () => {
       if (surveyError) throw surveyError;
 
       // Add XP for completing the survey
-      addXP(50);
+      await addXP(50);
       
       toast({
         title: "Journey Started! +50 XP",
-        description: "Your personalized plan is ready. Let's get started!",
+        description: "Your personalized plan is ready. Let's begin your transformation!",
         duration: 4000,
       });
 
-      // Navigate to home page with a slight delay for the toast to be seen
-      setTimeout(() => {
-        navigate("/home");
-      }, 1000);
+      console.log("Survey submitted successfully, navigating to home");
+      
+      // Navigate to home page immediately - this was likely the issue
+      navigate("/home");
     } catch (error) {
       console.error("Error saving survey response:", error);
       toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
+        title: "Something went wrong",
+        description: "We couldn't save your responses. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -160,20 +160,20 @@ const Survey = () => {
           >
             <div className="text-center mb-6">
               <div className="inline-flex p-3 bg-white/10 rounded-full mb-4">
-                <Target className="w-8 h-8 text-white" />
+                <Sparkles className="w-8 h-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-white">Choose Your Focus</h2>
+              <h2 className="text-2xl font-bold text-white">Choose Your Focus Area</h2>
               <p className="text-white/70 mt-2">
-                Which area do you want to improve in your life?
+                Select what matters most to you right now in your transformation journey
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 gap-4">
               {themes.map(t => (
                 <GlassCard 
                   key={t.value}
-                  variant="dark"
-                  className={`p-4 transition-all cursor-pointer border-2 ${
+                  variant={theme === t.value ? "primary" : "dark"}
+                  className={`p-5 transition-all cursor-pointer ${
                     theme === t.value 
                     ? "border-white scale-[1.02]" 
                     : "border-white/10 hover:border-white/30"
@@ -182,16 +182,16 @@ const Survey = () => {
                 >
                   <div className="flex items-center">
                     <div className={`
-                      w-5 h-5 rounded-full border-2 flex items-center justify-center
-                      ${theme === t.value ? "border-white bg-white" : "border-white/50"}
+                      w-6 h-6 rounded-full border-2 flex items-center justify-center
+                      ${theme === t.value ? "border-black bg-white" : "border-white/50"}
                     `}>
                       {theme === t.value && (
-                        <CheckCircle className="w-3 h-3 text-black" />
+                        <CheckCircle className={`w-4 h-4 ${theme === t.value ? "text-black" : "text-white"}`} />
                       )}
                     </div>
                     <div className="ml-3">
-                      <h3 className="text-white font-medium">{t.label}</h3>
-                      <p className="text-white/60 text-sm">{t.description}</p>
+                      <h3 className={`${theme === t.value ? "text-black" : "text-white"} font-medium text-lg`}>{t.label}</h3>
+                      <p className={`${theme === t.value ? "text-black/70" : "text-white/60"} text-sm`}>{t.description}</p>
                     </div>
                   </div>
                 </GlassCard>
@@ -200,9 +200,9 @@ const Survey = () => {
 
             <button
               onClick={nextStep}
-              className="w-full py-3 rounded-xl bg-white text-black flex items-center justify-center gap-2 transition-all hover:bg-white/90 active:scale-[0.98]"
+              className="w-full py-4 rounded-xl bg-white text-black flex items-center justify-center gap-2 transition-all hover:bg-white/90 active:scale-[0.98] font-medium text-lg"
             >
-              Continue <ArrowRight size={18} />
+              Continue <ArrowRight size={20} />
             </button>
           </motion.div>
         );
@@ -220,9 +220,9 @@ const Survey = () => {
               <div className="inline-flex p-3 bg-white/10 rounded-full mb-4">
                 <Target className="w-8 h-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-white">What's your goal?</h2>
+              <h2 className="text-2xl font-bold text-white">Set Your Goal</h2>
               <p className="text-white/70 mt-2">
-                Tell us what you want to achieve with {theme}.
+                Define what success looks like on your {theme} journey
               </p>
             </div>
 
@@ -230,8 +230,8 @@ const Survey = () => {
               <textarea
                 value={goal}
                 onChange={(e) => setGoal(e.target.value)}
-                className="w-full h-32 bg-[#1A1A1A] border border-white/10 rounded-xl p-4 text-white resize-none focus:outline-none focus:border-white/30"
-                placeholder="I want to..."
+                className="w-full h-32 bg-[#1A1A1A] border border-white/20 rounded-xl p-4 text-white resize-none focus:outline-none focus:border-white/30 text-lg"
+                placeholder="My goal is to..."
               />
 
               <div>
@@ -240,7 +240,7 @@ const Survey = () => {
                   onClick={() => setShowSuggestedGoals(!showSuggestedGoals)}
                   className="text-sm flex items-center gap-1 text-white/70 hover:text-white"
                 >
-                  <HelpCircle size={14} />
+                  <HelpCircle size={16} />
                   {showSuggestedGoals ? "Hide suggestions" : "Need inspiration?"}
                 </button>
                 
@@ -250,9 +250,9 @@ const Survey = () => {
                       <div 
                         key={idx}
                         onClick={() => setGoal(suggestion)}
-                        className="p-3 bg-white/5 border border-white/10 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                        className="p-3.5 bg-white/5 border border-white/10 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
                       >
-                        <p className="text-sm text-white">{suggestion}</p>
+                        <p className="text-white text-md">{suggestion}</p>
                       </div>
                     ))}
                   </div>
@@ -263,14 +263,14 @@ const Survey = () => {
             <div className="flex gap-3">
               <button
                 onClick={prevStep}
-                className="flex-1 py-3 rounded-xl bg-[#1A1A1A] border border-white/10 text-white flex items-center justify-center gap-2 hover:bg-[#222222] active:scale-[0.98] transition-all"
+                className="flex-1 py-3.5 rounded-xl bg-[#1A1A1A] border border-white/10 text-white flex items-center justify-center gap-2 hover:bg-[#222222] active:scale-[0.98] transition-all font-medium"
               >
                 <ArrowLeft size={18} /> Back
               </button>
               <button
                 onClick={nextStep}
                 disabled={!goal.trim()}
-                className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 transition-all ${
+                className={`flex-1 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all font-medium ${
                   goal.trim()
                     ? "bg-white text-black hover:bg-white/90 active:scale-[0.98]"
                     : "bg-white/20 text-white/50 cursor-not-allowed"
@@ -295,9 +295,9 @@ const Survey = () => {
               <div className="inline-flex p-3 bg-white/10 rounded-full mb-4">
                 <FileQuestion className="w-8 h-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-white">What's your biggest struggle?</h2>
+              <h2 className="text-2xl font-bold text-white">Identify Your Challenge</h2>
               <p className="text-white/70 mt-2">
-                Understanding your challenges helps us create a better plan for you.
+                Select what's currently holding you back from achieving your goals
               </p>
             </div>
 
@@ -306,24 +306,24 @@ const Survey = () => {
                 <div
                   key={challenge}
                   onClick={() => setBiggestStruggle(challenge)}
-                  className={`p-3 rounded-lg transition-all cursor-pointer ${
+                  className={`p-3.5 rounded-lg transition-all cursor-pointer ${
                     biggestStruggle === challenge
-                      ? "bg-white/20 border border-white"
-                      : "bg-[#1A1A1A] border border-white/10 hover:bg-[#222222]"
+                      ? "bg-white text-black border border-white"
+                      : "bg-[#1A1A1A] border border-white/20 hover:bg-[#222222] text-white"
                   }`}
                 >
-                  <span className="text-sm">{challenge}</span>
+                  <span className="text-sm font-medium">{challenge}</span>
                 </div>
               ))}
               <div
                 onClick={() => setBiggestStruggle("Other")}
-                className={`p-3 rounded-lg transition-all cursor-pointer ${
+                className={`p-3.5 rounded-lg transition-all cursor-pointer ${
                   biggestStruggle === "Other"
-                    ? "bg-white/20 border border-white"
-                    : "bg-[#1A1A1A] border border-white/10 hover:bg-[#222222]"
+                    ? "bg-white text-black border border-white"
+                    : "bg-[#1A1A1A] border border-white/20 hover:bg-[#222222] text-white"
                 }`}
               >
-                <span className="text-sm">Other</span>
+                <span className="text-sm font-medium">Other</span>
               </div>
             </div>
 
@@ -333,8 +333,8 @@ const Survey = () => {
                   type="text"
                   value={customStruggle}
                   onChange={(e) => setCustomStruggle(e.target.value)}
-                  placeholder="Describe your struggle..."
-                  className="w-full bg-[#1A1A1A] border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-white/30"
+                  placeholder="Describe your challenge..."
+                  className="w-full bg-[#1A1A1A] border border-white/20 rounded-lg p-3.5 text-white focus:outline-none focus:border-white/30 text-md"
                 />
               </div>
             )}
@@ -342,14 +342,14 @@ const Survey = () => {
             <div className="flex gap-3">
               <button
                 onClick={prevStep}
-                className="flex-1 py-3 rounded-xl bg-[#1A1A1A] border border-white/10 text-white flex items-center justify-center gap-2 hover:bg-[#222222] active:scale-[0.98] transition-all"
+                className="flex-1 py-3.5 rounded-xl bg-[#1A1A1A] border border-white/20 text-white flex items-center justify-center gap-2 hover:bg-[#222222] active:scale-[0.98] transition-all font-medium"
               >
                 <ArrowLeft size={18} /> Back
               </button>
               <button
                 onClick={nextStep}
                 disabled={!biggestStruggle || (biggestStruggle === "Other" && !customStruggle.trim())}
-                className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 transition-all ${
+                className={`flex-1 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all font-medium ${
                   (biggestStruggle && biggestStruggle !== "Other") || (biggestStruggle === "Other" && customStruggle.trim())
                     ? "bg-white text-black hover:bg-white/90 active:scale-[0.98]"
                     : "bg-white/20 text-white/50 cursor-not-allowed"
@@ -374,9 +374,9 @@ const Survey = () => {
               <div className="inline-flex p-3 bg-white/10 rounded-full mb-4">
                 <Clock className="w-8 h-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-white">Daily commitment</h2>
+              <h2 className="text-2xl font-bold text-white">Set Your Commitment</h2>
               <p className="text-white/70 mt-2">
-                How many minutes can you commit to {theme} each day?
+                How many minutes can you dedicate to your growth each day?
               </p>
             </div>
 
@@ -385,10 +385,10 @@ const Survey = () => {
                 <button
                   key={minutes}
                   onClick={() => setDailyCommitment(minutes)}
-                  className={`py-4 rounded-xl border transition-all ${
+                  className={`py-4 rounded-xl transition-all ${
                     dailyCommitment === minutes
-                      ? "bg-white text-black border-white"
-                      : "bg-[#1A1A1A] border-white/10 text-white hover:bg-[#222222]"
+                      ? "bg-white text-black border border-white font-bold"
+                      : "bg-[#1A1A1A] border-white/20 border text-white hover:bg-[#222222]"
                   }`}
                 >
                   {minutes} min
@@ -399,14 +399,14 @@ const Survey = () => {
             <div className="flex gap-3">
               <button
                 onClick={prevStep}
-                className="flex-1 py-3 rounded-xl bg-[#1A1A1A] border border-white/10 text-white flex items-center justify-center gap-2 hover:bg-[#222222] active:scale-[0.98] transition-all"
+                className="flex-1 py-3.5 rounded-xl bg-[#1A1A1A] border border-white/20 text-white flex items-center justify-center gap-2 hover:bg-[#222222] active:scale-[0.98] transition-all font-medium"
               >
                 <ArrowLeft size={18} /> Back
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={!dailyCommitment || loading}
-                className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 transition-all ${
+                className={`flex-1 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all font-medium ${
                   dailyCommitment && !loading
                     ? "bg-white text-black hover:bg-white/90 active:scale-[0.98]"
                     : "bg-white/20 text-white/50 cursor-not-allowed"
@@ -415,7 +415,7 @@ const Survey = () => {
                 {loading ? (
                   <span className="flex items-center gap-2">
                     <span className="animate-spin h-4 w-4 border-2 border-black/20 border-t-black rounded-full"></span>
-                    Creating...
+                    Creating Plan...
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
@@ -437,7 +437,7 @@ const Survey = () => {
         <div className="mb-8">
           <div className="flex justify-between items-center mb-3">
             <h1 className="text-xl font-bold">{theme} Journey</h1>
-            <div className="text-sm text-white/50">Step {step} of 4</div>
+            <div className="text-sm text-white/60 font-medium">Step {step} of 4</div>
           </div>
           <div className="w-full h-2 bg-[#1A1A1A] rounded-full overflow-hidden">
             <div

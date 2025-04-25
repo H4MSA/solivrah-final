@@ -20,6 +20,7 @@ import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 
+// Create a new QueryClient instance with custom options
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -30,16 +31,15 @@ const queryClient = new QueryClient({
   },
 });
 
+// SessionHandler component to manage authentication state
 const SessionHandler = ({ children }: { children: React.ReactNode }) => {
   const { setUser, setSession } = useApp();
-  const navigate = useNavigate();
-  const location = useLocation();
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     // Set up auth state listener FIRST (critical for avoiding auth deadlocks)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log("Auth state changed:", event);
         setSession(session);
         setUser(session?.user ?? null);
@@ -47,17 +47,25 @@ const SessionHandler = ({ children }: { children: React.ReactNode }) => {
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("Initial session check:", session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
-      setChecking(false);
-    });
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log("Initial session check:", session?.user?.email || "No session");
+        setSession(session);
+        setUser(session?.user ?? null);
+      } catch (error) {
+        console.error("Session check error:", error);
+      } finally {
+        setChecking(false);
+      }
+    };
+    
+    checkSession();
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [setUser, setSession, navigate]);
+  }, [setUser, setSession]);
 
   if (checking) {
     return (
@@ -76,9 +84,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen bg-black">
-      <div className="animate-spin w-8 h-8 border-t-2 border-white rounded-full"></div>
-    </div>;
+    return (
+      <div className="flex items-center justify-center h-screen bg-black">
+        <div className="animate-spin w-8 h-8 border-t-2 border-white rounded-full"></div>
+      </div>
+    );
   }
 
   if (!user && !isGuest) {
@@ -98,7 +108,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       {/* Main content area with scroll */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden page-transition">
         {children}
       </main>
 
@@ -109,6 +119,34 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
+  // Check if app is installed as PWA
+  const [isPWA, setIsPWA] = useState(false);
+  
+  useEffect(() => {
+    // Check if app is running as installed PWA
+    const isPWACheck = window.matchMedia('(display-mode: standalone)').matches;
+    setIsPWA(isPWACheck);
+    
+    // Request camera permission on mobile devices
+    const requestCameraPermission = async () => {
+      if ('mediaDevices' in navigator && isPWACheck) {
+        try {
+          // Just check if we can access the camera
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const hasCamera = devices.some(device => device.kind === 'videoinput');
+          
+          if (hasCamera) {
+            console.log("Camera access is available");
+          }
+        } catch (err) {
+          console.log("Camera access may require permission", err);
+        }
+      }
+    };
+    
+    requestCameraPermission();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AppProvider>
