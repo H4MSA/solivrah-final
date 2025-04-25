@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { GlassCard } from '@/components/GlassCard';
@@ -15,7 +14,7 @@ import { CameraUpload } from '@/components/CameraUpload';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Profile = () => {
-  const { user, xp, streak, signOut, selectedTheme, setSelectedTheme, resetProfile } = useApp();
+  const { user, xp, streak, signOut, selectedTheme, setSelectedTheme, resetProgress } = useApp();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("stats");
   const [showProfileUpload, setShowProfileUpload] = useState(false);
@@ -52,7 +51,7 @@ const Profile = () => {
   const handleResetProfile = async () => {
     setIsResetting(true);
     try {
-      await resetProfile();
+      await resetProgress();
       toast({
         title: "Profile reset successful",
         description: "Your progress has been reset.",
@@ -364,7 +363,10 @@ const Profile = () => {
             
             {/* Reset Profile Section */}
             <motion.div variants={itemVariants}>
-              <ProfileReset onReset={handleResetProfile} isLoading={isResetting} />
+              <ProfileReset 
+                onReset={handleResetProfile} 
+                isLoading={isResetting} 
+              />
             </motion.div>
           </motion.div>
         </TabsContent>

@@ -5,13 +5,23 @@ import { RefreshCw, AlertTriangle, Check, X } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { useToast } from "@/hooks/use-toast";
 
-export const ProfileReset = () => {
+interface ProfileResetProps {
+  onReset?: () => Promise<void>;
+  isLoading?: boolean;
+}
+
+export const ProfileReset: React.FC<ProfileResetProps> = ({ onReset, isLoading = false }) => {
   const [showConfirm, setShowConfirm] = useState(false);
   const { resetProgress } = useApp();
   const { toast } = useToast();
 
-  const handleReset = () => {
-    resetProgress();
+  const handleReset = async () => {
+    if (onReset) {
+      await onReset();
+    } else {
+      resetProgress();
+    }
+    
     setShowConfirm(false);
     
     toast({
@@ -27,8 +37,9 @@ export const ProfileReset = () => {
         <button
           onClick={() => setShowConfirm(true)}
           className="w-full py-3 rounded-xl bg-[#1A1A1A]/80 border border-white/10 text-white flex items-center justify-center gap-2 hover:bg-[#222222]/80 active:scale-[0.98] transition-all duration-300 shadow-md"
+          disabled={isLoading}
         >
-          <RefreshCw size={18} />
+          <RefreshCw size={18} className={isLoading ? "animate-spin" : ""} />
           <span>Reset All Progress</span>
         </button>
       ) : (
@@ -55,8 +66,13 @@ export const ProfileReset = () => {
               <button
                 onClick={handleReset}
                 className="py-2 px-4 rounded-xl bg-red-500/80 text-white hover:bg-red-600/80 active:scale-95 transition-all flex items-center gap-2"
+                disabled={isLoading}
               >
-                <Check size={16} />
+                {isLoading ? (
+                  <RefreshCw size={16} className="animate-spin" />
+                ) : (
+                  <Check size={16} />
+                )}
                 <span>Confirm Reset</span>
               </button>
             </div>

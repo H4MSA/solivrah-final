@@ -2,9 +2,9 @@
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/context/AppContext";
-import { motion } from "framer-motion";
+import { motion, HTMLMotionProps } from "framer-motion";
 
-interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
+interface GlassCardProps extends Omit<HTMLMotionProps<"div">, "animate"> {
   children: React.ReactNode;
   className?: string;
   variant?: "default" | "elevated" | "subtle" | "primary" | "interactive" | "dark" | "theme";
@@ -76,6 +76,27 @@ export const GlassCard: React.FC<GlassCardProps> = ({
     setIsPressed(false);
   };
 
+  // Fix: properly type the motion.div props
+  const motionProps: any = {
+    initial: false,
+    style: {
+      boxShadow: getDepthStyle(),
+      ...getThemeStyle(),
+      transform: `${isPressed ? 'scale(0.98)' : 'scale(1)'}`
+    },
+    animate: {
+      y: isHovered ? -4 : 0,
+      boxShadow: isHovered 
+        ? `0 20px 25px rgba(0, 0, 0, 0.2)` 
+        : getDepthStyle()
+    },
+    transition: { 
+      type: "spring", 
+      stiffness: 400, 
+      damping: 17 
+    }
+  };
+
   return (
     <motion.div 
       className={cn(
@@ -92,23 +113,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
         getAnimationClass(),
         className
       )}
-      style={{
-        boxShadow: getDepthStyle(),
-        ...getThemeStyle(),
-        transform: `${isPressed ? 'scale(0.98)' : 'scale(1)'}`
-      }}
-      initial={false}
-      animate={{
-        y: isHovered ? -4 : 0,
-        boxShadow: isHovered 
-          ? `0 20px 25px rgba(0, 0, 0, 0.2)` 
-          : getDepthStyle()
-      }}
-      transition={{ 
-        type: "spring", 
-        stiffness: 400, 
-        damping: 17 
-      }}
+      {...motionProps}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onMouseDown={handleTouchStart}
