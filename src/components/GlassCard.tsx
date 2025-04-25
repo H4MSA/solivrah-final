@@ -76,17 +76,8 @@ export const GlassCard: React.FC<GlassCardProps> = ({
     setIsPressed(false);
   };
 
-  // Fix the type issues with motion.div props
-  const motionProps: {
-    initial: boolean;
-    style: React.CSSProperties;
-    animate: Record<string, any>;
-    transition: {
-      type: string;
-      stiffness: number;
-      damping: number;
-    };
-  } = {
+  // Create custom motion props to fix the TypeScript error
+  const motionProps: any = {
     initial: false,
     style: {
       boxShadow: getDepthStyle(),
