@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/context/AppContext";
@@ -37,16 +36,14 @@ export const GlassCard: React.FC<GlassCardProps> = ({
     }
   };
 
-  // Get theme-specific style
   const getThemeStyle = () => {
     if (variant !== "theme") return {};
 
-    // Define theme-specific glow colors
     const themeColors: {[key: string]: string} = {
-      Focus: "rgba(106, 90, 205, 0.1)",   // Lavender
-      Discipline: "rgba(220, 38, 38, 0.1)", // Red
-      Resilience: "rgba(16, 185, 129, 0.1)", // Green
-      Wildcards: "rgba(245, 158, 11, 0.1)"  // Amber
+      Focus: "rgba(106, 90, 205, 0.1)",
+      Discipline: "rgba(220, 38, 38, 0.1)",
+      Resilience: "rgba(16, 185, 129, 0.1)",
+      Wildcards: "rgba(245, 158, 11, 0.1)"
     };
 
     const color = themeColors[selectedTheme as string] || themeColors.Focus;
@@ -76,7 +73,6 @@ export const GlassCard: React.FC<GlassCardProps> = ({
     setIsPressed(false);
   };
 
-  // Create custom motion props to fix the TypeScript error
   const motionProps: any = {
     initial: false,
     style: {
@@ -100,14 +96,14 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   return (
     <motion.div 
       className={cn(
-        "relative backdrop-blur-lg border rounded-xl transition-all duration-300 transform-gpu will-change-transform",
-        variant === "default" && "bg-black/70 border-white/5 text-white",
-        variant === "elevated" && "bg-black/40 border-white/10 text-white",
-        variant === "subtle" && "bg-black/30 border-white/5 text-white",
-        variant === "primary" && "bg-white text-black border-transparent",
-        variant === "interactive" && "bg-black/80 border-white/10 hover:bg-black/70 hover:border-white/20 cursor-pointer active:scale-[0.98]",
-        variant === "dark" && "bg-[#121212]/90 border-white/5 hover:border-white/10",
-        variant === "theme" && "bg-black/60 border-white/10 hover:border-white/20",
+        "relative backdrop-blur-xl border rounded-xl transition-all duration-300 transform-gpu will-change-transform shadow-lg",
+        variant === "default" && "bg-black/50 border-white/10 text-white",
+        variant === "elevated" && "bg-black/30 border-white/20 text-white shadow-xl",
+        variant === "subtle" && "bg-black/20 border-white/5 text-white",
+        variant === "primary" && "bg-gradient-to-b from-white/95 to-white/90 text-black border-transparent",
+        variant === "interactive" && "bg-black/40 border-white/10 hover:bg-black/30 hover:border-white/20 cursor-pointer active:scale-[0.98]",
+        variant === "dark" && "bg-[#121212]/95 border-white/5 hover:border-white/10",
+        variant === "theme" && "bg-black/40 border-white/10 hover:border-white/20",
         interactive && "cursor-pointer active:scale-[0.98]",
         isPressed && "scale-[0.98]",
         getAnimationClass(),
@@ -122,12 +118,8 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       onMouseLeave={handleMouseLeave}
       {...props}
     >
-      <div className="relative z-10">
-        {children}
-      </div>
-      
-      {/* Subtle inner highlight for 3D effect */}
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-b from-white/5 to-transparent pointer-events-none"></div>
+      {children}
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
     </motion.div>
   );
 };

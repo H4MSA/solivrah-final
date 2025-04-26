@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { GlassCard } from '@/components/GlassCard';
@@ -24,7 +23,6 @@ const Profile = () => {
   const [bannerImageUrl, setBannerImageUrl] = useState<string | null>(null);
   const [isResetting, setIsResetting] = useState(false);
   
-  // Profile themes
   const themes = [
     { id: "Discipline", name: "Discipline", color: "from-red-400/20 to-red-700/10" },
     { id: "Focus", name: "Focus", color: "from-purple-400/20 to-purple-700/10" },
@@ -76,14 +74,12 @@ const Profile = () => {
       const fileExt = file.name.split('.').pop();
       const filePath = `profile-images/${user.id}-${Date.now()}.${fileExt}`;
       
-      // Upload image to storage
       const { error: uploadError } = await supabase.storage
         .from('profile-images')
         .upload(filePath, file);
         
       if (uploadError) throw uploadError;
       
-      // Get public URL
       const { data: urlData } = supabase.storage
         .from('profile-images')
         .getPublicUrl(filePath);
@@ -113,14 +109,12 @@ const Profile = () => {
       const fileExt = file.name.split('.').pop();
       const filePath = `banner-images/${user.id}-${Date.now()}.${fileExt}`;
       
-      // Upload image to storage
       const { error: uploadError } = await supabase.storage
         .from('profile-images')
         .upload(filePath, file);
         
       if (uploadError) throw uploadError;
       
-      // Get public URL
       const { data: urlData } = supabase.storage
         .from('profile-images')
         .getPublicUrl(filePath);
@@ -261,11 +255,24 @@ const Profile = () => {
       </div>
       
       <Tabs defaultValue="stats" className="px-4">
-        <TabsList className="grid grid-cols-3 mb-6 bg-black/40 backdrop-blur-md border border-white/10 rounded-lg">
+        <TabsList className="grid grid-cols-4 mb-6 bg-black/40 backdrop-blur-md border border-white/10 rounded-lg">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-white/10">Overview</TabsTrigger>
           <TabsTrigger value="stats" className="data-[state=active]:bg-white/10">Stats</TabsTrigger>
           <TabsTrigger value="achievements" className="data-[state=active]:bg-white/10">Achievements</TabsTrigger>
           <TabsTrigger value="settings" className="data-[state=active]:bg-white/10">Settings</TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="overview" className="mt-0">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div variants={itemVariants}>
+              <ProfileOverview />
+            </motion.div>
+          </motion.div>
+        </TabsContent>
         
         <TabsContent value="stats" className="mt-0">
           <motion.div
