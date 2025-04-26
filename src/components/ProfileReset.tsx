@@ -1,84 +1,81 @@
 
-import React, { useState } from "react";
-import { GlassCard } from "./GlassCard";
-import { RefreshCw, AlertTriangle, Check, X } from "lucide-react";
-import { useApp } from "@/context/AppContext";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState } from 'react';
+import { GlassCard } from './GlassCard';
+import { AlertTriangle, RotateCcw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProfileResetProps {
-  onReset?: () => Promise<void>;
-  isLoading?: boolean;
+  onReset: () => Promise<void>;
+  isLoading: boolean;
 }
 
-export const ProfileReset: React.FC<ProfileResetProps> = ({ onReset, isLoading = false }) => {
+export const ProfileReset: React.FC<ProfileResetProps> = ({ onReset, isLoading }) => {
   const [showConfirm, setShowConfirm] = useState(false);
-  const { resetProgress } = useApp();
-  const { toast } = useToast();
-
-  const handleReset = async () => {
-    if (onReset) {
-      await onReset();
-    } else {
-      resetProgress();
-    }
-    
-    setShowConfirm(false);
-    
-    toast({
-      title: "Progress Reset",
-      description: "All your progress and stats have been reset.",
-      variant: "default",
-    });
+  
+  const handleRequestReset = () => {
+    setShowConfirm(true);
   };
-
+  
+  const handleCancelReset = () => {
+    setShowConfirm(false);
+  };
+  
+  const handleConfirmReset = async () => {
+    await onReset();
+    setShowConfirm(false);
+  };
+  
   return (
-    <div className="mt-4">
-      {!showConfirm ? (
-        <button
-          onClick={() => setShowConfirm(true)}
-          className="w-full py-3 rounded-xl bg-[#1A1A1A]/80 border border-white/10 text-white flex items-center justify-center gap-2 hover:bg-[#222222]/80 active:scale-[0.98] transition-all duration-300 shadow-md"
-          disabled={isLoading}
-        >
-          <RefreshCw size={18} className={isLoading ? "animate-spin" : ""} />
-          <span>Reset All Progress</span>
-        </button>
-      ) : (
-        <GlassCard variant="dark" className="p-4 animate-pop-in">
-          <div className="text-center space-y-3">
-            <div className="flex justify-center">
-              <div className="p-2 rounded-full bg-red-500/20 mb-2">
-                <AlertTriangle size={24} className="text-red-400" />
-              </div>
-            </div>
-            <h3 className="text-lg font-semibold">Reset Progress?</h3>
-            <p className="text-sm text-white/70">
-              This will reset all your XP, streaks, badges, and completed quests. This action cannot be undone.
+    <GlassCard variant="dark" className="p-5 relative overflow-hidden">
+      <AnimatePresence>
+        {showConfirm ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center p-5 backdrop-blur-sm"
+          >
+            <AlertTriangle size={32} className="text-red-400 mb-3" />
+            <h4 className="text-lg font-medium mb-2 text-center">Reset All Progress?</h4>
+            <p className="text-sm text-white/70 mb-6 text-center">
+              This will reset all your stats, badges, and completed quests. This action cannot be undone.
             </p>
-            
-            <div className="flex justify-center gap-3 pt-2">
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="py-2 px-4 rounded-xl border border-white/10 text-white hover:bg-white/5 active:scale-95 transition-all flex items-center gap-2"
-              >
-                <X size={16} />
-                <span>Cancel</span>
-              </button>
-              <button
-                onClick={handleReset}
-                className="py-2 px-4 rounded-xl bg-red-500/80 text-white hover:bg-red-600/80 active:scale-95 transition-all flex items-center gap-2"
+            <div className="flex gap-3 w-full">
+              <Button 
+                variant="outline" 
+                className="flex-1 bg-transparent border-white/10"
+                onClick={handleCancelReset}
                 disabled={isLoading}
               >
-                {isLoading ? (
-                  <RefreshCw size={16} className="animate-spin" />
-                ) : (
-                  <Check size={16} />
-                )}
-                <span>Confirm Reset</span>
-              </button>
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                className="flex-1"
+                onClick={handleConfirmReset}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Resetting...' : 'Reset All'}
+              </Button>
             </div>
-          </div>
-        </GlassCard>
-      )}
-    </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+      
+      <h3 className="text-lg font-medium text-white mb-3">Reset Progress</h3>
+      <p className="text-sm text-white/70 mb-4">
+        This will reset all your stats, badges, and completed quests. Use this option if you want to start fresh.
+      </p>
+      <Button 
+        variant="outline" 
+        className="bg-black/30 text-white hover:bg-black/50 w-full border-white/10"
+        onClick={handleRequestReset}
+      >
+        <RotateCcw size={16} className="mr-2" />
+        Reset All Progress
+      </Button>
+    </GlassCard>
   );
 };
