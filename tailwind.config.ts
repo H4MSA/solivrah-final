@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -18,6 +19,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ["Inter", "SF Pro Display", "system-ui", "sans-serif"],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -156,8 +160,17 @@ export default {
 					}
 				}
 			},
-			fontFamily: {
-				sans: ['"SF Pro Display"', 'system-ui', 'sans-serif']
+			animation: {
+				'accordion-down': 'accordion-down 0.2s ease-out',
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.4s ease-out forwards',
+				'scale': 'scale 0.2s ease-out',
+				'slide-in': 'slide-in 0.3s ease-out',
+				'slide-out': 'slide-out 0.3s ease-out',
+				'pop-in': 'pop-in 0.5s forwards',
+				'blur-in': 'blur-in 0.5s ease-out',
+				'float': 'float 5s infinite ease-in-out',
+				'pulse': 'pulse 2s infinite ease-in-out'
 			}
 		}
 	},

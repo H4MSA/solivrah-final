@@ -6,25 +6,34 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { motion } from 'framer-motion';
-import { Camera, Edit, LogOut, UserCircle, Send } from 'lucide-react';
+import { 
+  Award, 
+  Calendar, 
+  Camera, 
+  Edit, 
+  LogOut, 
+  Send, 
+  Settings, 
+  Share2, 
+  Trophy, 
+  UserCircle 
+} from 'lucide-react';
 import { ProfileReset } from '@/components/ProfileReset';
-import { ProfileStats } from '@/components/ProfileStats';
-import { ProfileAchievements } from '@/components/ProfileAchievements';
-import { ProfileOverview } from '@/components/ProfileOverview';
 import { useToast } from '@/hooks/use-toast';
 import { CameraUpload } from '@/components/CameraUpload';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TabNavigation } from '@/components/TabNavigation';
 
 const Profile = () => {
-  const { user, xp, streak, signOut, selectedTheme, setSelectedTheme, resetProgress } = useApp();
+  const { user, xp, streak, signOut, selectedTheme, setSelectedTheme, resetProgress, completedQuests } = useApp();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("overview");
   const [showProfileUpload, setShowProfileUpload] = useState(false);
   const [showBannerUpload, setShowBannerUpload] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [bannerImageUrl, setBannerImageUrl] = useState<string | null>(null);
   const [isResetting, setIsResetting] = useState(false);
+  
+  const level = Math.floor(xp / 1000) + 1;
+  const xpToNextLevel = 1000 - (xp % 1000);
   
   const themes = [
     { id: "Discipline", name: "Discipline", color: "from-red-400/20 to-red-700/10" },
@@ -140,6 +149,7 @@ const Profile = () => {
     }
   };
 
+  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -158,17 +168,25 @@ const Profile = () => {
       transition: { type: "spring", stiffness: 300, damping: 24 }
     }
   };
+
+  const badges = [
+    { name: "Early Adopter", icon: <Award size={20} />, unlocked: true },
+    { name: "7-Day Streak", icon: <Trophy size={20} />, unlocked: streak >= 7 },
+    { name: "First Quest", icon: <Award size={20} />, unlocked: completedQuests > 0 },
+    { name: "Social", icon: <Share2 size={20} />, unlocked: false }
+  ];
   
   return (
     <div className="min-h-screen pb-24 text-white">
       <motion.div 
-        className="px-5 pt-6 pb-24"
+        className="px-4 pt-6 pb-24"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
+        {/* Profile Header with Banner and Avatar */}
         <motion.div variants={itemVariants} className="mb-6">
-          <PremiumCard className="relative h-48 overflow-hidden rounded-xl">
+          <PremiumCard className="relative h-40 overflow-hidden rounded-[8px]">
             <div className={`absolute inset-0 bg-gradient-to-tr ${
               themes.find(t => t.id === selectedTheme)?.color || "from-purple-400/20 to-purple-700/10"
             }`}>
@@ -182,6 +200,7 @@ const Profile = () => {
                 <div className="w-full h-full">
                   <div className="absolute inset-0 bg-grid-white/[0.02]"></div>
                   
+                  {/* Theme-based backgrounds */}
                   {selectedTheme === "Discipline" && (
                     <div className="absolute inset-0 flex items-center justify-center opacity-10">
                       <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white">
@@ -226,8 +245,10 @@ const Profile = () => {
               )}
             </div>
             
+            {/* Banner overlay gradient */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
             
+            {/* Edit banner button */}
             <button
               onClick={() => setShowBannerUpload(true)}
               className="absolute top-4 right-4 bg-black/40 p-2 rounded-full backdrop-blur-sm border border-white/10 hover:bg-black/60 transition-all"
@@ -235,139 +256,177 @@ const Profile = () => {
               <Edit size={16} className="text-white" />
             </button>
             
-            <div className="absolute -bottom-12 left-4 h-24 w-24 rounded-full border-4 border-[#030303] shadow-xl">
-              <Avatar className="h-full w-full">
-                {profileImageUrl ? (
-                  <AvatarImage src={profileImageUrl} alt="Profile" className="object-cover" />
-                ) : (
-                  <AvatarFallback className="bg-black text-white text-xl">
-                    {user?.email?.charAt(0).toUpperCase() || <UserCircle size={28} />}
-                  </AvatarFallback>
-                )}
-              </Avatar>
+            {/* User avatar */}
+            <div className="absolute bottom-4 left-4 flex items-center gap-3">
+              <div className="relative">
+                <Avatar className="h-16 w-16 border-2 border-[#030303] shadow-xl">
+                  {profileImageUrl ? (
+                    <AvatarImage src={profileImageUrl} alt="Profile" className="object-cover" />
+                  ) : (
+                    <AvatarFallback className="bg-black text-white text-xl">
+                      {user?.email?.charAt(0).toUpperCase() || <UserCircle size={28} />}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                
+                <button
+                  onClick={() => setShowProfileUpload(true)}
+                  className="absolute bottom-0 right-0 bg-black/80 p-1.5 rounded-full backdrop-blur-sm border border-white/10 hover:bg-black/60 transition-all"
+                >
+                  <Camera size={14} className="text-white" />
+                </button>
+              </div>
               
-              <button
-                onClick={() => setShowProfileUpload(true)}
-                className="absolute bottom-0 right-0 bg-black/80 p-1.5 rounded-full backdrop-blur-sm border border-white/10 hover:bg-black/60 transition-all"
-              >
-                <Camera size={14} className="text-white" />
-              </button>
+              {/* User info */}
+              <div>
+                <h2 className="font-bold text-white">
+                  {user?.email?.split('@')[0] || "Guest User"}
+                </h2>
+                <p className="text-white/70 text-xs">
+                  {selectedTheme} • Level {level} • {streak} day streak
+                </p>
+              </div>
+            </div>
+            
+            {/* Settings button */}
+            <button
+              onClick={() => {/* Show settings */}}
+              className="absolute bottom-4 right-4 bg-black/40 p-2 rounded-full backdrop-blur-sm border border-white/10 hover:bg-black/60 transition-all"
+            >
+              <Settings size={16} className="text-white" />
+            </button>
+          </PremiumCard>
+        </motion.div>
+        
+        {/* XP and Level Progress */}
+        <motion.div variants={itemVariants} className="mb-6">
+          <PremiumCard className="p-4">
+            <div className="flex justify-between items-center mb-3">
+              <div>
+                <h3 className="text-lg font-semibold">Level {level}</h3>
+                <p className="text-xs text-white/70">{xpToNextLevel} XP to next level</p>
+              </div>
+              <div className="bg-white/5 px-3 py-1 rounded-full border border-white/10">
+                <span className="text-white font-medium">{xp} XP</span>
+              </div>
+            </div>
+            
+            {/* Progress bar */}
+            <div className="h-2 bg-white/5 rounded-full overflow-hidden mb-1">
+              <div 
+                className="h-full bg-white/30 rounded-full transition-all duration-500"
+                style={{ width: `${(xp % 1000) / 10}%` }}
+              />
             </div>
           </PremiumCard>
         </motion.div>
         
-        <motion.div variants={itemVariants} className="mt-16 mb-6">
-          <h2 className="text-xl font-bold text-white">
-            {user?.email?.split('@')[0] || "Guest User"}
-          </h2>
-          <p className="text-white/70 text-sm">
-            {selectedTheme} Journey • {xp} XP • {streak} day streak
-          </p>
+        {/* Stats Grid */}
+        <motion.div variants={itemVariants} className="grid grid-cols-3 gap-3 mb-6">
+          <PremiumCard className="p-4 flex flex-col items-center justify-center">
+            <div className="text-2xl font-semibold mb-1">{streak}</div>
+            <div className="text-xs text-white/70">Day Streak</div>
+          </PremiumCard>
+          
+          <PremiumCard className="p-4 flex flex-col items-center justify-center">
+            <div className="text-2xl font-semibold mb-1">{completedQuests}</div>
+            <div className="text-xs text-white/70">Completed</div>
+          </PremiumCard>
+          
+          <PremiumCard className="p-4 flex flex-col items-center justify-center">
+            <div className="text-2xl font-semibold mb-1">{level}</div>
+            <div className="text-xs text-white/70">Current Level</div>
+          </PremiumCard>
         </motion.div>
         
-        <motion.div variants={itemVariants}>
-          <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-4 mb-6 bg-black/30 backdrop-blur-md border border-white/10 rounded-lg">
-              <TabsTrigger value="overview" className="data-[state=active]:bg-white/10">Overview</TabsTrigger>
-              <TabsTrigger value="achievements" className="data-[state=active]:bg-white/10">Badges</TabsTrigger>
-              <TabsTrigger value="stats" className="data-[state=active]:bg-white/10">Stats</TabsTrigger>
-              <TabsTrigger value="settings" className="data-[state=active]:bg-white/10">Settings</TabsTrigger>
-            </TabsList>
-            
-            <div className="px-0">
-              <TabsContent value="overview" className="mt-0">
-                <motion.div
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate={activeTab === "overview" ? "visible" : "hidden"}
-                >
-                  <ProfileOverview />
-                </motion.div>
-              </TabsContent>
-              
-              <TabsContent value="stats" className="mt-0">
-                <motion.div
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate={activeTab === "stats" ? "visible" : "hidden"}
-                >
-                  <ProfileStats />
-                </motion.div>
-              </TabsContent>
-              
-              <TabsContent value="achievements" className="mt-0">
-                <motion.div
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate={activeTab === "achievements" ? "visible" : "hidden"}
-                >
-                  <ProfileAchievements />
-                </motion.div>
-              </TabsContent>
-              
-              <TabsContent value="settings" className="mt-0">
-                <motion.div
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate={activeTab === "settings" ? "visible" : "hidden"}
-                  className="space-y-4"
-                >
-                  <PremiumCard className="p-5">
-                    <h3 className="text-lg font-medium text-white mb-4">Theme Preference</h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      {themes.map((theme) => (
-                        <button
-                          key={theme.id}
-                          onClick={() => setSelectedTheme(theme.id)}
-                          className={`p-4 rounded-xl transition-all flex items-center justify-center ${
-                            selectedTheme === theme.id 
-                              ? "bg-white text-black font-medium"
-                              : "bg-white/5 text-white/80 border border-white/10 hover:bg-white/10"
-                          }`}
-                        >
-                          {theme.name}
-                        </button>
-                      ))}
-                    </div>
-                  </PremiumCard>
-  
-                  <PremiumCard className="p-5">
-                    <h3 className="text-lg font-medium text-white mb-4">Account</h3>
-                    <div className="space-y-3">
-                      {user ? (
-                        <>
-                          <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/5">
-                            <div className="flex items-center">
-                              <Send size={18} className="text-white/70 mr-3" />
-                              <span className="text-white/90">Email</span>
-                            </div>
-                            <span className="text-white/60 text-sm max-w-[180px] truncate">{user.email}</span>
-                          </div>
-                          
-                          <Button 
-                            onClick={handleSignOut}
-                            className="w-full bg-white/5 text-white hover:bg-white/10 focus:ring-white/10 border border-white/10"
-                          >
-                            <LogOut size={16} className="mr-2" />
-                            Sign Out
-                          </Button>
-                        </>
-                      ) : (
-                        <div className="p-3 rounded-lg bg-white/5 border border-white/5">
-                          <p className="text-white/70">Currently in guest mode</p>
-                        </div>
-                      )}
-                    </div>
-                  </PremiumCard>
-              
-                  <ProfileReset 
-                    onReset={handleResetProfile} 
-                    isLoading={isResetting} 
-                  />
-                </motion.div>
-              </TabsContent>
+        {/* Badges */}
+        <motion.div variants={itemVariants} className="mb-6">
+          <PremiumCard className="p-4">
+            <h3 className="text-lg font-semibold mb-4">Badges</h3>
+            <div className="grid grid-cols-4 gap-3">
+              {badges.map((badge, index) => (
+                <div key={index} className={`flex flex-col items-center ${!badge.unlocked && 'opacity-40'}`}>
+                  <div className={`w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-2 ${badge.unlocked ? 'border border-white/20' : 'border border-white/10'}`}>
+                    {badge.icon}
+                  </div>
+                  <span className="text-xs text-white/70 text-center">{badge.name}</span>
+                </div>
+              ))}
             </div>
-          </Tabs>
+          </PremiumCard>
+        </motion.div>
+        
+        {/* Action Buttons */}
+        <motion.div variants={itemVariants} className="grid grid-cols-3 gap-3 mb-6">
+          <Button variant="outline" className="bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-white/20 h-14 flex flex-col gap-1 rounded-[8px]">
+            <Calendar size={18} />
+            <span className="text-xs">Calendar</span>
+          </Button>
+          <Button variant="outline" className="bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-white/20 h-14 flex flex-col gap-1 rounded-[8px]">
+            <Trophy size={18} />
+            <span className="text-xs">Ranking</span>
+          </Button>
+          <Button variant="outline" className="bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-white/20 h-14 flex flex-col gap-1 rounded-[8px]">
+            <Share2 size={18} />
+            <span className="text-xs">Share</span>
+          </Button>
+        </motion.div>
+        
+        {/* Theme Selector & Account */}
+        <motion.div variants={itemVariants} className="space-y-4">
+          {/* Theme Selection */}
+          <PremiumCard className="p-4">
+            <h3 className="text-lg font-semibold mb-4">Theme</h3>
+            <div className="grid grid-cols-2 gap-3">
+              {themes.map((theme) => (
+                <button
+                  key={theme.id}
+                  onClick={() => setSelectedTheme(theme.id)}
+                  className={`p-3 h-12 rounded-[8px] transition-all flex items-center justify-center ${
+                    selectedTheme === theme.id 
+                      ? "bg-white text-black font-medium"
+                      : "bg-white/5 text-white/80 border border-white/10 hover:bg-white/10"
+                  }`}
+                >
+                  {theme.name}
+                </button>
+              ))}
+            </div>
+          </PremiumCard>
+          
+          {/* Account Section */}
+          <PremiumCard className="p-4">
+            <h3 className="text-lg font-semibold mb-4">Account</h3>
+            {user ? (
+              <>
+                <div className="flex items-center justify-between p-3 mb-4 rounded-[8px] bg-white/5 border border-white/5">
+                  <div className="flex items-center">
+                    <Send size={18} className="text-white/70 mr-3" />
+                    <span className="text-white/90">Email</span>
+                  </div>
+                  <span className="text-white/60 text-sm max-w-[180px] truncate">{user.email}</span>
+                </div>
+                
+                <Button 
+                  onClick={handleSignOut}
+                  className="w-full bg-white/5 text-white hover:bg-white/10 focus:ring-white/10 border border-white/10 rounded-[8px]"
+                >
+                  <LogOut size={16} className="mr-2" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <div className="p-3 rounded-[8px] bg-white/5 border border-white/5">
+                <p className="text-white/70">Currently in guest mode</p>
+              </div>
+            )}
+          </PremiumCard>
+          
+          {/* Profile Reset */}
+          <ProfileReset 
+            onReset={handleResetProfile} 
+            isLoading={isResetting} 
+          />
         </motion.div>
 
         {showProfileUpload && (

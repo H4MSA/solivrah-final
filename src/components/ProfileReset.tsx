@@ -27,7 +27,7 @@ export const ProfileReset: React.FC<ProfileResetProps> = ({ onReset, isLoading }
   };
   
   return (
-    <PremiumCard className="p-5 relative overflow-hidden">
+    <PremiumCard className="p-4 relative overflow-hidden">
       <AnimatePresence>
         {showConfirm ? (
           <motion.div
@@ -37,7 +37,7 @@ export const ProfileReset: React.FC<ProfileResetProps> = ({ onReset, isLoading }
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-6 backdrop-blur-sm"
           >
-            <AlertTriangle size={32} className="text-red-400 mb-4" />
+            <AlertTriangle size={28} className="text-red-400 mb-4" />
             <h4 className="text-lg font-medium mb-3 text-center">Reset All Progress?</h4>
             <p className="text-sm text-white/70 mb-6 text-center">
               This will reset all your stats, badges, and completed quests. This action cannot be undone.
@@ -45,7 +45,7 @@ export const ProfileReset: React.FC<ProfileResetProps> = ({ onReset, isLoading }
             <div className="flex gap-4 w-full">
               <Button 
                 variant="outline" 
-                className="flex-1 bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20"
+                className="flex-1 bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20 rounded-[8px]"
                 onClick={handleCancelReset}
                 disabled={isLoading}
               >
@@ -53,7 +53,7 @@ export const ProfileReset: React.FC<ProfileResetProps> = ({ onReset, isLoading }
               </Button>
               <Button 
                 variant="destructive" 
-                className="flex-1"
+                className="flex-1 rounded-[8px]"
                 onClick={handleConfirmReset}
                 disabled={isLoading}
               >
@@ -64,13 +64,13 @@ export const ProfileReset: React.FC<ProfileResetProps> = ({ onReset, isLoading }
         ) : null}
       </AnimatePresence>
       
-      <h3 className="text-lg font-medium text-white mb-3">Reset Progress</h3>
-      <p className="text-sm text-white/70 mb-5">
+      <h3 className="text-lg font-semibold text-white mb-3">Reset Progress</h3>
+      <p className="text-sm text-white/70 mb-4">
         This will reset all your stats, badges, and completed quests. Use this option if you want to start fresh.
       </p>
       <Button 
         variant="outline" 
-        className="bg-white/5 text-white hover:bg-white/10 w-full border-white/10 hover:border-white/20"
+        className="bg-white/5 text-white hover:bg-white/10 w-full border-white/10 hover:border-white/20 rounded-[8px]"
         onClick={handleRequestReset}
       >
         <RotateCcw size={16} className="mr-2" />

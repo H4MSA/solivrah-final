@@ -37,6 +37,7 @@
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border-radius: 8px; /* Standardized corner radius */
 }
 
 /* Animation for page transitions */
@@ -58,6 +59,8 @@
   box-shadow: 
     0 4px 16px rgba(0, 0, 0, 0.2),
     0 0 0 1px rgba(255, 255, 255, 0.05);
+  border-radius: 8px; /* Standardized corner radius */
+  padding: 8px; /* Standardized internal padding */
 }
 
 .glassmorphism-dark {
@@ -65,6 +68,7 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px; /* Standardized corner radius */
 }
 
 .glassmorphism-light {
@@ -72,6 +76,24 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px; /* Standardized corner radius */
+}
+
+/* Neumorphic elements */
+.neumorphic {
+  background: #111;
+  border-radius: 8px; 
+  box-shadow: 
+    5px 5px 10px rgba(0, 0, 0, 0.5),
+    -5px -5px 10px rgba(255, 255, 255, 0.05);
+}
+
+.neumorphic-inset {
+  background: #111;
+  border-radius: 8px;
+  box-shadow: 
+    inset 5px 5px 10px rgba(0, 0, 0, 0.5),
+    inset -5px -5px 10px rgba(255, 255, 255, 0.05);
 }
 
 /* Improved hover effects */
@@ -100,6 +122,31 @@
     0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
+/* Standardized spacing classes */
+.space-y-standard {
+  row-gap: 16px; /* Base spacing unit */
+}
+
+.space-y-large {
+  row-gap: 24px; /* Larger spacing unit */
+}
+
+.space-x-standard {
+  column-gap: 16px; /* Base spacing unit */
+}
+
+.space-x-large {
+  column-gap: 24px; /* Larger spacing unit */
+}
+
+.p-standard {
+  padding: 16px; /* Base padding unit */
+}
+
+.p-large {
+  padding: 24px; /* Larger padding unit */
+}
+
 /* Better animations */
 @keyframes float {
   0% { transform: translateY(0); }
@@ -114,4 +161,61 @@
 /* Better transitions */
 .smooth-transition {
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Standard button styles */
+.btn-standard {
+  height: 48px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+/* Typography styles */
+.h1 {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+
+.h2 {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+
+.body-text {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.small-text {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Card styles */
+.card-standard {
+  margin: 16px;
+  border-radius: 8px;
+  padding: 16px;
+  background: rgba(18, 18, 18, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-vertical-margins {
+  margin-top: 24px;
+  margin-bottom: 24px;
+  margin-left: 16px;
+  margin-right: 16px;
 }

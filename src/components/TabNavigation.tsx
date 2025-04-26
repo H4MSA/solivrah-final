@@ -126,7 +126,7 @@ export function TabNavigation() {
       <div className="mx-auto max-w-lg">
         <PremiumCard 
           variant="dark" 
-          className="flex items-center justify-around py-3 px-5 mx-4 mb-4 rounded-2xl backdrop-blur-2xl"
+          className="flex items-center justify-around py-2 px-4 mx-4 mb-4 rounded-[8px] backdrop-blur-2xl"
           withBorder={true}
         >
           {navItems.map(({ path, icon: Icon, label }) => (
@@ -145,7 +145,7 @@ export function TabNavigation() {
               {isActive(path) && (
                 <motion.div
                   layoutId="nav-indicator"
-                  className="absolute bottom-[55px] h-1 w-1 rounded-full bg-white"
+                  className="absolute bottom-[45px] h-1 w-1 rounded-full bg-white"
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
               )}
