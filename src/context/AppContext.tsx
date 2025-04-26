@@ -1,11 +1,13 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User } from '@supabase/supabase-js';
+import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface AppContextType {
   user: User | null;
   setUser: (user: User | null) => void;
+  session: Session | null;
+  setSession: (session: Session | null) => void;
   selectedTheme: string;
   setSelectedTheme: (theme: string) => void;
   signOut: () => Promise<void>;
@@ -14,21 +16,29 @@ export interface AppContextType {
   completedQuests: number;
   addXP: (amount: number) => void;
   resetProgress: () => Promise<void>;
+  incrementStreak: () => void;
+  loading: boolean;
+  isGuest: boolean;
+  setIsGuest: (isGuest: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [selectedTheme, setSelectedTheme] = useState<string>('Focus');
   const [streak, setStreak] = useState<number>(0);
   const [xp, setXP] = useState<number>(0);
   const [completedQuests, setCompletedQuests] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isGuest, setIsGuest] = useState<boolean>(false);
 
   useEffect(() => {
     // Load user data from localStorage if not in user state
     const getUser = async () => {
       try {
+        setLoading(true);
         const { data: { user } } = await supabase.auth.getUser();
         setUser(user);
 
@@ -48,6 +58,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       } catch (error) {
         console.error('Error loading user:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -64,6 +76,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setSession(null);
+    setIsGuest(false);
     setStreak(0);
     setXP(0);
     setCompletedQuests(0);
@@ -71,6 +85,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const addXP = (amount: number) => {
     setXP(prevXP => prevXP + amount);
+  };
+
+  const incrementStreak = () => {
+    setStreak(prevStreak => prevStreak + 1);
   };
 
   const resetProgress = async () => {
@@ -90,6 +108,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       value={{
         user,
         setUser,
+        session,
+        setSession,
         selectedTheme,
         setSelectedTheme,
         signOut,
@@ -98,6 +118,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         completedQuests,
         addXP,
         resetProgress,
+        incrementStreak,
+        loading,
+        isGuest,
+        setIsGuest,
       }}
     >
       {children}

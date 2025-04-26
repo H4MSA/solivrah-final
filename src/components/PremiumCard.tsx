@@ -1,9 +1,9 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, HTMLMotionProps } from "framer-motion";
 
-interface PremiumCardProps extends React.HTMLAttributes<HTMLDivElement> {
+interface PremiumCardProps extends Omit<HTMLMotionProps<"div">, "whileTap" | "whileHover"> {
   children: React.ReactNode;
   variant?: "default" | "selected" | "dark" | "subtle" | "black";
   interactive?: boolean;
@@ -22,6 +22,12 @@ export const PremiumCard: React.FC<PremiumCardProps> = ({
   ...props
 }) => {
   const isInteractive = interactive || hoverEffect;
+  
+  // Define motion props separately to avoid type conflicts
+  const motionProps: any = {
+    ...(hoverEffect ? { whileHover: { y: -4, scale: 1.01 } } : {}),
+    ...(interactive ? { whileTap: { scale: 0.98 } } : {})
+  };
 
   return (
     <motion.div
@@ -37,8 +43,7 @@ export const PremiumCard: React.FC<PremiumCardProps> = ({
         hoverEffect && "hover:translate-y-[-2px]",
         className
       )}
-      whileHover={hoverEffect ? { y: -4, scale: 1.01 } : {}}
-      whileTap={interactive ? { scale: 0.98 } : {}}
+      {...motionProps}
       {...props}
     >
       {children}
