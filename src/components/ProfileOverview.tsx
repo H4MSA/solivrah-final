@@ -5,7 +5,7 @@ import { GlassCard } from './GlassCard';
 import { useApp } from '@/context/AppContext';
 
 export const ProfileOverview = () => {
-  const { streak, xp, completedQuests = 0 } = useApp();
+  const { streak, xp, completedQuests } = useApp();
 
   return (
     <div className="space-y-6">

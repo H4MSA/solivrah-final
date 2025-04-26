@@ -18,6 +18,7 @@ interface AppContextType {
   setSelectedTheme: (theme: string) => void;
   streak: number;
   xp: number;
+  completedQuests: number;
   addXP: (amount: number) => void;
   incrementStreak: () => void;
   resetProgress: () => void;
@@ -36,6 +37,7 @@ const AppContext = createContext<AppContextType>({
   setSelectedTheme: () => {},
   streak: 0,
   xp: 0,
+  completedQuests: 0,
   addXP: () => {},
   incrementStreak: () => {},
   resetProgress: () => {},
@@ -56,6 +58,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   const [selectedTheme, setSelectedTheme] = useState("Discipline");
   const [streak, setStreak] = useState(0);
   const [xp, setXP] = useState(0);
+  const [completedQuests, setCompletedQuests] = useState(0);
   const [isGuest, setIsGuest] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
 
@@ -83,6 +86,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
           setSelectedTheme(data.theme || "Discipline");
           setStreak(data.streak || 0);
           setXP(data.xp || 0);
+          
+          // Load completed quests count
+          const { data: questsData, error: questsError } = await supabase
+            .from("quests")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("completed", true);
+          
+          if (!questsError && questsData) {
+            setCompletedQuests(questsData.length);
+          }
         } else {
           console.log("No profile found, creating new profile");
           // Profile might not exist if RLS is preventing access or it genuinely doesn't exist
@@ -175,6 +189,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setStreak(0);
     setXP(0);
+    setCompletedQuests(0);
 
     toast({
       title: "Progress Reset",
@@ -186,6 +201,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
         .from("profiles")
         .update({ streak: 0, xp: 0 })
         .eq("id", user.id);
+        
+      // Mark all quests as incomplete
+      await supabase
+        .from("quests")
+        .update({ completed: false, completed_at: null })
+        .eq("user_id", user.id);
     } catch (error) {
       console.error("Error resetting progress:", error);
     }
@@ -225,6 +246,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
         setSelectedTheme: updateSelectedTheme,
         streak,
         xp,
+        completedQuests,
         addXP,
         incrementStreak,
         resetProgress,

@@ -9,6 +9,7 @@ import { Camera, Settings, Edit, LogOut, UserCircle, Award, ChevronRight, Send, 
 import { ProfileReset } from '@/components/ProfileReset';
 import { ProfileStats } from '@/components/ProfileStats';
 import { ProfileAchievements } from '@/components/ProfileAchievements';
+import { ProfileOverview } from '@/components/ProfileOverview';
 import { useToast } from '@/hooks/use-toast';
 import { CameraUpload } from '@/components/CameraUpload';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
