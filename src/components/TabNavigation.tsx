@@ -1,7 +1,8 @@
 
+import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { GlassCard } from "./GlassCard";
+import { PremiumCard } from "./PremiumCard";
 
 export function TabNavigation() {
   const navigate = useNavigate();
@@ -9,7 +10,7 @@ export function TabNavigation() {
 
   const isActive = (path: string) => location.pathname === path;
 
-  // Custom SVG icons for our unique app look
+  // Custom SVG icons specific to our app
   const HomeIcon = ({ active }: { active: boolean }) => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path 
@@ -18,8 +19,7 @@ export function TabNavigation() {
         strokeWidth="1.5" 
         strokeLinecap="round" 
         strokeLinejoin="round"
-        strokeOpacity={active ? "1" : "0.6"}
-        fill={active ? "rgba(255,255,255,0.03)" : "none"}
+        fill={active ? "rgba(255,255,255,0.1)" : "none"}
       />
       {active && <circle cx="12" cy="16" r="1" fill="currentColor" />}
     </svg>
@@ -32,9 +32,8 @@ export function TabNavigation() {
         width="18" height="18" 
         rx="2" 
         stroke="currentColor" 
-        strokeWidth="1.5" 
-        strokeOpacity={active ? "1" : "0.6"}
-        fill={active ? "rgba(255,255,255,0.03)" : "none"}
+        strokeWidth="1.5"
+        fill={active ? "rgba(255,255,255,0.1)" : "none"}
       />
       <path 
         d="M9 14L11 16L15 10" 
@@ -42,35 +41,6 @@ export function TabNavigation() {
         strokeWidth="1.5" 
         strokeLinecap="round" 
         strokeLinejoin="round"
-        strokeOpacity={active ? "1" : "0.6"}
-      />
-    </svg>
-  );
-
-  const CommunityIcon = ({ active }: { active: boolean }) => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle 
-        cx="8" cy="8" 
-        r="4" 
-        stroke="currentColor" 
-        strokeWidth="1.5" 
-        strokeOpacity={active ? "1" : "0.6"}
-        fill={active ? "rgba(255,255,255,0.03)" : "none"}
-      />
-      <circle 
-        cx="16" cy="16" 
-        r="4" 
-        stroke="currentColor" 
-        strokeWidth="1.5" 
-        strokeOpacity={active ? "1" : "0.6"}
-        fill={active ? "rgba(255,255,255,0.03)" : "none"}
-      />
-      <path 
-        d="M15 9L9 15" 
-        stroke="currentColor" 
-        strokeWidth="1.5" 
-        strokeLinecap="round"
-        strokeOpacity={active ? "1" : "0.6"}
       />
     </svg>
   );
@@ -83,8 +53,7 @@ export function TabNavigation() {
         strokeWidth="1.5" 
         strokeLinecap="round" 
         strokeLinejoin="round"
-        strokeOpacity={active ? "1" : "0.6"}
-        fill={active ? "rgba(255,255,255,0.03)" : "none"}
+        fill={active ? "rgba(255,255,255,0.1)" : "none"}
       />
       {active && (
         <>
@@ -96,25 +65,56 @@ export function TabNavigation() {
     </svg>
   );
 
+  const SocialIcon = ({ active }: { active: boolean }) => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle 
+        cx="8" cy="8" 
+        r="4" 
+        stroke="currentColor" 
+        strokeWidth="1.5"
+        fill={active ? "rgba(255,255,255,0.1)" : "none"}
+      />
+      <circle 
+        cx="16" cy="16" 
+        r="4" 
+        stroke="currentColor" 
+        strokeWidth="1.5" 
+        fill={active ? "rgba(255,255,255,0.1)" : "none"}
+      />
+      <path 
+        d="M15 9L9 15" 
+        stroke="currentColor" 
+        strokeWidth="1.5" 
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+
   const ProfileIcon = ({ active }: { active: boolean }) => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle 
         cx="12" cy="8" 
         r="4" 
         stroke="currentColor" 
-        strokeWidth="1.5" 
-        strokeOpacity={active ? "1" : "0.6"}
-        fill={active ? "rgba(255,255,255,0.03)" : "none"}
+        strokeWidth="1.5"
+        fill={active ? "rgba(255,255,255,0.1)" : "none"}
       />
       <path 
         d="M20 19C20 16.2386 16.4183 14 12 14C7.58172 14 4 16.2386 4 19" 
         stroke="currentColor" 
         strokeWidth="1.5" 
         strokeLinecap="round"
-        strokeOpacity={active ? "1" : "0.6"}
       />
     </svg>
   );
+
+  const navItems = [
+    { path: '/home', icon: HomeIcon, label: 'Home' },
+    { path: '/quests', icon: QuestsIcon, label: 'Quests' },
+    { path: '/coach', icon: CoachIcon, label: 'Coach' },
+    { path: '/community', icon: SocialIcon, label: 'Social' },
+    { path: '/profile', icon: ProfileIcon, label: 'Profile' }
+  ];
 
   return (
     <motion.nav 
@@ -124,17 +124,12 @@ export function TabNavigation() {
       transition={{ type: "spring", stiffness: 260, damping: 20 }}
     >
       <div className="mx-auto max-w-lg">
-        <GlassCard 
-          variant="ultra-glass" 
-          className="flex items-center justify-around py-4 px-6 mx-4 mb-4 rounded-2xl"
+        <PremiumCard 
+          variant="dark" 
+          className="flex items-center justify-around py-4 px-6 mx-4 mb-4 rounded-2xl backdrop-blur-2xl"
+          withBorder={true}
         >
-          {[
-            { path: '/home', icon: HomeIcon, label: 'Home' },
-            { path: '/quests', icon: QuestsIcon, label: 'Quests' },
-            { path: '/coach', icon: CoachIcon, label: 'Coach' },
-            { path: '/community', icon: CommunityIcon, label: 'Social' },
-            { path: '/profile', icon: ProfileIcon, label: 'Profile' }
-          ].map(({ path, icon: Icon, label }) => (
+          {navItems.map(({ path, icon: Icon, label }) => (
             <button
               key={path}
               onClick={() => navigate(path)}
@@ -156,7 +151,7 @@ export function TabNavigation() {
               )}
             </button>
           ))}
-        </GlassCard>
+        </PremiumCard>
       </div>
     </motion.nav>
   );

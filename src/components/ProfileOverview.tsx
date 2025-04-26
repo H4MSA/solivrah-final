@@ -1,108 +1,141 @@
 
 import React from 'react';
-import { Star, Trophy, Target, RotateCcw, Calendar, Share2, Download } from 'lucide-react';
-import { GlassCard } from './GlassCard';
+import { Star, Trophy, Target, Calendar, Share2 } from 'lucide-react';
+import { PremiumCard } from './PremiumCard';
 import { useApp } from '@/context/AppContext';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 
-export const ProfileOverview = () => {
+export const ProfileOverview: React.FC = () => {
   const { streak, xp, completedQuests, selectedTheme } = useApp();
   const level = Math.floor(xp / 1000) + 1;
   const xpToNextLevel = 1000 - (xp % 1000);
   
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 300, damping: 24 }
+    }
+  };
+  
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-3 gap-3">
-        <GlassCard variant="dark" className="p-4 flex flex-col items-center justify-center space-y-2">
+    <motion.div 
+      className="space-y-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div variants={itemVariants} className="grid grid-cols-3 gap-3">
+        <PremiumCard className="p-4 flex flex-col items-center justify-center space-y-2">
           <Star className="w-5 h-5 text-white/90" />
           <span className="text-2xl font-semibold">{streak}</span>
           <span className="text-xs text-white/70">Day Streak</span>
-        </GlassCard>
+        </PremiumCard>
         
-        <GlassCard variant="dark" className="p-4 flex flex-col items-center justify-center space-y-2">
+        <PremiumCard className="p-4 flex flex-col items-center justify-center space-y-2">
           <Trophy className="w-5 h-5 text-white/90" />
           <span className="text-2xl font-semibold">{xp}</span>
           <span className="text-xs text-white/70">Total XP</span>
-        </GlassCard>
+        </PremiumCard>
         
-        <GlassCard variant="dark" className="p-4 flex flex-col items-center justify-center space-y-2">
+        <PremiumCard className="p-4 flex flex-col items-center justify-center space-y-2">
           <Target className="w-5 h-5 text-white/90" />
           <span className="text-2xl font-semibold">{completedQuests}</span>
           <span className="text-xs text-white/70">Completed</span>
-        </GlassCard>
-      </div>
+        </PremiumCard>
+      </motion.div>
 
-      <GlassCard variant="dark" className="p-4">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-medium">Level Progress</h3>
-          <RotateCcw size={16} className="text-white/50" />
-        </div>
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-white/70">Level {level}</span>
-            <span className="text-white/70">{xpToNextLevel} XP to Level {level + 1}</span>
+      <motion.div variants={itemVariants}>
+        <PremiumCard className="p-4">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-lg font-medium">Level Progress</h3>
+            <span className="text-xs bg-white/5 px-2 py-1 rounded-full text-white/70 border border-white/5">
+              Level {level}
+            </span>
           </div>
-          <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-white/80 to-white/60 rounded-full transition-all duration-500"
-              style={{ width: `${(xp % 1000) / 10}%` }}
-            />
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-white/70">{xp} XP</span>
+              <span className="text-white/70">{xpToNextLevel} XP to Level {level + 1}</span>
+            </div>
+            <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-white/30 rounded-full transition-all duration-500"
+                style={{ width: `${(xp % 1000) / 10}%` }}
+              />
+            </div>
           </div>
-        </div>
-      </GlassCard>
+        </PremiumCard>
+      </motion.div>
 
-      <GlassCard variant="dark" className="p-4">
-        <h3 className="text-lg font-medium mb-3">Badges</h3>
-        <div className="grid grid-cols-4 gap-4">
-          <div className="flex flex-col items-center">
-            <div className="aspect-square w-12 h-12 rounded-full bg-black/60 flex items-center justify-center mb-2">
-              <Trophy size={20} className="text-white/80" />
+      <motion.div variants={itemVariants}>
+        <PremiumCard className="p-4">
+          <h3 className="text-lg font-medium mb-3">Badges</h3>
+          <div className="grid grid-cols-4 gap-4">
+            <div className="flex flex-col items-center">
+              <div className="aspect-square w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-2 border border-white/10">
+                <Trophy size={20} className="text-white/80" />
+              </div>
+              <span className="text-xs text-white/70 text-center">Early Adopter</span>
             </div>
-            <span className="text-xs text-white/70">Early Adopter</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="aspect-square w-12 h-12 rounded-full bg-black/60 flex items-center justify-center mb-2">
-              <Star size={20} className="text-white/80" />
+            <div className="flex flex-col items-center">
+              <div className="aspect-square w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-2 border border-white/10">
+                <Star size={20} className="text-white/80" />
+              </div>
+              <span className="text-xs text-white/70 text-center">7-Day Streak</span>
             </div>
-            <span className="text-xs text-white/70">7-Day Streak</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="aspect-square w-12 h-12 rounded-full bg-black/60 flex items-center justify-center mb-2">
-              <Target size={20} className="text-white/80" />
+            <div className="flex flex-col items-center">
+              <div className="aspect-square w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-2 border border-white/10">
+                <Target size={20} className="text-white/80" />
+              </div>
+              <span className="text-xs text-white/70 text-center">First Quest</span>
             </div>
-            <span className="text-xs text-white/70">First Quest</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="aspect-square w-12 h-12 rounded-full bg-black/60 flex items-center justify-center mb-2 opacity-50">
-              <Share2 size={20} className="text-white/80" />
+            <div className="flex flex-col items-center opacity-40">
+              <div className="aspect-square w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-2 border border-white/10">
+                <Share2 size={20} className="text-white/80" />
+              </div>
+              <span className="text-xs text-white/70 text-center">Social</span>
             </div>
-            <span className="text-xs text-white/50">Social</span>
           </div>
-        </div>
-      </GlassCard>
+        </PremiumCard>
+      </motion.div>
 
-      <div className="grid grid-cols-3 gap-3">
-        <Button variant="outline" className="bg-black/60 border border-white/10 text-white hover:bg-black/40 hover:border-white/20 h-14 flex flex-col gap-1 rounded-xl">
+      <motion.div variants={itemVariants} className="grid grid-cols-3 gap-3">
+        <Button variant="outline" className="bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-white/20 h-14 flex flex-col gap-1 rounded-xl">
           <Calendar size={18} />
           <span className="text-xs">Calendar</span>
         </Button>
-        <Button variant="outline" className="bg-black/60 border border-white/10 text-white hover:bg-black/40 hover:border-white/20 h-14 flex flex-col gap-1 rounded-xl">
-          <Download size={18} />
-          <span className="text-xs">Export</span>
+        <Button variant="outline" className="bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-white/20 h-14 flex flex-col gap-1 rounded-xl">
+          <Trophy size={18} />
+          <span className="text-xs">Ranking</span>
         </Button>
-        <Button variant="outline" className="bg-black/60 border border-white/10 text-white hover:bg-black/40 hover:border-white/20 h-14 flex flex-col gap-1 rounded-xl">
+        <Button variant="outline" className="bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-white/20 h-14 flex flex-col gap-1 rounded-xl">
           <Share2 size={18} />
           <span className="text-xs">Share</span>
         </Button>
-      </div>
+      </motion.div>
 
-      <GlassCard variant="dark" className="p-4">
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="text-lg font-medium">Theme Preferences</h3>
-          <span className="text-sm text-white/70">{selectedTheme}</span>
-        </div>
-      </GlassCard>
-    </div>
+      <motion.div variants={itemVariants}>
+        <PremiumCard className="p-4">
+          <div className="flex justify-between items-center mb-1">
+            <h3 className="text-lg font-medium">Current Theme</h3>
+            <span className="text-sm text-white/70">{selectedTheme}</span>
+          </div>
+          <p className="text-sm text-white/70">Enhance your journey with personalized theme settings.</p>
+        </PremiumCard>
+      </motion.div>
+    </motion.div>
   );
 };

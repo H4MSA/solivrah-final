@@ -9,24 +9,24 @@ export const ThemeBackground = () => {
   const getThemeAccentColor = () => {
     switch (selectedTheme) {
       case "Focus":
-        return "bg-[#3a2c7c]/[0.12]";
+        return "bg-[#3a2c7c]/[0.10]";
       case "Discipline":
-        return "bg-[#7c2c2c]/[0.12]";
+        return "bg-[#7c2c2c]/[0.10]";
       case "Resilience":
-        return "bg-[#2c7c56]/[0.12]";
+        return "bg-[#2c7c56]/[0.10]";
       case "Wildcards":
-        return "bg-[#7c6c2c]/[0.12]";
+        return "bg-[#7c6c2c]/[0.10]";
       default:
-        return "bg-white/[0.05]";
+        return "bg-white/[0.04]";
     }
   };
 
   return (
     <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
-      {/* Enhanced base background with subtle grid */}
-      <div className="absolute inset-0 bg-[#070707] bg-grid-white/[0.03]"></div>
+      {/* Base background with subtle grid */}
+      <div className="absolute inset-0 bg-[#030303] bg-grid-white/[0.02]"></div>
 
-      {/* Improved animated gradients with better blur */}
+      {/* Improved animated gradients with enhanced blur */}
       <div className="absolute inset-0">
         <motion.div 
           className={`absolute top-[-20%] right-[-10%] w-[1000px] h-[1000px] ${getThemeAccentColor()} rounded-full blur-[180px] opacity-60`}
@@ -42,7 +42,7 @@ export const ThemeBackground = () => {
           }}
         />
         <motion.div 
-          className="absolute bottom-[-20%] left-[-10%] w-[800px] h-[800px] bg-white/[0.03] rounded-full blur-[150px] opacity-50"
+          className="absolute bottom-[-20%] left-[-10%] w-[800px] h-[800px] bg-white/[0.02] rounded-full blur-[150px] opacity-50"
           animate={{ 
             x: [0, -30, 0],
             y: [0, 30, 0],
@@ -58,7 +58,7 @@ export const ThemeBackground = () => {
       </div>
 
       {/* Enhanced grid overlay with animation */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:44px_44px]">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:44px_44px]">
         <motion.div
           className="w-full h-full"
           animate={{
@@ -73,10 +73,10 @@ export const ThemeBackground = () => {
       </div>
 
       {/* Improved vignette effect */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_10%,#000000_100%)] opacity-90"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_10%,#000000_100%)] opacity-80"></div>
       
       {/* Subtle animated particles */}
-      <div className="absolute inset-0 overflow-hidden opacity-30">
+      <div className="absolute inset-0 overflow-hidden opacity-20">
         {[...Array(8)].map((_, i) => (
           <motion.div
             key={i}

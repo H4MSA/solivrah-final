@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { GlassCard } from './GlassCard';
+import { PremiumCard } from './PremiumCard';
 import { AlertTriangle, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -27,7 +27,7 @@ export const ProfileReset: React.FC<ProfileResetProps> = ({ onReset, isLoading }
   };
   
   return (
-    <GlassCard variant="dark" className="p-5 relative overflow-hidden">
+    <PremiumCard className="p-5 relative overflow-hidden">
       <AnimatePresence>
         {showConfirm ? (
           <motion.div
@@ -35,7 +35,7 @@ export const ProfileReset: React.FC<ProfileResetProps> = ({ onReset, isLoading }
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center p-5 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-5 backdrop-blur-sm"
           >
             <AlertTriangle size={32} className="text-red-400 mb-3" />
             <h4 className="text-lg font-medium mb-2 text-center">Reset All Progress?</h4>
@@ -45,7 +45,7 @@ export const ProfileReset: React.FC<ProfileResetProps> = ({ onReset, isLoading }
             <div className="flex gap-3 w-full">
               <Button 
                 variant="outline" 
-                className="flex-1 bg-transparent border-white/10"
+                className="flex-1 bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20"
                 onClick={handleCancelReset}
                 disabled={isLoading}
               >
@@ -70,12 +70,12 @@ export const ProfileReset: React.FC<ProfileResetProps> = ({ onReset, isLoading }
       </p>
       <Button 
         variant="outline" 
-        className="bg-black/30 text-white hover:bg-black/50 w-full border-white/10"
+        className="bg-white/5 text-white hover:bg-white/10 w-full border-white/10 hover:border-white/20"
         onClick={handleRequestReset}
       >
         <RotateCcw size={16} className="mr-2" />
         Reset All Progress
       </Button>
-    </GlassCard>
+    </PremiumCard>
   );
 };
