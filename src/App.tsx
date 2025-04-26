@@ -134,7 +134,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       {/* Main content area with scroll */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden page-transition">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden page-transition dynamic-island-aware notch-aware gesture-area-aware">
         {children}
       </main>
 
@@ -147,11 +147,45 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 const App = () => {
   // Check if app is installed as PWA
   const [isPWA, setIsPWA] = useState(false);
+  const [hasSafeArea, setHasSafeArea] = useState(false);
   
   useEffect(() => {
     // Check if app is running as installed PWA
     const isPWACheck = window.matchMedia('(display-mode: standalone)').matches;
     setIsPWA(isPWACheck);
+    
+    // Check for device with safe areas
+    const detectSafeArea = () => {
+      const hasSafeAreaInsets = 
+        window.CSS && CSS.supports('padding-top: env(safe-area-inset-top)') && 
+        (Number(getComputedStyle(document.documentElement).getPropertyValue('--sat').trim()) > 0 ||
+         window.innerWidth >= 375);
+      
+      setHasSafeArea(hasSafeAreaInsets);
+      
+      // Add CSS variables for detection
+      document.documentElement.style.setProperty('--sat', 'env(safe-area-inset-top, 0px)');
+      document.documentElement.style.setProperty('--sab', 'env(safe-area-inset-bottom, 0px)');
+      document.documentElement.style.setProperty('--sal', 'env(safe-area-inset-left, 0px)');
+      document.documentElement.style.setProperty('--sar', 'env(safe-area-inset-right, 0px)');
+      
+      // Add classes to handle different devices
+      if (hasSafeAreaInsets) {
+        document.body.classList.add('has-safe-area');
+        
+        // Check for iPhone X and newer with notch
+        if (window.innerWidth >= 375 && window.innerHeight >= 812) {
+          document.body.classList.add('has-notch');
+        }
+        
+        // Check for iPhone with Dynamic Island
+        if (window.innerWidth >= 390 && window.innerHeight >= 844) {
+          document.body.classList.add('has-dynamic-island');
+        }
+      }
+    };
+    
+    detectSafeArea();
     
     // Request camera permission on mobile devices
     const requestCameraPermission = async () => {
@@ -181,7 +215,7 @@ const App = () => {
           <ThemeBackground />
 
           {/* Fixed viewport container with safe areas */}
-          <div className="fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-transparent overflow-hidden dynamic-island-aware">
+          <div className={`fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-transparent overflow-hidden ${hasSafeArea ? 'dynamic-island-aware' : 'p-4 pb-20'}`}>
             <Toaster />
             <Sonner />
 

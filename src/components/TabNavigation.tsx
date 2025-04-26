@@ -126,14 +126,14 @@ export function TabNavigation() {
       <div className="mx-auto max-w-lg">
         <PremiumCard 
           variant="dark" 
-          className="flex items-center justify-around py-4 px-6 mx-4 mb-4 rounded-2xl backdrop-blur-2xl"
+          className="flex items-center justify-around py-3 px-5 mx-4 mb-4 rounded-2xl backdrop-blur-2xl"
           withBorder={true}
         >
           {navItems.map(({ path, icon: Icon, label }) => (
             <button
               key={path}
               onClick={() => navigate(path)}
-              className={`flex flex-col items-center gap-1.5 px-3 py-1 rounded-lg transition-all duration-300`}
+              className={`flex flex-col items-center gap-1 px-2 py-1 rounded-lg transition-all duration-300`}
             >
               <Icon active={isActive(path)} />
               <span className={`text-xs font-medium ${
@@ -145,7 +145,7 @@ export function TabNavigation() {
               {isActive(path) && (
                 <motion.div
                   layoutId="nav-indicator"
-                  className="absolute bottom-[62px] h-1 w-1 rounded-full bg-white"
+                  className="absolute bottom-[55px] h-1 w-1 rounded-full bg-white"
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
               )}

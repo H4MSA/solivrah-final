@@ -551,6 +551,18 @@
         padding-top: calc(env(safe-area-inset-top, 44px) + 16px);
       }
     }
+
+    /* iPhone X and newer with notch */
+    @media (min-width: 375px) and (min-height: 812px) {
+      .notch-aware {
+        padding-top: env(safe-area-inset-top);
+      }
+    }
+
+    /* Android gesture area */
+    .gesture-area-aware {
+      padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    }
   }
 }
 

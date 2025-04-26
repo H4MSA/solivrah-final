@@ -35,14 +35,14 @@ export const ProfileReset: React.FC<ProfileResetProps> = ({ onReset, isLoading }
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-5 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-6 backdrop-blur-sm"
           >
-            <AlertTriangle size={32} className="text-red-400 mb-3" />
-            <h4 className="text-lg font-medium mb-2 text-center">Reset All Progress?</h4>
+            <AlertTriangle size={32} className="text-red-400 mb-4" />
+            <h4 className="text-lg font-medium mb-3 text-center">Reset All Progress?</h4>
             <p className="text-sm text-white/70 mb-6 text-center">
               This will reset all your stats, badges, and completed quests. This action cannot be undone.
             </p>
-            <div className="flex gap-3 w-full">
+            <div className="flex gap-4 w-full">
               <Button 
                 variant="outline" 
                 className="flex-1 bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20"
@@ -65,7 +65,7 @@ export const ProfileReset: React.FC<ProfileResetProps> = ({ onReset, isLoading }
       </AnimatePresence>
       
       <h3 className="text-lg font-medium text-white mb-3">Reset Progress</h3>
-      <p className="text-sm text-white/70 mb-4">
+      <p className="text-sm text-white/70 mb-5">
         This will reset all your stats, badges, and completed quests. Use this option if you want to start fresh.
       </p>
       <Button 

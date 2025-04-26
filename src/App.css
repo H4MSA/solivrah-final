@@ -7,7 +7,7 @@
 }
 
 .page-container {
-  padding: 1rem;
+  padding: 1.5rem;
   padding-bottom: 5rem;
   max-width: 640px;
   margin: 0 auto;
@@ -16,8 +16,8 @@
 .dynamic-island-aware {
   padding-top: calc(env(safe-area-inset-top, 44px) + 1rem);
   padding-bottom: calc(env(safe-area-inset-bottom, 34px) + 5rem);
-  padding-left: calc(1rem + env(safe-area-inset-left, 0px));
-  padding-right: calc(1rem + env(safe-area-inset-right, 0px));
+  padding-left: calc(1.5rem + env(safe-area-inset-left, 0px));
+  padding-right: calc(1.5rem + env(safe-area-inset-right, 0px));
 }
 
 /* Safe areas for mobile devices */
