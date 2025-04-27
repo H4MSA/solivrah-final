@@ -37,7 +37,7 @@ export const PremiumCard: React.FC<PremiumCardProps> = ({
         variant === "subtle" && "bg-[#111111]/60 text-white",
         variant === "black" && "bg-black text-white",
         withBorder && "border border-white/10",
-        isInteractive && "cursor-pointer hover:border-white/20",
+        interactive && "cursor-pointer hover:border-white/20", // Fixed: replaced isInteractive with interactive
         hoverEffect && "hover:translate-y-[-2px]",
         className
       )}
