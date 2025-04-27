@@ -24,9 +24,7 @@ export const QuestCard: React.FC<QuestCardProps> = ({
   return (
     <PremiumCard
       variant={locked ? "subtle" : current ? "selected" : "default"}
-      className={`relative overflow-hidden transition-all duration-300 ${
-        locked ? 'opacity-70 hover:opacity-80' : ''
-      }`}
+      className={`relative overflow-hidden transition-all duration-300`}
       interactive={!locked}
       onClick={!locked ? onClick : undefined}
     >
@@ -60,8 +58,8 @@ export const QuestCard: React.FC<QuestCardProps> = ({
         )}
         
         {locked && (
-          <div className="absolute inset-0 backdrop-blur-[6px] bg-black/40 flex items-center justify-center">
-            <Lock className="text-white/30 w-8 h-8 animate-pulse-slow" />
+          <div className="absolute inset-0 backdrop-blur-[8px] bg-black/50 flex items-center justify-center">
+            <Lock className="text-white/40 w-8 h-8 animate-pulse-slow" />
           </div>
         )}
       </div>

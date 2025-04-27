@@ -30,7 +30,7 @@ const Progress = React.forwardRef<
       <ProgressPrimitive.Root
         ref={ref}
         className={cn(
-          "relative w-full overflow-hidden rounded-full bg-white/[0.03] backdrop-blur-lg border border-white/10",
+          "relative w-full overflow-hidden rounded-full bg-black/40 backdrop-blur-md border border-white/10",
           getHeightClass(),
           className
         )}
@@ -38,7 +38,7 @@ const Progress = React.forwardRef<
       >
         <ProgressPrimitive.Indicator
           className={cn(
-            "h-full w-full flex-1 rounded-full transition-all duration-700",
+            "h-full w-full flex-1 rounded-full transition-all duration-500",
             animated && "animate-pulse-slow",
             indicatorClassName || "bg-white/20"
           )}
@@ -56,7 +56,7 @@ const Progress = React.forwardRef<
       )}
       
       {levelIndicator && (
-        <div className="absolute top-1/2 right-0 transform translate-x-[calc(100%+8px)] -translate-y-1/2 bg-black/60 backdrop-blur-sm text-white/90 text-xs font-medium px-2.5 py-1 rounded-full border border-white/10 shadow-lg">
+        <div className="absolute top-1/2 right-0 transform translate-x-[calc(100%+8px)] -translate-y-1/2 bg-black/70 backdrop-blur-sm text-white/90 text-xs font-medium px-2.5 py-1 rounded-full border border-white/10 shadow-lg">
           Lvl {Math.floor((value || 0) / 100) + 1}
         </div>
       )}
