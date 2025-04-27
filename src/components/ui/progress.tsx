@@ -31,7 +31,7 @@ const Progress = React.forwardRef<
       <ProgressPrimitive.Root
         ref={ref}
         className={cn(
-          "relative w-full overflow-hidden rounded-full bg-[#1A1A1A]",
+          "relative w-full overflow-hidden rounded-full bg-white/5",
           getHeightClass(),
           className
         )}
@@ -39,9 +39,9 @@ const Progress = React.forwardRef<
       >
         <ProgressPrimitive.Indicator
           className={cn(
-            "h-full w-full flex-1 rounded-full transition-all duration-700 ease-in-out",
+            "h-full w-full flex-1 rounded-full transition-all duration-700",
             animated && "animate-pulse-slow",
-            indicatorClassName || "bg-white"
+            indicatorClassName || "bg-white/20"
           )}
           style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
         />
@@ -49,7 +49,7 @@ const Progress = React.forwardRef<
       
       {showValue && (
         <span className={cn(
-          "absolute text-xs text-[#CCCCCC] right-0 top-0 transform -translate-y-6 font-medium",
+          "absolute text-xs text-white/70 right-0 top-0 transform -translate-y-6",
           progressTextClassName
         )}>
           {Math.round(value || 0)}%
@@ -57,13 +57,14 @@ const Progress = React.forwardRef<
       )}
       
       {levelIndicator && (
-        <div className="absolute top-1/2 right-0 transform translate-x-[calc(100%+8px)] -translate-y-1/2 bg-[#222222] text-white text-xs font-bold px-2 py-1 rounded-full border border-[#333333] shadow-lg">
+        <div className="absolute top-1/2 right-0 transform translate-x-[calc(100%+8px)] -translate-y-1/2 bg-black/60 backdrop-blur-sm text-white/90 text-xs font-medium px-2 py-1 rounded-full border border-white/10 shadow-lg">
           Lvl {Math.floor((value || 0) / 100) + 1}
         </div>
       )}
     </div>
-  )
-})
-Progress.displayName = ProgressPrimitive.Root.displayName
+  );
+});
 
-export { Progress }
+Progress.displayName = ProgressPrimitive.Root.displayName;
+
+export { Progress };
