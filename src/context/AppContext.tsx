@@ -18,6 +18,7 @@ export interface AppContextType {
   resetProgress: () => Promise<void>;
   incrementStreak: () => void;
   loading: boolean;
+  setLoading: (loading: boolean) => void;
   isGuest: boolean;
   setIsGuest: (isGuest: boolean) => void;
 }
@@ -120,6 +121,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         resetProgress,
         incrementStreak,
         loading,
+        setLoading,
         isGuest,
         setIsGuest,
       }}
