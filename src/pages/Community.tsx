@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { TabNavigation } from "@/components/TabNavigation";
@@ -114,44 +113,46 @@ const Community = () => {
   };
   
   return (
-    <div className="min-h-screen pb-20">
-      <div className="p-6 space-y-4">
+    <div className="min-h-screen pb-24">
+      <div className="p-6 space-y-6">
         <h1 className="text-xl font-medium">Community</h1>
         
-        <div className="flex space-x-2 overflow-x-auto pb-2">
+        <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-none">
           <button 
-            className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${
+            className={`px-4 py-2.5 rounded-xl text-sm whitespace-nowrap backdrop-blur-xl ${
               activeTab === "leaderboards" 
-                ? "bg-primary text-primary-foreground" 
-                : "glass text-white"
+                ? "bg-white/10 text-white border border-white/20" 
+                : "glass text-white/80 hover:text-white hover:bg-white/5"
             }`}
             onClick={() => setActiveTab("leaderboards")}
           >
-            <FiStar className="inline mr-1" /> Leaderboards
+            <FiStar className="inline mr-2" /> Leaderboards
           </button>
           <button 
-            className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${
+            className={`px-4 py-2.5 rounded-xl text-sm whitespace-nowrap backdrop-blur-xl ${
               activeTab === "groups" 
-                ? "bg-primary text-primary-foreground" 
-                : "glass text-white"
+                ? "bg-white/10 text-white border border-white/20" 
+                : "glass text-white/80 hover:text-white hover:bg-white/5"
             }`}
             onClick={() => setActiveTab("groups")}
           >
-            <FiUsers className="inline mr-1" /> Groups
+            <FiUsers className="inline mr-2" /> Groups
           </button>
           <button 
-            className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${
+            className={`px-4 py-2.5 rounded-xl text-sm whitespace-nowrap backdrop-blur-xl ${
               activeTab === "posts" 
-                ? "bg-primary text-primary-foreground" 
-                : "glass text-white"
+                ? "bg-white/10 text-white border border-white/20" 
+                : "glass text-white/80 hover:text-white hover:bg-white/5"
             }`}
             onClick={() => setActiveTab("posts")}
           >
-            <FiMessageCircle className="inline mr-1" /> Posts
+            <FiMessageCircle className="inline mr-2" /> Posts
           </button>
         </div>
         
-        {renderTabContent()}
+        <div className="space-y-4">
+          {renderTabContent()}
+        </div>
       </div>
       
       <TabNavigation />
