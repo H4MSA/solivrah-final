@@ -48,7 +48,7 @@ export const TabNavigation = () => {
                     {active && (
                       <motion.div
                         layoutId="activeTab"
-                        className="absolute -bottom-2 w-1 h-1 bg-white rounded-full"
+                        className="absolute bottom-0 w-full h-1 bg-blue-400 rounded-t-full"
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                       />
                     )}

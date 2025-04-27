@@ -13,7 +13,7 @@ import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Quests from "./pages/Quests";
 import Coach from "./pages/Coach";
-import Community from "./pages/Community";
+import Social from "./pages/Social";
 import Profile from "./pages/Profile";
 import Survey from "./pages/Survey";
 import Auth from "./pages/Auth";
@@ -33,7 +33,7 @@ const queryClient = new QueryClient({
 
 // SessionHandler component to manage authentication state
 const SessionHandler = ({ children }: { children: React.ReactNode }) => {
-  const { setUser, setSession } = useApp();
+  const { setUser, setSession, setLoading } = useApp();
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
@@ -47,7 +47,7 @@ const SessionHandler = ({ children }: { children: React.ReactNode }) => {
         // Store session in localStorage for persistence between page refreshes
         if (session) {
           localStorage.setItem('authSession', JSON.stringify(session));
-        } else {
+        } else if (event === 'SIGNED_OUT') {
           localStorage.removeItem('authSession');
         }
       }
@@ -56,6 +56,7 @@ const SessionHandler = ({ children }: { children: React.ReactNode }) => {
     // Check for existing session
     const checkSession = async () => {
       try {
+        setLoading(true);
         // First try to get from localStorage for faster initial load
         const storedSession = localStorage.getItem('authSession');
         if (storedSession) {
@@ -83,6 +84,7 @@ const SessionHandler = ({ children }: { children: React.ReactNode }) => {
         localStorage.removeItem('authSession');
       } finally {
         setChecking(false);
+        setLoading(false);
       }
     };
     
@@ -91,7 +93,7 @@ const SessionHandler = ({ children }: { children: React.ReactNode }) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [setUser, setSession]);
+  }, [setUser, setSession, setLoading]);
 
   if (checking) {
     return (
@@ -106,7 +108,7 @@ const SessionHandler = ({ children }: { children: React.ReactNode }) => {
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading, isGuest } = useApp();
+  const { user, loading, isGuest, session } = useApp();
   const location = useLocation();
 
   if (loading) {
@@ -117,8 +119,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  if (!user && !isGuest) {
+  // Check if user exists or is in guest mode
+  if (!user && !isGuest && !session) {
     // Save the attempted URL for redirecting after login
+    // But don't redirect to auth page itself to avoid loops
     const returnUrl = location.pathname !== "/auth" ? location.pathname : "/home";
     return <Navigate to="/auth" state={{ returnUrl }} replace />;
   }
@@ -129,7 +133,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 // App Layout with Navigation
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
-  const showNavigation = ['/home', '/quests', '/community', '/coach', '/profile'].includes(location.pathname);
+  const showNavigation = ['/', '/home', '/quests', '/social', '/coach', '/profile'].includes(location.pathname);
 
   return (
     <>
@@ -186,25 +190,6 @@ const App = () => {
     };
     
     detectSafeArea();
-    
-    // Request camera permission on mobile devices
-    const requestCameraPermission = async () => {
-      if ('mediaDevices' in navigator && isPWACheck) {
-        try {
-          // Just check if we can access the camera
-          const devices = await navigator.mediaDevices.enumerateDevices();
-          const hasCamera = devices.some(device => device.kind === 'videoinput');
-          
-          if (hasCamera) {
-            console.log("Camera access is available");
-          }
-        } catch (err) {
-          console.log("Camera access may require permission", err);
-        }
-      }
-    };
-    
-    requestCameraPermission();
   }, []);
 
   return (
@@ -223,7 +208,11 @@ const App = () => {
               <SessionHandler>
                 <Routes>
                   {/* Public routes */}
-                  <Route path="/" element={<Index />} />
+                  <Route path="/" element={
+                    <AppLayout>
+                      <Home />
+                    </AppLayout>
+                  } />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
 
@@ -256,12 +245,10 @@ const App = () => {
                       </AppLayout>
                     </ProtectedRoute>
                   } />
-                  <Route path="/community" element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Community />
-                      </AppLayout>
-                    </ProtectedRoute>
+                  <Route path="/social" element={
+                    <AppLayout>
+                      <Social />
+                    </AppLayout>
                   } />
                   <Route path="/profile" element={
                     <ProtectedRoute>

@@ -30,7 +30,7 @@ const NotFound = () => {
           <div className="text-center space-y-6">
             <div className="relative">
               <div className="absolute inset-0 blur-[80px] bg-white/10 rounded-full"></div>
-              <h1 className="text-7xl font-bold relative z-10">404</h1>
+              <h1 className="text-7xl font-bold relative z-10 text-gradient">404</h1>
             </div>
             
             <div className="space-y-4">
@@ -42,7 +42,7 @@ const NotFound = () => {
               <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
                 <Link 
                   to="/"
-                  className="px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-white/90 transition-all active:scale-95"
+                  className="px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-white/90 transition-all active:scale-95 backdrop-blur-sm"
                 >
                   Go Home
                 </Link>
