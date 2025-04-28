@@ -9,14 +9,47 @@ export const TabNavigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  const isActive = (path: string) => location.pathname === path;
+  // Helper function to check if a path is active
+  const isActive = (path: string) => {
+    // Special case for home path to match both "/" and "/home"
+    if (path === "/" && (location.pathname === "/" || location.pathname === "/home")) {
+      return true;
+    }
+    return location.pathname === path;
+  };
   
+  // Define our tabs with all needed properties
   const tabs = [
-    { icon: Home, label: "Home", path: "/" },
-    { icon: Target, label: "Quests", path: "/quests" },
-    { icon: MessageCircle, label: "Coach", path: "/coach" },
-    { icon: Users, label: "Social", path: "/social" },
-    { icon: User, label: "Profile", path: "/profile" }
+    { 
+      icon: Home, 
+      label: "Home", 
+      path: "/", 
+      accessibilityLabel: "Navigate to home page"
+    },
+    { 
+      icon: Target, 
+      label: "Quests", 
+      path: "/quests", 
+      accessibilityLabel: "Navigate to quests page"
+    },
+    { 
+      icon: MessageCircle, 
+      label: "Coach", 
+      path: "/coach", 
+      accessibilityLabel: "Navigate to AI coach page"
+    },
+    { 
+      icon: Users, 
+      label: "Social", 
+      path: "/social", 
+      accessibilityLabel: "Navigate to social page"
+    },
+    { 
+      icon: User, 
+      label: "Profile", 
+      path: "/profile", 
+      accessibilityLabel: "Navigate to profile page"
+    }
   ];
 
   // Enhanced animation variants
@@ -35,38 +68,50 @@ export const TabNavigation = () => {
 
   return (
     <motion.nav 
-      className="fixed bottom-0 left-0 right-0 z-50 pb-2"
+      className="fixed bottom-0 left-0 right-0 z-50 pb-2 pointer-events-none"
       initial="hidden"
       animate="visible"
       variants={barVariants}
     >
-      <div className="mx-auto max-w-md">
-        <div className="mx-4 mb-2">
-          <div className="backdrop-blur-2xl bg-black/80 border border-white/10 rounded-2xl shadow-lg overflow-hidden">
+      <div className="mx-auto max-w-md px-4">
+        <div className="mb-2">
+          <motion.div
+            className="backdrop-blur-2xl bg-black/80 border border-white/10 rounded-2xl shadow-lg overflow-hidden pointer-events-auto"
+            whileHover={{ y: -2 }}
+            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          >
             <div className="flex items-center justify-around">
-              {tabs.map(({ icon: Icon, label, path }) => {
+              {tabs.map(({ icon: Icon, label, path, accessibilityLabel }) => {
                 const active = isActive(path);
                 return (
                   <button
                     key={path}
                     onClick={() => navigate(path)}
+                    aria-label={accessibilityLabel}
                     className={cn(
                       "relative flex flex-col items-center justify-center py-3 px-2 w-16 group transition-all",
                       active ? "text-white" : "text-white/40 hover:text-white/60"
                     )}
                   >
-                    <div className={cn(
-                      "flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300",
-                      active ? "bg-white/10" : "bg-transparent"
-                    )}>
+                    <motion.div 
+                      className={cn(
+                        "flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300",
+                        active ? "bg-white/10" : "bg-transparent"
+                      )}
+                      whileHover={{ 
+                        scale: active ? 1 : 1.05, 
+                        backgroundColor: active ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.05)" 
+                      }}
+                      whileTap={{ scale: 0.95 }}
+                    >
                       <Icon
-                        size={18}
+                        size={active ? 20 : 18}
                         className={cn(
                           "transition-all duration-200",
                           active ? "text-white" : "text-white/40 group-hover:text-white/60"
                         )}
                       />
-                    </div>
+                    </motion.div>
                     <span
                       className={cn(
                         "text-xs mt-1 transition-all duration-200",
@@ -81,12 +126,12 @@ export const TabNavigation = () => {
                       <>
                         <motion.div
                           layoutId="activeTabGlow"
-                          className="absolute bottom-0 w-12 h-1 rounded-full bg-white/20 blur-md"
+                          className="absolute -bottom-0.5 w-12 h-1 rounded-full bg-white/20 blur-md"
                           transition={{ type: "spring", stiffness: 300, damping: 30 }}
                         />
                         <motion.div
                           layoutId="activeTab"
-                          className="absolute bottom-0 w-8 h-[3px] bg-white rounded-full"
+                          className="absolute -bottom-0.5 w-8 h-[3px] bg-white rounded-full"
                           transition={{ type: "spring", stiffness: 300, damping: 30 }}
                         />
                       </>
@@ -95,7 +140,7 @@ export const TabNavigation = () => {
                 );
               })}
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </motion.nav>
