@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { TabNavigation } from "@/components/TabNavigation";
 import { ThemeBackground } from "@/components/ThemeBackground";
 import { useApp } from "@/context/AppContext";
-import { GlassPane, GlassCard, GlassButton, GlassBadge } from "@/components/ui/glass";
+import { GlassPane, GlassCard, GlassButton, GlassBadge, GlassInput } from "@/components/ui/glass";
 import { motion } from "framer-motion";
 import { 
   MessageSquare, 

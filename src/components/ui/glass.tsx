@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
@@ -59,6 +59,17 @@ export const GlassPane = React.forwardRef<HTMLDivElement, GlassPaneProps>(
       }
     };
 
+    // Fix: Properly type motion props to avoid TypeScript errors
+    const motionProps: any = {};
+    
+    if (hoverEffect) {
+      motionProps.whileHover = { y: -4 };
+    }
+    
+    if (interactive && pressEffect) {
+      motionProps.whileTap = { scale: 0.98 };
+    }
+
     return (
       <motion.div
         ref={ref}
@@ -72,8 +83,7 @@ export const GlassPane = React.forwardRef<HTMLDivElement, GlassPaneProps>(
           !noPadding && "p-4",
           className
         )}
-        whileHover={hoverEffect ? { y: -4 } : undefined}
-        whileTap={interactive && pressEffect ? { scale: 0.98 } : undefined}
+        {...motionProps}
         {...props}
       >
         {children}
@@ -153,17 +163,19 @@ export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
 
 GlassCard.displayName = "GlassCard";
 
+export interface GlassButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "primary" | "secondary" | "outline" | "ghost";
+  size?: "sm" | "md" | "lg";
+  iconLeft?: React.ReactNode;
+  iconRight?: React.ReactNode;
+  loading?: boolean;
+  fullWidth?: boolean;
+  glassBorder?: boolean;
+}
+
 export const GlassButton = React.forwardRef<
   HTMLButtonElement,
-  React.ButtonHTMLAttributes<HTMLButtonElement> & {
-    variant?: "primary" | "secondary" | "outline" | "ghost";
-    size?: "sm" | "md" | "lg";
-    iconLeft?: React.ReactNode;
-    iconRight?: React.ReactNode;
-    loading?: boolean;
-    fullWidth?: boolean;
-    glassBorder?: boolean;
-  }
+  GlassButtonProps
 >(
   (
     {
@@ -207,6 +219,13 @@ export const GlassButton = React.forwardRef<
       }
     };
 
+    // Fix: Properly type motion props to avoid TypeScript errors
+    const motionProps: any = {};
+    
+    if (!disabled && !loading) {
+      motionProps.whileTap = { scale: 0.98 };
+    }
+
     return (
       <motion.button
         ref={ref}
@@ -220,7 +239,7 @@ export const GlassButton = React.forwardRef<
           className
         )}
         disabled={disabled || loading}
-        whileTap={!disabled && !loading ? { scale: 0.98 } : undefined}
+        {...motionProps}
         {...props}
       >
         {iconLeft && <span className="flex-shrink-0">{iconLeft}</span>}
@@ -241,41 +260,42 @@ export const GlassButton = React.forwardRef<
 
 GlassButton.displayName = "GlassButton";
 
-export const GlassInput = React.forwardRef<
-  HTMLInputElement,
-  React.InputHTMLAttributes<HTMLInputElement> & {
-    icon?: React.ReactNode;
-    error?: string;
-    label?: string;
-  }
->(({ className, icon, error, label, ...props }, ref) => {
-  return (
-    <div className="space-y-2 w-full">
-      {label && (
-        <label className="text-sm font-medium text-white/80">{label}</label>
-      )}
-      <div className="relative">
-        {icon && (
-          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50">
-            {icon}
-          </div>
+export interface GlassInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  icon?: React.ReactNode;
+  error?: string;
+  label?: string;
+}
+
+export const GlassInput = React.forwardRef<HTMLInputElement, GlassInputProps>(
+  ({ className, icon, error, label, ...props }, ref) => {
+    return (
+      <div className="space-y-2 w-full">
+        {label && (
+          <label className="text-sm font-medium text-white/80">{label}</label>
         )}
-        <input
-          ref={ref}
-          className={cn(
-            "w-full h-12 bg-black/20 backdrop-blur-xl border border-white/10 rounded-xl text-white placeholder:text-white/40",
-            "focus:outline-none focus:ring-1 focus:ring-white/20 focus:border-white/20 transition-all duration-300",
-            icon ? "pl-10 pr-4" : "px-4",
-            error && "border-red-500/50",
-            className
+        <div className="relative">
+          {icon && (
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50">
+              {icon}
+            </div>
           )}
-          {...props}
-        />
+          <input
+            ref={ref}
+            className={cn(
+              "w-full h-12 bg-black/20 backdrop-blur-xl border border-white/10 rounded-xl text-white placeholder:text-white/40",
+              "focus:outline-none focus:ring-1 focus:ring-white/20 focus:border-white/20 transition-all duration-300",
+              icon ? "pl-10 pr-4" : "px-4",
+              error && "border-red-500/50",
+              className
+            )}
+            {...props}
+          />
+        </div>
+        {error && <p className="text-xs text-red-500">{error}</p>}
       </div>
-      {error && <p className="text-xs text-red-500">{error}</p>}
-    </div>
-  );
-});
+    );
+  }
+);
 
 GlassInput.displayName = "GlassInput";
 
