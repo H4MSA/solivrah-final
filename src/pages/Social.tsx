@@ -3,24 +3,42 @@ import React, { useState } from "react";
 import { TabNavigation } from "@/components/TabNavigation";
 import { ThemeBackground } from "@/components/ThemeBackground";
 import { useApp } from "@/context/AppContext";
-import { PremiumCard } from "@/components/PremiumCard";
+import { GlassPane, GlassCard, GlassButton, GlassBadge } from "@/components/ui/glass";
 import { motion } from "framer-motion";
-import { MessageSquare, Heart, Share, Users, User, Star, Search, Bell, ChevronRight } from "lucide-react";
+import { 
+  MessageSquare, 
+  Heart, 
+  Share, 
+  Users, 
+  User, 
+  Star, 
+  Search, 
+  Bell, 
+  ChevronRight, 
+  Globe, 
+  UserPlus, 
+  Sparkles,
+  Flame,
+  UserCheck,
+  Flag,
+  MessageCircle
+} from "lucide-react";
 
 const Social = () => {
   const { selectedTheme } = useApp();
-  const [activeTab, setActiveTab] = useState("feed");
+  const [activeTab, setActiveTab] = useState<"feed" | "groups" | "discover">("feed");
   
   // Sample data
   const posts = [
     {
       id: 1, 
       author: "FocusMaster", 
-      content: "Just completed Day 15! The 'Focus Mode' technique has completely changed how I work.", 
+      content: "Just completed Day 15! The 'Focus Mode' technique has completely changed how I work. Anyone else having success with this?", 
       likes: 24, 
       theme: "Focus", 
       time: "2h ago",
-      comments: 5
+      comments: 5,
+      avatar: null
     },
     {
       id: 2, 
@@ -29,7 +47,8 @@ const Social = () => {
       likes: 42, 
       theme: "Discipline", 
       time: "5h ago",
-      comments: 12
+      comments: 12,
+      avatar: null
     },
     {
       id: 3, 
@@ -38,7 +57,8 @@ const Social = () => {
       likes: 56, 
       theme: "Resilience", 
       time: "1d ago",
-      comments: 8
+      comments: 8,
+      avatar: null
     },
     {
       id: 4, 
@@ -47,7 +67,43 @@ const Social = () => {
       likes: 19, 
       theme: "Focus", 
       time: "1d ago",
-      comments: 15
+      comments: 15,
+      avatar: null
+    },
+  ];
+  
+  const communities = [
+    { 
+      id: 1,
+      name: "Focus Masters", 
+      members: 230, 
+      theme: "Focus",
+      description: "A community for sharing focus techniques and deep work strategies.",
+      active: true
+    },
+    { 
+      id: 2,
+      name: "Discipline Circle", 
+      members: 187, 
+      theme: "Discipline",
+      description: "Building habits together with accountability and support.",
+      active: true
+    },
+    { 
+      id: 3,
+      name: "Resilience Community", 
+      members: 156, 
+      theme: "Resilience",
+      description: "Learn to bounce back from setbacks and build mental toughness.",
+      active: false
+    },
+    { 
+      id: 4,
+      name: "Habit Builders", 
+      members: 128, 
+      theme: "Discipline",
+      description: "Structured approach to building lasting habits that change your life.",
+      active: false
     },
   ];
   
@@ -57,13 +113,6 @@ const Social = () => {
     { name: "ProductivityPro", theme: "Discipline", streak: 45 },
     { name: "MindfulMotivator", theme: "Resilience", streak: 30 },
     { name: "FocusFinder", theme: "Focus", streak: 22 }
-  ];
-  
-  const groups = [
-    { name: "Focus Masters", members: 230, theme: "Focus" },
-    { name: "Discipline Circle", members: 187, theme: "Discipline" },
-    { name: "Resilience Community", members: 156, theme: "Resilience" },
-    { name: "Habit Builders", members: 128, theme: "Discipline" },
   ];
   
   const containerVariants = {
@@ -87,308 +136,298 @@ const Social = () => {
   
   const renderTabContent = () => {
     switch (activeTab) {
-      case "feed":
-        return (
-          <div className="space-y-6">
-            {/* New post input */}
-            <PremiumCard className="p-5 backdrop-blur-xl">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/5 flex items-center justify-center">
-                  <User size={18} />
-                </div>
-                <div className="flex-1">
-                  <textarea 
-                    className="w-full bg-transparent resize-none border-none outline-none text-white placeholder:text-white/50"
-                    placeholder="Share your journey with the community..."
-                    rows={2}
-                  />
-                  <div className="flex justify-end mt-2">
-                    <button className="px-4 py-2 bg-white/10 hover:bg-white/15 rounded-lg text-sm backdrop-blur-sm border border-white/10 transition-all active:scale-95">
-                      Share
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </PremiumCard>
-            
-            {/* Feed posts */}
-            {posts.map((post) => (
-              <PremiumCard key={post.id} className="p-5 backdrop-blur-xl">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center">
-                      {post.author.charAt(0)}
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-white">{post.author}</h3>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-white/60">{post.time}</span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
-                          {post.theme}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <p className="text-white/80 text-sm mb-4">{post.content}</p>
-                
-                <div className="flex items-center justify-between border-t border-white/5 pt-3 mt-2">
-                  <button className="flex items-center gap-1.5 text-white/70 hover:text-white text-sm transition-all">
-                    <Heart size={16} className={post.likes > 30 ? "text-pink-400" : ""} />
-                    <span>{post.likes}</span>
-                  </button>
-                  <button className="flex items-center gap-1.5 text-white/70 hover:text-white text-sm transition-all">
-                    <MessageSquare size={16} />
-                    <span>{post.comments}</span>
-                  </button>
-                  <button className="flex items-center gap-1.5 text-white/70 hover:text-white text-sm transition-all">
-                    <Share size={16} />
-                    <span>Share</span>
-                  </button>
-                </div>
-              </PremiumCard>
-            ))}
-          </div>
-        );
       case "groups":
         return (
-          <div className="space-y-4">
-            <div className="relative mb-4">
-              <div className="absolute inset-y-0 left-3 flex items-center text-white/40">
-                <Search size={18} />
-              </div>
-              <input 
-                type="text" 
-                placeholder="Search groups..." 
-                className="w-full h-11 pl-10 pr-4 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10 text-white placeholder:text-white/50 focus:outline-none"
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {groups.map((group, index) => (
-                <PremiumCard key={index} className="p-5 backdrop-blur-xl">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-medium text-white">{group.name}</h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-white/60 flex items-center gap-1">
-                          <Users size={12} /> {group.members} members
-                        </span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
-                          {group.theme}
-                        </span>
-                      </div>
-                    </div>
-                    <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/5">
-                      <ChevronRight size={16} />
-                    </button>
-                  </div>
-                  
-                  <button className="w-full mt-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-sm backdrop-blur-sm border border-white/10 transition-all">
-                    Join Group
-                  </button>
-                </PremiumCard>
-              ))}
-            </div>
-            
-            <PremiumCard className="p-5 backdrop-blur-xl">
-              <div className="text-center">
-                <h3 className="font-medium">Create Your Own Group</h3>
-                <p className="text-sm text-white/70 mt-1 mb-3">Connect with like-minded people on your journey</p>
-                <button className="py-2.5 px-4 bg-white text-black rounded-lg font-medium hover:bg-white/90 transition-all active:scale-95">
-                  Start a Group
-                </button>
-              </div>
-            </PremiumCard>
-          </div>
-        );
-      case "discover":
-        return (
-          <div className="space-y-5">
-            <div className="relative mb-4">
-              <div className="absolute inset-y-0 left-3 flex items-center text-white/40">
-                <Search size={18} />
-              </div>
-              <input 
-                type="text" 
-                placeholder="Discover people and content..." 
-                className="w-full h-11 pl-10 pr-4 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10 text-white placeholder:text-white/50 focus:outline-none"
-              />
-            </div>
-            
-            <div>
-              <h3 className="font-medium mb-3">Trending Topics</h3>
-              <div className="flex flex-wrap gap-2 mb-5">
-                {trendingTopics.map((topic, index) => (
-                  <span 
-                    key={index} 
-                    className="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10 text-sm cursor-pointer transition-all"
-                  >
-                    #{topic}
-                  </span>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="font-medium mb-3">Suggested Users</h3>
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-5"
+          >
+            <motion.div variants={itemVariants} className="space-y-2">
+              <h2 className="text-lg font-medium text-white">Your Communities</h2>
               <div className="space-y-3">
-                {suggestedUsers.map((user, index) => (
-                  <PremiumCard key={index} className="p-4 backdrop-blur-xl">
+                {communities.filter(c => c.active).map(community => (
+                  <GlassCard
+                    key={community.id}
+                    variant="frost"
+                    className="p-4"
+                    interactive
+                    hoverEffect
+                  >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center">
-                          {user.name.charAt(0)}
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center">
+                          <Users size={16} className="text-white/80" />
                         </div>
                         <div>
-                          <h4 className="font-medium">{user.name}</h4>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-white/60">{user.theme}</span>
-                            <span className="text-xs flex items-center gap-1 text-white/60">
-                              <Star size={12} /> {user.streak} streak
-                            </span>
+                          <h3 className="font-medium">{community.name}</h3>
+                          <p className="text-xs text-white/70 mt-1">{community.members} members</p>
+                          <p className="text-sm text-white/70 mt-1">{community.description}</p>
+                        </div>
+                      </div>
+                      <GlassBadge variant="subtle" className="h-6">
+                        {community.theme}
+                      </GlassBadge>
+                    </div>
+                    
+                    <div className="flex justify-end mt-3">
+                      <GlassButton variant="secondary" size="sm" iconLeft={<MessageCircle size={14} />}>
+                        Join Chat
+                      </GlassButton>
+                    </div>
+                  </GlassCard>
+                ))}
+              </div>
+            </motion.div>
+            
+            <motion.div variants={itemVariants} className="space-y-2">
+              <h2 className="text-lg font-medium text-white">Discover Communities</h2>
+              <div className="space-y-3">
+                {communities.filter(c => !c.active).map(community => (
+                  <GlassCard
+                    key={community.id}
+                    variant="standard"
+                    className="p-4"
+                    interactive
+                    hoverEffect
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center">
+                          <Users size={16} className="text-white/80" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium">{community.name}</h3>
+                          <p className="text-xs text-white/70 mt-1">{community.members} members</p>
+                          <p className="text-sm text-white/70 mt-1">{community.description}</p>
+                        </div>
+                      </div>
+                      <GlassBadge variant="subtle" className="h-6">
+                        {community.theme}
+                      </GlassBadge>
+                    </div>
+                    
+                    <div className="flex justify-end mt-3">
+                      <GlassButton variant="secondary" size="sm" iconLeft={<UserPlus size={14} />}>
+                        Join
+                      </GlassButton>
+                    </div>
+                  </GlassCard>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        );
+      
+      case "discover":
+        return (
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-5"
+          >
+            <motion.div variants={itemVariants} className="relative">
+              <GlassInput 
+                icon={<Search size={16} />} 
+                placeholder="Search for users or communities..."
+                className="mb-4"
+              />
+            </motion.div>
+            
+            <motion.div variants={itemVariants} className="space-y-2">
+              <h2 className="text-lg font-medium text-white">Trending Topics</h2>
+              <GlassPane variant="frost" className="p-3">
+                <div className="flex flex-wrap gap-2">
+                  {trendingTopics.map((topic, index) => (
+                    <GlassBadge key={index} className="px-3 py-1.5 text-sm">
+                      {topic}
+                    </GlassBadge>
+                  ))}
+                </div>
+              </GlassPane>
+            </motion.div>
+            
+            <motion.div variants={itemVariants} className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-medium text-white">Suggested People</h2>
+                <GlassButton variant="ghost" size="sm" iconRight={<ChevronRight size={14} />}>
+                  View All
+                </GlassButton>
+              </div>
+              <div className="space-y-3">
+                {suggestedUsers.map((user, index) => (
+                  <GlassPane
+                    key={index}
+                    variant="frost"
+                    className="p-3"
+                    interactive
+                    hoverEffect
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center">
+                          {user.name[0]}
+                        </div>
+                        <div>
+                          <h3 className="font-medium">{user.name}</h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-white/70">{user.theme}</span>
+                            <div className="flex items-center gap-1">
+                              <Flame size={12} className="text-white/70" />
+                              <span className="text-xs text-white/70">{user.streak} streak</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                      <button className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-xs backdrop-blur-sm border border-white/10 transition-all">
+                      <GlassButton variant="secondary" size="sm" iconLeft={<UserPlus size={14} />}>
                         Follow
-                      </button>
+                      </GlassButton>
                     </div>
-                  </PremiumCard>
+                  </GlassPane>
                 ))}
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         );
-      case "notifications":
+      
+      default: // feed tab
         return (
-          <div className="space-y-3">
-            <PremiumCard className="p-4 backdrop-blur-xl">
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-full bg-blue-500/20 backdrop-blur-sm">
-                  <Star size={16} className="text-blue-400" />
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-5"
+          >
+            {/* New post input */}
+            <motion.div variants={itemVariants} className="mb-6">
+              <GlassCard className="p-4 backdrop-blur-xl">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 flex items-center justify-center">
+                    <User size={16} className="text-white/80" />
+                  </div>
+                  <div className="flex-1">
+                    <textarea 
+                      className="w-full bg-transparent resize-none border-none outline-none text-white placeholder:text-white/50 h-16"
+                      placeholder="Share your journey with the community..."
+                    />
+                    <div className="flex justify-end mt-2">
+                      <GlassButton variant="secondary" size="sm">
+                        Share
+                      </GlassButton>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm"><span className="font-medium">DisciplineDaily</span> achieved a 30-day streak!</p>
-                  <span className="text-xs text-white/60 mt-1 block">2 hours ago</span>
-                </div>
-              </div>
-            </PremiumCard>
+              </GlassCard>
+            </motion.div>
             
-            <PremiumCard className="p-4 backdrop-blur-xl">
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-full bg-pink-500/20 backdrop-blur-sm">
-                  <Heart size={16} className="text-pink-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm"><span className="font-medium">FocusMaster</span> liked your post about meditation.</p>
-                  <span className="text-xs text-white/60 mt-1 block">5 hours ago</span>
-                </div>
-              </div>
-            </PremiumCard>
-            
-            <PremiumCard className="p-4 backdrop-blur-xl">
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-full bg-violet-500/20 backdrop-blur-sm">
-                  <MessageSquare size={16} className="text-violet-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm"><span className="font-medium">ResilienceBuilder</span> commented on your progress.</p>
-                  <span className="text-xs text-white/60 mt-1 block">1 day ago</span>
-                </div>
-              </div>
-            </PremiumCard>
-            
-            <PremiumCard className="p-4 backdrop-blur-xl">
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-full bg-green-500/20 backdrop-blur-sm">
-                  <Users size={16} className="text-green-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm"><span className="font-medium">Focus Masters</span> group invited you to join.</p>
-                  <span className="text-xs text-white/60 mt-1 block">2 days ago</span>
-                </div>
-              </div>
-            </PremiumCard>
-          </div>
+            {/* Feed posts */}
+            {posts.map((post, index) => (
+              <motion.div key={post.id} variants={itemVariants}>
+                <GlassCard 
+                  variant="frost" 
+                  className="p-0 overflow-hidden"
+                >
+                  <div className="p-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 flex items-center justify-center">
+                          {post.author.charAt(0)}
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-white">{post.author}</h3>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-white/60">{post.time}</span>
+                            <GlassBadge variant="subtle" className="h-5">
+                              {post.theme}
+                            </GlassBadge>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <p className="text-white/90 text-sm mb-4 leading-relaxed">{post.content}</p>
+                    
+                    <div className="border-t border-white/5 mt-3 pt-3 flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <button className="flex items-center gap-1.5 text-white/70 hover:text-white/90 transition-colors">
+                          <Heart size={16} />
+                          <span className="text-xs">{post.likes}</span>
+                        </button>
+                        <button className="flex items-center gap-1.5 text-white/70 hover:text-white/90 transition-colors">
+                          <MessageSquare size={16} />
+                          <span className="text-xs">{post.comments}</span>
+                        </button>
+                      </div>
+                      <button className="flex items-center gap-1.5 text-white/70 hover:text-white/90 transition-colors">
+                        <Share size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </GlassCard>
+              </motion.div>
+            ))}
+          </motion.div>
         );
-      default:
-        return <div className="text-center py-10">Select a tab to view content</div>;
     }
   };
   
   return (
-    <div className="min-h-screen text-white pb-24">
-      <ThemeBackground />
-      
-      <motion.div 
-        className="px-5 pt-6 pb-24"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
-          <h1 className="text-xl font-medium">Social</h1>
+    <div className="min-h-screen pb-32 text-white">
+      <div className="px-5 pt-6 pb-24">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold bg-gradient-to-b from-white to-white/80 bg-clip-text text-transparent">Community</h1>
           <div className="flex items-center gap-2">
-            <button className="w-10 h-10 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all">
+            <GlassButton 
+              variant="secondary" 
+              size="sm"
+              className="w-10 h-10 p-0 rounded-full flex items-center justify-center"
+            >
               <Bell size={18} />
-            </button>
-            <button className="w-10 h-10 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all">
-              <User size={18} />
-            </button>
+            </GlassButton>
+            <GlassButton 
+              variant="secondary" 
+              size="sm"
+              className="w-10 h-10 p-0 rounded-full flex items-center justify-center"
+            >
+              <Globe size={18} />
+            </GlassButton>
           </div>
-        </motion.div>
+        </div>
         
-        <motion.div variants={itemVariants} className="overflow-x-auto mb-6 no-scrollbar">
-          <div className="flex space-x-2 min-w-full">
-            <button
+        {/* Tab Navigation */}
+        <div className="flex items-center justify-between mb-6 border-b border-white/5 pb-1">
+          <div className="flex items-center gap-1">
+            <GlassButton
+              variant={activeTab === "feed" ? "secondary" : "ghost"}
+              size="sm"
               onClick={() => setActiveTab("feed")}
-              className={`px-4 py-2.5 rounded-xl text-sm whitespace-nowrap transition-all ${
-                activeTab === "feed"
-                  ? "bg-white/10 text-white border border-white/20 backdrop-blur-xl"
-                  : "bg-black/40 text-white/70 hover:text-white hover:bg-black/50 border border-white/5 backdrop-blur-sm"
-              }`}
             >
-              <MessageSquare className="inline mr-2 h-4 w-4" /> Feed
-            </button>
-            <button
+              Feed
+            </GlassButton>
+            <GlassButton
+              variant={activeTab === "groups" ? "secondary" : "ghost"}
+              size="sm"
               onClick={() => setActiveTab("groups")}
-              className={`px-4 py-2.5 rounded-xl text-sm whitespace-nowrap transition-all ${
-                activeTab === "groups"
-                  ? "bg-white/10 text-white border border-white/20 backdrop-blur-xl"
-                  : "bg-black/40 text-white/70 hover:text-white hover:bg-black/50 border border-white/5 backdrop-blur-sm"
-              }`}
             >
-              <Users className="inline mr-2 h-4 w-4" /> Groups
-            </button>
-            <button
+              Communities
+            </GlassButton>
+            <GlassButton
+              variant={activeTab === "discover" ? "secondary" : "ghost"}
+              size="sm"
               onClick={() => setActiveTab("discover")}
-              className={`px-4 py-2.5 rounded-xl text-sm whitespace-nowrap transition-all ${
-                activeTab === "discover"
-                  ? "bg-white/10 text-white border border-white/20 backdrop-blur-xl"
-                  : "bg-black/40 text-white/70 hover:text-white hover:bg-black/50 border border-white/5 backdrop-blur-sm"
-              }`}
             >
-              <Search className="inline mr-2 h-4 w-4" /> Discover
-            </button>
-            <button
-              onClick={() => setActiveTab("notifications")}
-              className={`px-4 py-2.5 rounded-xl text-sm whitespace-nowrap transition-all ${
-                activeTab === "notifications"
-                  ? "bg-white/10 text-white border border-white/20 backdrop-blur-xl"
-                  : "bg-black/40 text-white/70 hover:text-white hover:bg-black/50 border border-white/5 backdrop-blur-sm"
-              }`}
-            >
-              <Bell className="inline mr-2 h-4 w-4" /> Notifications
-            </button>
+              Discover
+            </GlassButton>
           </div>
-        </motion.div>
+        </div>
         
-        <motion.div variants={itemVariants}>
+        {/* Content Area */}
+        <div className="pb-20">
           {renderTabContent()}
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
       
       <TabNavigation />
     </div>

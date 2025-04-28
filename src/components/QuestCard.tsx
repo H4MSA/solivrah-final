@@ -1,8 +1,9 @@
 
 import React from "react";
-import { Lock } from "lucide-react";
+import { ArrowRight, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import { PremiumCard } from "./PremiumCard";
+import { cn } from "@/lib/utils";
 
 interface QuestCardProps {
   title: string;
@@ -24,47 +25,60 @@ export const QuestCard: React.FC<QuestCardProps> = ({
   return (
     <PremiumCard
       variant={locked ? "subtle" : current ? "selected" : "default"}
-      className={`relative overflow-hidden transition-all duration-300 backdrop-blur-xl`}
+      className={cn(
+        "relative overflow-hidden",
+        locked ? "opacity-80" : "opacity-100"
+      )}
       interactive={!locked}
       onClick={!locked ? onClick : undefined}
+      glowEffect={current && !locked}
+      hoverEffect={!locked}
     >
       <div className="p-5 space-y-3">
         <div className="flex justify-between items-center">
           <h3 className="font-medium text-base">{title}</h3>
           {locked ? (
-            <span className="text-xs bg-black/60 backdrop-blur-sm px-2.5 py-1 rounded-full text-white/70 flex items-center gap-1.5 border border-white/10">
+            <span className="text-xs bg-black/70 backdrop-blur-xl px-2.5 py-1 rounded-full text-white/70 flex items-center gap-1.5 border border-white/10">
               <Lock size={12} />
               <span>Locked</span>
             </span>
           ) : (
-            <span className={`text-xs px-2.5 py-1 rounded-full border backdrop-blur-md ${
-              completed ? 'bg-white/10 text-white border-white/20' : 
-              current ? 'bg-white/5 text-white border-white/10' : 
-              'bg-black/50 text-white/70 border-white/5'
-            }`}>
+            <motion.span 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={cn(
+                "text-xs px-2.5 py-1 rounded-full border backdrop-blur-xl",
+                completed ? 'bg-white/10 text-white border-white/20' : 
+                current ? 'bg-white/5 text-white border-white/10' : 
+                'bg-black/60 text-white/70 border-white/5'
+              )}
+            >
               {completed ? 'Completed' : current ? 'Current' : 'Upcoming'}
-            </span>
+            </motion.span>
           )}
         </div>
         
         <p className="text-sm text-white/70">{description}</p>
         
         {!locked && !completed && (
-          <button 
+          <motion.button 
             className="w-full mt-2 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-medium flex items-center justify-center gap-2 border border-white/10 backdrop-blur-lg transition-all"
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.98 }}
           >
-            {current ? 'Continue Quest' : 'Start Quest'}
-          </button>
+            {current ? 'Continue Quest' : 'Start Quest'} <ArrowRight size={16} />
+          </motion.button>
         )}
         
         {locked && (
-          <div className="absolute inset-0 backdrop-blur-[8px] bg-black/50 flex items-center justify-center rounded-xl border border-white/5">
+          <div className="absolute inset-0 backdrop-blur-lg bg-black/60 flex items-center justify-center rounded-xl border border-white/5">
             <motion.div
               initial={{ opacity: 0.6 }}
               animate={{ opacity: [0.6, 0.8, 0.6] }}
               transition={{ duration: 2, repeat: Infinity }}
+              className="w-12 h-12 flex items-center justify-center rounded-full bg-black/40 border border-white/10"
             >
-              <Lock className="text-white/40 w-8 h-8" />
+              <Lock className="text-white/40 w-6 h-6" />
             </motion.div>
           </div>
         )}
