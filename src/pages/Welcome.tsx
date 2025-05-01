@@ -1,10 +1,13 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Logo } from "@/components/Logo";
-import { CheckCircle, ArrowRight, Shield } from "lucide-react";
+import { CheckCircle, ArrowRight, Shield, User } from "lucide-react";
 import { GlassButton } from "@/components/ui/glass";
 import { useAuth } from "@/context/AuthContext";
+import { AuthService } from "@/services/AuthService";
+import { useToast } from "@/hooks/use-toast";
 
 const Feature = ({
   icon,
@@ -31,7 +34,9 @@ const Feature = ({
 const Welcome = () => {
   const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoggingInAsGuest, setIsLoggingInAsGuest] = useState(false);
   const { isAuthenticated, hasCompletedOnboarding, isLoading } = useAuth();
+  const { toast } = useToast();
   
   useEffect(() => {
     // If the auth check is complete and user is loading the welcome page
@@ -53,6 +58,27 @@ const Welcome = () => {
       }
     }
   }, [isAuthenticated, hasCompletedOnboarding, isLoading, navigate]);
+
+  const handleGuestLogin = async () => {
+    setIsLoggingInAsGuest(true);
+    try {
+      await AuthService.signInAsGuest();
+      navigate("/survey", { replace: true });
+      toast({
+        title: "Welcome!",
+        description: "You're logged in as a guest. Enjoy exploring the app.",
+      });
+    } catch (error) {
+      console.error("Guest login error:", error);
+      toast({
+        variant: "destructive",
+        title: "Guest login failed",
+        description: "Please try again or create an account.",
+      });
+    } finally {
+      setIsLoggingInAsGuest(false);
+    }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -129,6 +155,18 @@ const Welcome = () => {
               onClick={() => navigate("/auth", { state: { initialTab: 'login' } })}
             >
               Sign In
+            </GlassButton>
+
+            <GlassButton
+              variant="outline"
+              size="lg"
+              fullWidth
+              className="rounded-xl font-medium mt-2"
+              onClick={handleGuestLogin}
+              loading={isLoggingInAsGuest}
+              iconLeft={<User size={16} />}
+            >
+              Continue as Guest
             </GlassButton>
           </div>
         </motion.div>

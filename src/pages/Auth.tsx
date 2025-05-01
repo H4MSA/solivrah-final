@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -146,6 +145,35 @@ const Auth = () => {
         title: "Google sign in failed",
         description: "There was a problem signing in with Google."
       });
+      setIsLoading(false);
+    }
+  };
+  
+  const handleGuestLogin = async () => {
+    setIsLoading(true);
+    
+    try {
+      const { user, session } = await AuthService.signInAsGuest();
+      
+      localStorage.setItem('authToken', session?.access_token || "");
+      
+      setUser(user);
+      setSession(session);
+      
+      toast({
+        title: "Guest login successful",
+        description: "Welcome! You're logged in as a guest."
+      });
+      
+      navigate("/survey", { replace: true });
+    } catch (error) {
+      console.error("Guest login error:", error);
+      toast({
+        variant: "destructive",
+        title: "Guest login failed",
+        description: error instanceof Error ? error.message : "Please try again later."
+      });
+    } finally {
       setIsLoading(false);
     }
   };
@@ -317,6 +345,18 @@ const Auth = () => {
               >
                 Sign In
               </GlassButton>
+
+              <GlassButton
+                type="button"
+                variant="secondary"
+                size="lg"
+                fullWidth
+                onClick={handleGuestLogin}
+                disabled={isLoading}
+                className="mt-2"
+              >
+                Continue as Guest
+              </GlassButton>
             </motion.form>
           ) : (
             <motion.form 
@@ -388,6 +428,18 @@ const Auth = () => {
                 className="mt-6"
               >
                 Create Account
+              </GlassButton>
+
+              <GlassButton
+                type="button"
+                variant="secondary"
+                size="lg"
+                fullWidth
+                onClick={handleGuestLogin}
+                disabled={isLoading}
+                className="mt-2"
+              >
+                Continue as Guest
               </GlassButton>
             </motion.form>
           )}

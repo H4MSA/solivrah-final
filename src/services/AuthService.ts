@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from '@supabase/supabase-js';
 
@@ -76,6 +75,50 @@ export const AuthService = {
       };
     } catch (error) {
       console.error("Sign in error:", error);
+      throw error;
+    }
+  },
+  
+  signInAsGuest: async (): Promise<AuthResponse> => {
+    try {
+      const guestEmail = `guest_${Math.floor(Math.random() * 10000)}@example.com`;
+      const guestPassword = "guest123456";
+      
+      // Check if guest account exists, if not create it
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: guestEmail,
+        password: guestPassword,
+      });
+      
+      if (signInError) {
+        // Guest account doesn't exist, create it
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: guestEmail,
+          password: guestPassword,
+          options: {
+            data: {
+              username: `Guest_${Math.floor(Math.random() * 10000)}`,
+              isGuest: true,
+            },
+          },
+        });
+        
+        if (signUpError) {
+          throw signUpError;
+        }
+        
+        return {
+          session: signUpData.session,
+          user: signUpData.user
+        };
+      }
+      
+      return {
+        session: signInData.session,
+        user: signInData.user
+      };
+    } catch (error) {
+      console.error("Guest login error:", error);
       throw error;
     }
   },
