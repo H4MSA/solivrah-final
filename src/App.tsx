@@ -51,7 +51,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
 // Protected route component using enhanced auth context
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, isSkippingAuth } = useAuth();
 
   if (isLoading) {
     return (
@@ -61,7 +61,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  if (!isAuthenticated) {
+  // Allow access if authenticated or skipping authentication
+  if (!isAuthenticated && !isSkippingAuth) {
     return <Navigate to="/welcome" replace />;
   }
 
@@ -70,7 +71,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Survey route component that checks if survey is completed
 const SurveyRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, hasCompletedOnboarding, isLoading } = useAuth();
+  const { isAuthenticated, hasCompletedOnboarding, isLoading, isSkippingAuth } = useAuth();
 
   if (isLoading) {
     return (
@@ -80,13 +81,13 @@ const SurveyRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  // If not authenticated, redirect to welcome
-  if (!isAuthenticated) {
+  // If not authenticated and not skipping auth, redirect to welcome
+  if (!isAuthenticated && !isSkippingAuth) {
     return <Navigate to="/welcome" replace />;
   }
 
-  // If authenticated but already completed onboarding, redirect to home
-  if (isAuthenticated && hasCompletedOnboarding) {
+  // If authenticated or skipping auth but already completed onboarding, redirect to home
+  if ((isAuthenticated || isSkippingAuth) && hasCompletedOnboarding) {
     return <Navigate to="/" replace />;
   }
 
@@ -96,7 +97,7 @@ const SurveyRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Public route component that redirects authenticated users
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, hasCompletedOnboarding, isLoading } = useAuth();
+  const { isAuthenticated, hasCompletedOnboarding, isLoading, isSkippingAuth } = useAuth();
 
   if (isLoading) {
     return (
@@ -106,13 +107,13 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  // If authenticated and has completed onboarding, redirect to home
-  if (isAuthenticated && hasCompletedOnboarding) {
+  // If authenticated or skipping auth and has completed onboarding, redirect to home
+  if ((isAuthenticated || isSkippingAuth) && hasCompletedOnboarding) {
     return <Navigate to="/" replace />;
   }
 
-  // If authenticated but hasn't completed onboarding, redirect to survey
-  if (isAuthenticated && !hasCompletedOnboarding) {
+  // If authenticated or skipping auth but hasn't completed onboarding, redirect to survey
+  if ((isAuthenticated || isSkippingAuth) && !hasCompletedOnboarding) {
     return <Navigate to="/survey" replace />;
   }
 
@@ -122,7 +123,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Dynamic route resolver based on auth state
 const RootRoute = () => {
-  const { isAuthenticated, hasCompletedOnboarding, isLoading } = useAuth();
+  const { isAuthenticated, hasCompletedOnboarding, isLoading, isSkippingAuth } = useAuth();
   
   if (isLoading) {
     return (
@@ -132,11 +133,11 @@ const RootRoute = () => {
     );
   }
   
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !isSkippingAuth) {
     return <Navigate to="/welcome" replace />;
   }
   
-  if (isAuthenticated && !hasCompletedOnboarding) {
+  if ((isAuthenticated || isSkippingAuth) && !hasCompletedOnboarding) {
     return <Navigate to="/survey" replace />;
   }
   

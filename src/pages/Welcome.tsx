@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Logo } from "@/components/Logo";
-import { CheckCircle, ArrowRight, Shield, User } from "lucide-react";
+import { CheckCircle, ArrowRight, Shield, User, LogIn } from "lucide-react";
 import { GlassButton } from "@/components/ui/glass";
 import { useAuth } from "@/context/AuthContext";
 import { AuthService } from "@/services/AuthService";
@@ -35,7 +35,7 @@ const Welcome = () => {
   const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoggingInAsGuest, setIsLoggingInAsGuest] = useState(false);
-  const { isAuthenticated, hasCompletedOnboarding, isLoading } = useAuth();
+  const { isAuthenticated, hasCompletedOnboarding, isLoading, skipAuthentication } = useAuth();
   const { toast } = useToast();
   
   useEffect(() => {
@@ -83,6 +83,10 @@ const Welcome = () => {
     } finally {
       setIsLoggingInAsGuest(false);
     }
+  };
+  
+  const handleSkipLogin = () => {
+    skipAuthentication();
   };
 
   const containerVariants = {
@@ -143,6 +147,17 @@ const Welcome = () => {
           <div className="flex flex-col w-full gap-4 mt-6">
             <GlassButton
               variant="primary"
+              size="lg"
+              fullWidth
+              className="rounded-xl font-semibold"
+              onClick={handleSkipLogin}
+              iconRight={<LogIn size={18} />}
+            >
+              Skip Login & Explore
+            </GlassButton>
+            
+            <GlassButton
+              variant="secondary"
               size="lg"
               fullWidth
               className="rounded-xl font-semibold"

@@ -21,6 +21,8 @@ export interface AppContextType {
   setLoading: (loading: boolean) => void;
   isGuest: boolean;
   setIsGuest: (isGuest: boolean) => void;
+  isAnonymous: boolean;
+  setIsAnonymous: (isAnonymous: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -34,12 +36,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [completedQuests, setCompletedQuests] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [isGuest, setIsGuest] = useState<boolean>(false);
+  const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
 
   useEffect(() => {
     // Load user data from localStorage if not in user state
     const getUser = async () => {
       try {
         setLoading(true);
+        
+        // Check if user is skipping authentication
+        const isSkipping = localStorage.getItem('skipAuthentication') === 'true';
+        
+        if (isSkipping) {
+          setIsAnonymous(true);
+          // Create placeholder data for anonymous users
+          setStreak(Math.floor(Math.random() * 5));
+          setXP(Math.floor(Math.random() * 200));
+          setCompletedQuests(Math.floor(Math.random() * 3));
+          
+          // Load theme preference from localStorage if it exists
+          const savedTheme = localStorage.getItem('anonymous_theme');
+          if (savedTheme) {
+            setSelectedTheme(savedTheme);
+          }
+          setLoading(false);
+          return;
+        }
+        
         const { data: { user } } = await supabase.auth.getUser();
         setUser(user);
 
@@ -73,16 +96,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Save theme preference when it changes
   useEffect(() => {
-    if (user) {
+    if (isAnonymous) {
+      localStorage.setItem('anonymous_theme', selectedTheme);
+    } else if (user) {
       localStorage.setItem(`${user.id}_theme`, selectedTheme);
     }
-  }, [selectedTheme, user]);
+  }, [selectedTheme, user, isAnonymous]);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setIsGuest(false);
+    // If anonymous user
+    if (isAnonymous) {
+      localStorage.removeItem('skipAuthentication');
+      localStorage.removeItem('anonymous_theme');
+      setIsAnonymous(false);
+    } else {
+      await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
+      setIsGuest(false);
+    }
+    
     setStreak(0);
     setXP(0);
     setCompletedQuests(0);
@@ -128,6 +161,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setLoading,
         isGuest,
         setIsGuest,
+        isAnonymous,
+        setIsAnonymous,
       }}
     >
       {children}

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -76,20 +75,40 @@ const Survey = () => {
   ];
   
   // Submit survey responses to Supabase
-  const handleSubmit = async () => {
-    if (!user) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'You must be signed in to complete the survey.'
-      });
-      return;
-    }
-    
-    setIsSubmitting(true);
-    
+  const submitSurvey = async () => {
     try {
-      // Submit survey responses
+      setIsSubmitting(true);
+      
+      // If anonymous user, just store data in localStorage instead of database
+      if (isAnonymousUser()) {
+        // Store survey data in localStorage for anonymous users
+        localStorage.setItem('anonymous_survey', JSON.stringify({
+          theme: selectedTheme,
+          goal: goal,
+          biggestStruggle: struggle,
+          dailyCommitment: commitment,
+          timestamp: new Date().toISOString()
+        }));
+        
+        // Set onboarding as completed
+        localStorage.setItem('onboardingComplete', 'true');
+        setHasCompletedOnboarding(true);
+        
+        // Show success message
+        toast({
+          title: "Survey submitted!",
+          description: "Your personalized journey is ready."
+        });
+        
+        // Navigate to main app after short delay
+        setTimeout(() => {
+          navigate('/', { replace: true });
+        }, 1000);
+        
+        return;
+      }
+      
+      // For authenticated users, use existing code to submit to database
       const { error } = await supabase
         .from('survey_responses')
         .insert({
@@ -118,11 +137,11 @@ const Survey = () => {
       navigate('/', { replace: true });
       
     } catch (error) {
-      console.error('Error submitting survey:', error);
+      console.error("Error submitting survey:", error);
       toast({
-        variant: 'destructive',
-        title: 'Submission Failed',
-        description: 'There was a problem saving your responses. Please try again.'
+        variant: "destructive",
+        title: "Submission failed",
+        description: "There was an error submitting your responses."
       });
     } finally {
       setIsSubmitting(false);
@@ -182,7 +201,7 @@ const Survey = () => {
     if (step < 3) {
       setStep(step + 1);
     } else {
-      handleSubmit();
+      submitSurvey();
     }
   };
   
@@ -442,6 +461,9 @@ const Survey = () => {
         return null;
     }
   };
+
+  // Check if user is anonymous
+  const isAnonymousUser = () => localStorage.getItem('skipAuthentication') === 'true';
 
   return (
     <div className="min-h-screen flex flex-col px-4 py-10">
