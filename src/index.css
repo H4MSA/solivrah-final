@@ -204,16 +204,28 @@
     display: none; /* Chrome, Safari and Opera */
   }
 
-  /* Add touch feedback */
+  /* Add touch feedback optimized for Android */
   button, a, [role="button"] {
     @apply active:scale-[0.98] transition-all touch-manipulation;
     -webkit-tap-highlight-color: transparent;
+    outline: none !important; /* Remove default outline */
+    user-select: none; /* Prevent text selection on Android */
   }
 
-  /* Page transition effect */
+  /* Android-specific focus style */
+  button:focus, a:focus, [role="button"]:focus {
+    @apply ring-0 outline-none;
+  }
+
+  /* Add visual feedback for touch without using outline */
+  button:active, a:active, [role="button"]:active {
+    @apply bg-opacity-80;
+  }
+
+  /* Page transition effect - optimized for Android */
   .page-transition {
-    @apply duration-300 transition-all;
-    animation: pageTransition 0.3s ease-out;
+    @apply will-change-transform will-change-opacity;
+    animation: pageTransition 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
   }
 }
 
@@ -229,8 +241,11 @@
 }
 
 @layer utilities {
+  /* Optimize glass effect for better Android performance */
   .glass {
-    @apply bg-black/60 backdrop-blur-xl border border-white/10 shadow-lg hover:bg-black/50 transition-all duration-300;
+    @apply bg-black/60 backdrop-blur-sm border border-white/10 shadow-lg hover:bg-black/50 transition-all duration-200;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   }
 
@@ -238,32 +253,31 @@
     background-image: url("data:image/svg+xml,%3Csvg width='44' height='44' viewBox='0 0 44 44' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h44v44H0V0zm4 4h36v36H4V4z' fill='%23ffffff' fill-opacity='0.05'/%3E%3C/svg%3E");
   }
 
+  /* Android-optimized hover effect */
   .hover-lift {
-    @apply transition-transform duration-200 hover:-translate-y-1;
+    @apply will-change-transform;
+    transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+  .hover-lift:hover {
+    transform: translateY(-1px);
   }
 
+  /* Android-optimized shadows */
   .depth-shadow {
-    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   }
 
   .card-hover {
-    @apply transition-all duration-300 hover:bg-white/5 hover:border-white/20 hover:-translate-y-1;
+    @apply transition-all duration-200 hover:bg-white/5 hover:border-white/20 will-change-transform;
   }
 
   .glass-card {
     @apply glass rounded-xl p-5;
   }
 
+  /* Android-optimized gradient background */
   .gradient-bg {
-    @apply bg-gradient-to-b from-background via-background/90 to-background-end transition-all duration-500;
-    background-size: 200% 200%;
-    animation: gradient 8s ease infinite;
-  }
-
-  @keyframes gradient {
-    0% { background-position: 0% 0%; }
-    50% { background-position: 100% 100%; }
-    100% { background-position: 0% 0%; }
+    @apply bg-gradient-to-b from-background via-background/90 to-background-end transition-all duration-300;
   }
 
   .text-gradient {
@@ -274,31 +288,23 @@
     @apply rounded-full flex items-center justify-center border border-white/10;
   }
 
+  /* Android-optimized interactive elements */
   .interactive {
-    @apply transition-all duration-300 hover:scale-[1.02] active:scale-95 cursor-pointer;
+    @apply transition-all duration-200 active:scale-95 cursor-pointer will-change-transform;
   }
-
+  
+  /* Android-specific touch feedback */
   .touch-feedback {
-    @apply active:scale-[0.98] transition-transform duration-200;
+    @apply active:scale-[0.97] transition-transform duration-150;
   }
 
   .task-locked {
-    @apply opacity-40 filter grayscale blur-[2px] pointer-events-none;
+    @apply opacity-40 filter grayscale;
   }
-  .hover-lift {
-    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
-  }
-
-  .hover-lift:hover {
-    transform: translateY(-2px);
-  }
-
-  .press-effect {
-    transition: transform 0.1s cubic-bezier(0.2, 0, 0, 1);
-  }
-
-  .press-effect:active {
-    transform: scale(0.97);
+  
+  /* Optimize animation performance for Android */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 16px);
   }
 }
 
@@ -522,48 +528,89 @@
   animation: float 15s infinite ease-in-out;
 }
 
-/* Mobile-specific optimizations */
+/* Mobile-specific optimizations for Android */
 @media (max-width: 640px) {
-  html {
-    @apply overflow-hidden;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    height: 100vh;
-    /* Handle iOS Safari viewport height */
-    height: -webkit-fill-available;
+  html, body {
+    @apply overflow-hidden touch-manipulation;
+    height: 100%;
+    width: 100%;
+    overscroll-behavior: none;
+    position: fixed; /* Prevent elastic scrolling on some Android devices */
   }
 
-  body {
-    @apply overflow-x-hidden min-h-screen;
-    touch-action: manipulation;
-    /* Handle iOS Safari viewport height */
-    min-height: -webkit-fill-available;
+  /* Main scrollable container */
+  #root {
+    @apply overflow-auto;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
-  input, button, a {
-    @apply touch-manipulation;
+  /* Android-specific tap effect */
+  .android-tap-effect {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .android-tap-effect::after {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, #fff 10%, transparent 10%);
+    background-repeat: no-repeat;
+    background-position: 50%;
+    transform: scale(10, 10);
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.5s;
+  }
+  
+  .android-tap-effect:active::after {
+    transform: scale(0, 0);
+    opacity: 0.3;
+    transition: 0s;
   }
 
-  /* Dynamic island area (iPhone 14 Pro and above) */
-  @supports (padding-top: env(safe-area-inset-top)) {
-    @media (min-width: 390px) and (min-height: 844px) {
-      .dynamic-island-aware {
-        padding-top: calc(env(safe-area-inset-top, 44px) + 16px);
-      }
-    }
-
-    /* iPhone X and newer with notch */
-    @media (min-width: 375px) and (min-height: 812px) {
-      .notch-aware {
-        padding-top: env(safe-area-inset-top);
-      }
-    }
-
-    /* Android gesture area */
-    .gesture-area-aware {
-      padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
-    }
+  /* Bottom safe area for navigation bars */
+  .safe-area-bottom {
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
   }
+}
+
+/* Better performance animations for Android */
+@keyframes optimized-float {
+  0% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -8px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+.animate-optimized-float {
+  will-change: transform;
+  animation: optimized-float 3s infinite cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Enhanced touch targets for Android */
+.enhanced-touch-target {
+  @apply min-h-[48px] min-w-[48px];
+  position: relative;
+}
+
+.enhanced-touch-target::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  z-index: -1;
 }
 
 /* 3D Tilt Effect */
