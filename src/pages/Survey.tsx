@@ -83,10 +83,10 @@ const Survey = () => {
       if (isAnonymousUser()) {
         // Store survey data in localStorage for anonymous users
         localStorage.setItem('anonymous_survey', JSON.stringify({
-          theme: selectedTheme,
+          theme: theme,
           goal: goal,
           biggestStruggle: struggle,
-          dailyCommitment: commitment,
+          dailyCommitment: dailyCommitment,
           timestamp: new Date().toISOString()
         }));
         
