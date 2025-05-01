@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -54,6 +55,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session) {
         setIsAuthenticated(true);
         await checkOnboardingStatus(session.user.id);
+        
+        // Check if user is a guest from metadata
+        const isGuestUser = session.user?.user_metadata?.isGuest === true;
+        console.log("User is guest:", isGuestUser, session.user?.user_metadata);
+        
         return true;
       } else {
         setIsAuthenticated(false);
@@ -102,9 +108,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Set up the auth state change listener
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         async (event, session) => {
+          console.log("Auth state changed:", event, session?.user?.email);
+          
           if (session) {
             setIsAuthenticated(true);
             localStorage.setItem('authToken', session.access_token);
+            
+            // Check if user is a guest from metadata
+            const isGuestUser = session.user?.user_metadata?.isGuest === true;
+            console.log("User is guest:", isGuestUser, session.user?.user_metadata);
+            
             await checkOnboardingStatus(session.user.id);
           } else {
             setIsAuthenticated(false);

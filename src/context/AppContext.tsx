@@ -45,6 +45,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         // If user exists, load their data
         if (user) {
+          // Check if user is a guest
+          const userMetadata = user.user_metadata || {};
+          setIsGuest(Boolean(userMetadata.isGuest));
+          
           // In a real app, we would load the user's data from the database
           // For now, we'll use some placeholder data
           setStreak(Math.floor(Math.random() * 30));
