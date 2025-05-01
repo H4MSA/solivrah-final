@@ -155,6 +155,10 @@ const Auth = () => {
     try {
       const { user, session } = await AuthService.signInAsGuest();
       
+      if (!user || !session) {
+        throw new Error("Failed to create guest account");
+      }
+      
       localStorage.setItem('authToken', session?.access_token || "");
       
       setUser(user);
@@ -166,12 +170,12 @@ const Auth = () => {
       });
       
       navigate("/survey", { replace: true });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Guest login error:", error);
       toast({
         variant: "destructive",
         title: "Guest login failed",
-        description: error instanceof Error ? error.message : "Please try again later."
+        description: error.message || "Please try again later."
       });
     } finally {
       setIsLoading(false);

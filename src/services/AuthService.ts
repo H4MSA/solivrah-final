@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from '@supabase/supabase-js';
 
@@ -81,8 +82,10 @@ export const AuthService = {
   
   signInAsGuest: async (): Promise<AuthResponse> => {
     try {
-      const guestEmail = `guest_${Math.floor(Math.random() * 10000)}@example.com`;
-      const guestPassword = `guest${Math.random().toString(36).substring(2, 10)}`;
+      // Using a valid email format that Supabase will accept
+      const randomId = Math.floor(Math.random() * 100000);
+      const guestEmail = `guest.user${randomId}@mailinator.com`;
+      const guestPassword = `Guest${Math.random().toString(36).substring(2, 10)}!`;
       
       console.log("Attempting guest login with generated credentials");
       
@@ -92,7 +95,7 @@ export const AuthService = {
         password: guestPassword,
         options: {
           data: {
-            username: `Guest_${Math.floor(Math.random() * 10000)}`,
+            username: `Guest_${randomId}`,
             isGuest: true,
           },
         },

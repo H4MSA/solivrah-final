@@ -62,18 +62,23 @@ const Welcome = () => {
   const handleGuestLogin = async () => {
     setIsLoggingInAsGuest(true);
     try {
-      await AuthService.signInAsGuest();
+      const { user, session } = await AuthService.signInAsGuest();
+      
+      if (!user || !session) {
+        throw new Error("Failed to create guest account");
+      }
+      
       navigate("/survey", { replace: true });
       toast({
         title: "Welcome!",
         description: "You're logged in as a guest. Enjoy exploring the app.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Guest login error:", error);
       toast({
         variant: "destructive",
         title: "Guest login failed",
-        description: "Please try again or create an account.",
+        description: error.message || "Please try again or create an account.",
       });
     } finally {
       setIsLoggingInAsGuest(false);
@@ -164,6 +169,7 @@ const Welcome = () => {
               className="rounded-xl font-medium mt-2"
               onClick={handleGuestLogin}
               loading={isLoggingInAsGuest}
+              disabled={isLoggingInAsGuest}
               iconLeft={<User size={16} />}
             >
               Continue as Guest
