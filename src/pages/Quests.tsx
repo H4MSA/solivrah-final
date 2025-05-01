@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { QuestCard } from "@/components/QuestCard";
@@ -8,18 +7,7 @@ import { useApp } from "@/context/AppContext";
 import { QuestCompleteModal } from "@/components/QuestCompleteModal";
 import { Filter, CheckCircle2, CalendarDays, Target, ArrowRightLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
-interface Quest {
-  id: string;
-  title: string;
-  description: string;
-  day: number;
-  theme: string;
-  completed: boolean;
-  difficulty?: 'Easy' | 'Medium' | 'Hard';
-  xp: number;
-  requires_photo: boolean;
-}
+import { Quest } from "@/types/quest"; // Import our custom Quest type
 
 const Quests = () => {
   const [currentQuest, setCurrentQuest] = useState<Quest | null>(null);
@@ -48,14 +36,31 @@ const Quests = () => {
         if (data && data.length > 0) {
           // Find current quest (first incomplete quest)
           const current = data.find(quest => !quest.completed);
-          if (current) setCurrentQuest(current);
+          if (current) {
+            // Cast the difficulty to our expected type
+            const typedCurrent: Quest = {
+              ...current,
+              difficulty: (current.difficulty as 'Easy' | 'Medium' | 'Hard') || 'Medium'
+            };
+            setCurrentQuest(typedCurrent);
+          }
           
           // Get upcoming quests (incomplete quests except current)
-          const upcoming = data.filter(quest => !quest.completed && quest.id !== current?.id);
+          const upcoming = data
+            .filter(quest => !quest.completed && quest.id !== current?.id)
+            .map(quest => ({
+              ...quest,
+              difficulty: (quest.difficulty as 'Easy' | 'Medium' | 'Hard') || 'Medium'
+            }));
           setUpcomingQuests(upcoming);
           
           // Get completed quests
-          const completed = data.filter(quest => quest.completed);
+          const completed = data
+            .filter(quest => quest.completed)
+            .map(quest => ({
+              ...quest,
+              difficulty: (quest.difficulty as 'Easy' | 'Medium' | 'Hard') || 'Medium'
+            }));
           setCompletedQuests(completed);
         }
       } catch (error) {
@@ -326,7 +331,7 @@ const Quests = () => {
             setSelectedQuest(null);
           }}
           onComplete={handleQuestComplete}
-          quest={selectedQuest}
+          questId={selectedQuest.id}
           requiresPhoto={selectedQuest.requires_photo}
         />
       )}
