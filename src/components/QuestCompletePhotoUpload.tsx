@@ -7,19 +7,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useApp } from "@/context/AppContext";
 
-interface QuestCompletePhotoUploadProps {
-  questId: string;
-  onSuccess: () => void;
+export interface QuestCompletePhotoUploadProps {
+  questId?: string;
+  onSuccess?: () => void;
   onCancel: () => void;
+  onPhotoUploaded: (url: string) => void;
+  isUploading: boolean;
 }
 
 export const QuestCompletePhotoUpload: React.FC<QuestCompletePhotoUploadProps> = ({ 
   questId, 
   onSuccess, 
-  onCancel 
+  onCancel,
+  onPhotoUploaded,
+  isUploading: externalIsUploading
 }) => {
   const [showCamera, setShowCamera] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isUploading, setIsUploading] = useState(externalIsUploading);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const { toast } = useToast();
   const { user, addXP } = useApp();
@@ -41,7 +45,9 @@ export const QuestCompletePhotoUpload: React.FC<QuestCompletePhotoUploadProps> =
       // Create form data for file upload
       const formData = new FormData();
       formData.append('photo', file);
-      formData.append('questId', questId);
+      if (questId) {
+        formData.append('questId', questId);
+      }
       
       // Submit to our verification API
       const response = await fetch('/api/verify-photo', {
@@ -70,7 +76,13 @@ export const QuestCompletePhotoUpload: React.FC<QuestCompletePhotoUploadProps> =
           addXP(result.xp);
         }
         
-        onSuccess();
+        // Use either success callback or photo uploaded callback
+        if (onSuccess) {
+          onSuccess();
+        }
+        if (onPhotoUploaded && result.url) {
+          onPhotoUploaded(result.url);
+        }
       } else {
         toast({
           title: "Verification Failed",
@@ -135,7 +147,7 @@ export const QuestCompletePhotoUpload: React.FC<QuestCompletePhotoUploadProps> =
           
           {previewUrl && !isUploading && (
             <button
-              onClick={onSuccess}
+              onClick={() => onPhotoUploaded(previewUrl)}
               className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground flex items-center justify-center gap-2"
             >
               <Check size={18} />
@@ -155,3 +167,4 @@ export const QuestCompletePhotoUpload: React.FC<QuestCompletePhotoUploadProps> =
     </GlassCard>
   );
 };
+

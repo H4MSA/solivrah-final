@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X, Upload, Camera, CheckCircle } from 'lucide-react';
@@ -95,6 +96,7 @@ export const QuestCompleteModal: React.FC<QuestCompleteModalProps> = ({
             onPhotoUploaded={handlePhotoUpload}
             onCancel={() => setShowPhotoUpload(false)}
             isUploading={isUploading}
+            questId={questId}
           />
         )}
         
