@@ -3,12 +3,34 @@ import React, { useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
 import { motion } from "framer-motion";
 
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+  duration: number;
+  delay: number;
+}
+
 export const ThemeBackground: React.FC = () => {
   const { selectedTheme } = useApp();
   const [mounted, setMounted] = useState(false);
+  const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
     setMounted(true);
+    
+    // Generate particles
+    const newParticles = Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 3 + 1,
+      duration: Math.random() * 10 + 10,
+      delay: Math.random() * 5
+    }));
+    
+    setParticles(newParticles);
   }, []);
 
   // Generate theme-specific colors
@@ -34,9 +56,9 @@ export const ThemeBackground: React.FC = () => {
         };
       default:
         return {
-          primary: "rgba(100, 100, 120, 0.08)",
-          secondary: "rgba(80, 80, 100, 0.06)",
-          accent: "rgba(150, 150, 170, 0.04)"
+          primary: "rgba(0, 255, 133, 0.08)",
+          secondary: "rgba(191, 255, 0, 0.05)",
+          accent: "rgba(56, 189, 248, 0.05)"
         };
     }
   };
@@ -49,7 +71,7 @@ export const ThemeBackground: React.FC = () => {
     <div className="fixed inset-0 -z-10 overflow-hidden">
       {/* Base gradient */}
       <div 
-        className="absolute inset-0 bg-gradient-to-b from-black via-black to-[#0a0a0a] transition-all duration-1000"
+        className="absolute inset-0 bg-gradient-to-b from-rich-black via-rich-black to-dark-purple transition-all duration-1000"
       />
       
       {/* Ambient glow */}
@@ -87,9 +109,29 @@ export const ThemeBackground: React.FC = () => {
       {/* Subtle moving particles/lights */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Floating particles */}
-        <div className="absolute top-1/4 left-1/4 w-32 h-32 rounded-full bg-white/5 blur-3xl animate-float-slow" />
-        <div className="absolute top-3/4 left-2/3 w-48 h-48 rounded-full bg-white/3 blur-3xl animate-float" />
-        <div className="absolute top-2/3 left-1/5 w-40 h-40 rounded-full bg-white/2 blur-3xl animate-float-reverse" />
+        {particles.map((particle) => (
+          <motion.div
+            key={particle.id}
+            className="absolute w-2 h-2 rounded-full bg-white/5"
+            style={{
+              left: `${particle.x}%`,
+              top: `${particle.y}%`,
+              width: `${particle.size}px`,
+              height: `${particle.size}px`,
+            }}
+            animate={{
+              y: [0, -100, 0],
+              x: [0, Math.random() * 50 - 25, 0],
+              opacity: [0, 0.5, 0],
+            }}
+            transition={{
+              duration: particle.duration,
+              delay: particle.delay,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
       </div>
       
       {/* Subtle grid pattern overlay */}
@@ -101,3 +143,5 @@ export const ThemeBackground: React.FC = () => {
     </div>
   );
 };
+
+export default ThemeBackground;

@@ -29,6 +29,18 @@ export default {
 				background: 'hsl(var(--background))',
 				'background-end': 'hsl(var(--background-end))',
 				foreground: 'hsl(var(--foreground))',
+				
+				// New color palette
+				'rich-black': '#000000',
+				'dark-purple': '#150F1E',
+				'neon-green': '#00FF85',
+				'soft-lime': '#BFFF00',
+				'soft-purple': '#A78BFA',
+				'electric-blue': '#38BDF8',
+				'subdued-orange': '#FF901F',
+				'success': '#2DD4BF',
+				'warning': '#FBBF24',
+				
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
@@ -62,6 +74,10 @@ export default {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			boxShadow: {
+				'glass': '0 8px 24px 0 rgba(0, 0, 0, 0.3)',
+				'glass-hover': '0 12px 28px 0 rgba(0, 0, 0, 0.4)'
 			},
 			keyframes: {
 				'accordion-down': {
@@ -158,6 +174,22 @@ export default {
 					'100%': {
 						transform: 'scale(1)'
 					}
+				},
+				'glow': {
+					'0%': {
+						boxShadow: '0 0 5px rgba(0, 255, 133, 0.5), 0 0 10px rgba(0, 255, 133, 0.2)'
+					},
+					'50%': {
+						boxShadow: '0 0 10px rgba(0, 255, 133, 0.7), 0 0 20px rgba(0, 255, 133, 0.4)'
+					},
+					'100%': {
+						boxShadow: '0 0 5px rgba(0, 255, 133, 0.5), 0 0 10px rgba(0, 255, 133, 0.2)'
+					}
+				},
+				'particle-float': {
+					'0%': { transform: 'translateY(0) translateX(0) rotate(0deg)', opacity: '0' },
+					'50%': { opacity: '0.5' },
+					'100%': { transform: 'translateY(-100px) translateX(20px) rotate(180deg)', opacity: '0' }
 				}
 			},
 			animation: {
@@ -170,7 +202,13 @@ export default {
 				'pop-in': 'pop-in 0.5s forwards',
 				'blur-in': 'blur-in 0.5s ease-out',
 				'float': 'float 5s infinite ease-in-out',
-				'pulse': 'pulse 2s infinite ease-in-out'
+				'pulse': 'pulse 2s infinite ease-in-out',
+				'glow': 'glow 2s infinite ease-in-out',
+				'particle-float': 'particle-float 5s forwards'
+			},
+			backgroundImage: {
+				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+				'accent-gradient': 'linear-gradient(to right, #00FF85, #BFFF00)',
 			}
 		}
 	},
