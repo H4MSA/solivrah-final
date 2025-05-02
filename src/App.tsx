@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider } from "./context/AppContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeBackground } from "./components/ThemeBackground";
+import { TabNavigation } from "./components/TabNavigation";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Welcome from "./pages/Welcome";
@@ -42,9 +44,11 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       {/* Main content area with scroll */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden page-transition dynamic-island-aware notch-aware gesture-area-aware">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden page-transition dynamic-island-aware notch-aware gesture-area-aware pb-20">
         {children}
       </main>
+      {/* TabNavigation always rendered for authenticated users */}
+      <TabNavigation />
     </>
   );
 };
@@ -238,9 +242,7 @@ const App = () => {
                   <Route 
                     path="/" 
                     element={
-                      <AppLayout>
-                        <RootRoute />
-                      </AppLayout>
+                      <RootRoute />
                     } 
                   />
 

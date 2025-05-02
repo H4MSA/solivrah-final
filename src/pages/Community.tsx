@@ -117,7 +117,7 @@ const Community = () => {
   };
   
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-28"> {/* Increased bottom padding to prevent overlap */}
       <ThemeBackground />
       
       <div className="p-6 space-y-6">

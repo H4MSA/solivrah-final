@@ -54,13 +54,17 @@ export const TabNavigation = () => {
 
   return (
     <motion.nav 
-      className="fixed bottom-0 left-0 right-0 z-50 pb-safe pointer-events-none"
+      className="fixed bottom-0 left-0 right-0 z-[999] pb-safe pointer-events-none"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ 
         type: "spring",
         stiffness: 400,
         damping: 30
+      }}
+      style={{
+        backfaceVisibility: "hidden",
+        transform: "translate3d(0,0,0)"
       }}
     >
       <div className="mx-auto max-w-md px-4 pb-2">
@@ -78,7 +82,7 @@ export const TabNavigation = () => {
                   onClick={() => navigate(path)}
                   aria-label={accessibilityLabel}
                   className={cn(
-                    "relative flex flex-col items-center justify-center py-3 px-2 w-16 group transition-all -webkit-tap-highlight-color-transparent",
+                    "relative flex flex-col items-center justify-center py-3 px-2 w-16 group transition-all -webkit-tap-highlight-color-transparent touch-manipulation",
                     active ? "text-white" : "text-white/40 hover:text-white/60"
                   )}
                   style={{WebkitTapHighlightColor: 'transparent'}}
@@ -93,6 +97,10 @@ export const TabNavigation = () => {
                       backgroundColor: active ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.05)" 
                     }}
                     whileTap={{ scale: 0.95 }}
+                    style={{
+                      backfaceVisibility: "hidden",
+                      transform: "translate3d(0,0,0)"
+                    }}
                   >
                     <Icon
                       size={active ? 20 : 18}
@@ -117,11 +125,19 @@ export const TabNavigation = () => {
                         layoutId="activeTabGlow"
                         className="absolute -bottom-0.5 w-12 h-1 rounded-full bg-white/20 blur-md"
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        style={{
+                          backfaceVisibility: "hidden",
+                          transform: "translate3d(0,0,0)"
+                        }}
                       />
                       <motion.div
                         layoutId="activeTab"
                         className="absolute -bottom-0.5 w-8 h-[3px] bg-white rounded-full"
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        style={{
+                          backfaceVisibility: "hidden",
+                          transform: "translate3d(0,0,0)"
+                        }}
                       />
                     </>
                   )}

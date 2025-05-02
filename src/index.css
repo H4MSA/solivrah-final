@@ -224,19 +224,20 @@
 
   /* Page transition effect - optimized for Android */
   .page-transition {
-    @apply will-change-transform;
     animation: pageTransition 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transform: translate3d(0,0,0);
+    backface-visibility: hidden;
   }
 }
 
 @keyframes pageTransition {
   0% {
     opacity: 0;
-    transform: scale(0.98) translateY(10px);
+    transform: translate3d(0, 10px, 0);
   }
   100% {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -244,7 +245,7 @@
   /* Optimize glass effect for better Android performance */
   .glass {
     @apply bg-black/60 backdrop-blur-sm border border-white/10 shadow-lg hover:bg-black/50 transition-all duration-200;
-    will-change: transform;
+    transform: translate3d(0,0,0);
     backface-visibility: hidden;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   }
@@ -256,6 +257,7 @@
   /* Android-optimized hover effect */
   .hover-lift {
     transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transform: translate3d(0,0,0);
   }
   .hover-lift:hover {
     transform: translateY(-1px);
@@ -267,7 +269,8 @@
   }
 
   .card-hover {
-    @apply transition-all duration-200 hover:bg-white/5 hover:border-white/20 will-change-transform;
+    @apply transition-all duration-200 hover:bg-white/5 hover:border-white/20;
+    transform: translate3d(0,0,0);
   }
 
   .glass-card {
@@ -289,7 +292,8 @@
 
   /* Android-optimized interactive elements */
   .interactive {
-    @apply transition-all duration-200 active:scale-95 cursor-pointer will-change-transform;
+    @apply transition-all duration-200 active:scale-95 cursor-pointer;
+    transform: translate3d(0,0,0);
   }
   
   /* Android-specific touch feedback */

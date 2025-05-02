@@ -4,6 +4,7 @@ import { Send, User, Smile, Meh, Frown, ChevronDown, ChevronUp } from "lucide-re
 import { useApp } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { TabNavigation } from "@/components/TabNavigation";
 
 interface Message {
   id?: string;
@@ -207,7 +208,7 @@ const Coach = () => {
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 pb-4 chat-container">
+      <div className="flex-1 overflow-y-auto px-6 pb-28 chat-container">
         <div className="space-y-4 py-4">
           {messages.map((message, index) => (
             <div 
@@ -276,6 +277,8 @@ const Coach = () => {
           </button>
         </div>
       </div>
+
+      <TabNavigation />
     </div>
   );
 };
