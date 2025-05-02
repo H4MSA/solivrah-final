@@ -175,23 +175,25 @@
 
   /* Optimize scrolling for mobile */
   body {
-    @apply overflow-x-hidden overscroll-y-contain;
+    @apply bg-background text-foreground;
     -webkit-overflow-scrolling: touch;
-  }
-
-  /* Better touch feedback */
-  .touch-target {
-    @apply min-h-[44px] min-w-[44px];
+    overscroll-behavior: none;
+    overflow-x: hidden;
+    position: relative;
+    height: 100%;
+    width: 100%;
   }
 
   html {
     font-family: 'SF Pro Display', system-ui, sans-serif;
     -webkit-tap-highlight-color: transparent;
+    height: 100%;
+    width: 100%;
   }
 
-  body {
-    @apply bg-background text-foreground touch-manipulation;
-    overscroll-behavior: none;
+  /* Better touch feedback */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
   }
 
   /* Hide scrollbars while maintaining scroll functionality */

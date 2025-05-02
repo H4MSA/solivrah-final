@@ -1,9 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { QuestCard } from "@/components/QuestCard";
 import { GlassPane, GlassButton } from "@/components/ui/glass";
-import { TabNavigation } from "@/components/TabNavigation";
 import { useApp } from "@/context/AppContext";
 import { QuestCompleteModal } from "@/components/QuestCompleteModal";
 import { Filter, CheckCircle2, CalendarDays, Target, ArrowRightLeft, Loader2 } from "lucide-react";

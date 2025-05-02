@@ -13,7 +13,7 @@ import Welcome from "./pages/Welcome";
 import Home from "./pages/Home";
 import Quests from "./pages/Quests";
 import Coach from "./pages/Coach";
-import Community from "./pages/Community"; // Import Community page
+import Community from "./pages/Community"; 
 import Profile from "./pages/Profile";
 import Survey from "./pages/Survey";
 import Auth from "./pages/Auth";
@@ -201,7 +201,7 @@ const App = () => {
               <ThemeBackground />
 
               {/* Fixed viewport container with safe areas */}
-              <div className={`fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-transparent overflow-hidden ${hasSafeArea ? 'dynamic-island-aware' : 'p-4'}`}>
+              <div className="fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-transparent overflow-auto">
                 <Toaster />
                 <Sonner />
 
