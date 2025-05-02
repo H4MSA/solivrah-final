@@ -4,7 +4,6 @@ import { Send, User, Smile, Meh, Frown, ChevronDown, ChevronUp } from "lucide-re
 import { useApp } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
-import { TabNavigation } from "@/components/TabNavigation";
 
 interface Message {
   id?: string;
@@ -277,8 +276,6 @@ const Coach = () => {
           </button>
         </div>
       </div>
-
-      <TabNavigation />
     </div>
   );
 };
