@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { QuestCard } from "@/components/QuestCard";
@@ -8,7 +7,7 @@ import { useApp } from "@/context/AppContext";
 import { QuestCompleteModal } from "@/components/QuestCompleteModal";
 import { Filter, CheckCircle2, CalendarDays, Target, ArrowRightLeft, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Quest } from "@/types/quest"; 
+import { Quest, QuestDifficulty } from "@/types/quest"; 
 
 // Sample quest data for 30 days to ensure we always have quests to display
 const defaultQuests: Partial<Quest>[] = [
@@ -358,7 +357,7 @@ const Quests = () => {
               day: q.day || 1,
               theme: q.theme || "Focus",
               xp: q.xp || 50,
-              difficulty: q.difficulty || "Medium" as "Easy" | "Medium" | "Hard",
+              difficulty: (q.difficulty || "Medium") as QuestDifficulty,
               completed: false,
               requires_photo: q.requires_photo || false,
               user_id: user?.id || "anonymous",
@@ -366,7 +365,7 @@ const Quests = () => {
               verification_status: "not_required"
             }));
             
-            processQuestsData(filledQuests);
+            processQuestsData(filledQuests as Quest[]);
           }
         }, 800); // Artificial delay for loading simulation
       } catch (error) {
@@ -380,7 +379,7 @@ const Quests = () => {
             day: q.day || 1,
             theme: q.theme || "Focus",
             xp: q.xp || 50,
-            difficulty: q.difficulty || "Medium" as "Easy" | "Medium" | "Hard",
+            difficulty: (q.difficulty || "Medium") as QuestDifficulty,
             completed: false,
             requires_photo: q.requires_photo || false,
             user_id: user?.id || "anonymous",
@@ -388,7 +387,7 @@ const Quests = () => {
             verification_status: "not_required"
           }));
           
-          processQuestsData(filledQuests);
+          processQuestsData(filledQuests as Quest[]);
         }
       } finally {
         if (isMounted) {
@@ -408,30 +407,17 @@ const Quests = () => {
     // Find current quest (first incomplete quest)
     const current = data.find(quest => !quest.completed);
     if (current) {
-      // Cast the difficulty to our expected type
-      const typedCurrent: Quest = {
-        ...current,
-        difficulty: (current.difficulty as 'Easy' | 'Medium' | 'Hard') || 'Medium'
-      };
-      setCurrentQuest(typedCurrent);
+      setCurrentQuest(current);
     }
     
     // Get upcoming quests (incomplete quests except current)
     const upcoming = data
-      .filter(quest => !quest.completed && quest.id !== current?.id)
-      .map(quest => ({
-        ...quest,
-        difficulty: (quest.difficulty as 'Easy' | 'Medium' | 'Hard') || 'Medium'
-      }));
+      .filter(quest => !quest.completed && quest.id !== current?.id);
     setUpcomingQuests(upcoming);
     
     // Get completed quests
     const completed = data
-      .filter(quest => quest.completed)
-      .map(quest => ({
-        ...quest,
-        difficulty: (quest.difficulty as 'Easy' | 'Medium' | 'Hard') || 'Medium'
-      }));
+      .filter(quest => quest.completed);
     setCompletedQuests(completed);
   };
   
