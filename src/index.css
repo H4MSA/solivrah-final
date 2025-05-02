@@ -224,7 +224,7 @@
 
   /* Page transition effect - optimized for Android */
   .page-transition {
-    @apply will-change-transform will-change-opacity;
+    @apply will-change-transform;
     animation: pageTransition 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
   }
 }
@@ -244,7 +244,7 @@
   /* Optimize glass effect for better Android performance */
   .glass {
     @apply bg-black/60 backdrop-blur-sm border border-white/10 shadow-lg hover:bg-black/50 transition-all duration-200;
-    will-change: transform, opacity;
+    will-change: transform;
     backface-visibility: hidden;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   }
@@ -255,7 +255,6 @@
 
   /* Android-optimized hover effect */
   .hover-lift {
-    @apply will-change-transform;
     transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
   }
   .hover-lift:hover {

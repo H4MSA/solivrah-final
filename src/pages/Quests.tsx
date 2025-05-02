@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { QuestCard } from "@/components/QuestCard";
@@ -341,7 +342,12 @@ const Quests = () => {
           
           // If user has quests in Supabase, use those
           if (data && data.length > 0) {
-            processQuestsData(data);
+            // Make sure each quest has the correct difficulty type
+            const typedData = data.map(q => ({
+              ...q,
+              difficulty: (q.difficulty as QuestDifficulty) || 'Medium'
+            }));
+            processQuestsData(typedData as Quest[]);
             return;
           }
         }
