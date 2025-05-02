@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { TabNavigation } from "@/components/TabNavigation";
 import { useApp } from "@/context/AppContext";
 import { QRScanner } from "@/components/QRScanner";
 import { DailyAffirmation } from "@/components/DailyAffirmation";
@@ -159,7 +158,7 @@ const Home = () => {
   };
   
   return (
-    <div className="min-h-screen pb-24 text-white">
+    <div className="min-h-screen text-white overflow-y-auto">
       {showScanner && (
         <QRScanner 
           onClose={() => setShowScanner(false)} 
@@ -176,7 +175,7 @@ const Home = () => {
       )}
       
       <motion.div 
-        className="px-5 pt-6 pb-24 space-y-6"
+        className="px-5 pt-6 pb-28 space-y-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -324,8 +323,6 @@ const Home = () => {
           </CollapsibleSection>
         </motion.div>
       </motion.div>
-      
-      <TabNavigation />
     </div>
   );
 };
