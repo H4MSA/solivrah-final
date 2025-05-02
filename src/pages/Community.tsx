@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
+import { TabNavigation } from "@/components/TabNavigation";
 import { FiStar, FiUsers, FiMessageCircle, FiHeart } from "react-icons/fi";
 import { useApp } from "@/context/AppContext";
 import { ThemeBackground } from "@/components/ThemeBackground";
@@ -159,6 +160,8 @@ const Community = () => {
           {renderTabContent()}
         </div>
       </div>
+      
+      <TabNavigation />
     </div>
   );
 };

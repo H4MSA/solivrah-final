@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,7 +14,7 @@ import Welcome from "./pages/Welcome";
 import Home from "./pages/Home";
 import Quests from "./pages/Quests";
 import Coach from "./pages/Coach";
-import Community from "./pages/Community"; // Import Community page
+import Social from "./pages/Social";
 import Profile from "./pages/Profile";
 import Survey from "./pages/Survey";
 import Auth from "./pages/Auth";
@@ -43,7 +44,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       {/* Main content area with scroll */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden page-transition dynamic-island-aware notch-aware gesture-area-aware pb-24">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden page-transition dynamic-island-aware notch-aware gesture-area-aware pb-20">
         {children}
       </main>
       {/* TabNavigation always rendered for authenticated users */}
@@ -201,7 +202,7 @@ const App = () => {
               <ThemeBackground />
 
               {/* Fixed viewport container with safe areas */}
-              <div className={`fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-transparent overflow-hidden ${hasSafeArea ? 'dynamic-island-aware' : 'p-4'}`}>
+              <div className={`fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-transparent overflow-hidden ${hasSafeArea ? 'dynamic-island-aware' : 'p-4 pb-20'}`}>
                 <Toaster />
                 <Sonner />
 
@@ -241,11 +242,7 @@ const App = () => {
                   <Route 
                     path="/" 
                     element={
-                      <ProtectedRoute>
-                        <AppLayout>
-                          <RootRoute />
-                        </AppLayout>
-                      </ProtectedRoute>
+                      <RootRoute />
                     } 
                   />
 
@@ -288,7 +285,7 @@ const App = () => {
                     element={
                       <ProtectedRoute>
                         <AppLayout>
-                          <Community />
+                          <Social />
                         </AppLayout>
                       </ProtectedRoute>
                     }

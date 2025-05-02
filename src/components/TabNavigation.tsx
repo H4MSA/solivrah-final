@@ -63,7 +63,7 @@ export const TabNavigation = () => {
         damping: 30
       }}
       style={{
-        willChange: "transform",
+        backfaceVisibility: "hidden",
         transform: "translate3d(0,0,0)"
       }}
     >
@@ -82,7 +82,7 @@ export const TabNavigation = () => {
                   onClick={() => navigate(path)}
                   aria-label={accessibilityLabel}
                   className={cn(
-                    "relative flex flex-col items-center justify-center py-3 px-2 w-16 group transition-all",
+                    "relative flex flex-col items-center justify-center py-3 px-2 w-16 group transition-all -webkit-tap-highlight-color-transparent touch-manipulation",
                     active ? "text-white" : "text-white/40 hover:text-white/60"
                   )}
                   style={{WebkitTapHighlightColor: 'transparent'}}
@@ -98,7 +98,7 @@ export const TabNavigation = () => {
                     }}
                     whileTap={{ scale: 0.95 }}
                     style={{
-                      willChange: "transform",
+                      backfaceVisibility: "hidden",
                       transform: "translate3d(0,0,0)"
                     }}
                   >
@@ -126,7 +126,7 @@ export const TabNavigation = () => {
                         className="absolute -bottom-0.5 w-12 h-1 rounded-full bg-white/20 blur-md"
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                         style={{
-                          willChange: "transform",
+                          backfaceVisibility: "hidden",
                           transform: "translate3d(0,0,0)"
                         }}
                       />
@@ -135,7 +135,7 @@ export const TabNavigation = () => {
                         className="absolute -bottom-0.5 w-8 h-[3px] bg-white rounded-full"
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                         style={{
-                          willChange: "transform",
+                          backfaceVisibility: "hidden",
                           transform: "translate3d(0,0,0)"
                         }}
                       />
