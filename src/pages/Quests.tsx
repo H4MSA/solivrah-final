@@ -3,6 +3,10 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Check, X, Clock, ChevronRight, Loader2, Star, Lock, Trophy, Flame, Award } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { CardGlass, CardGlassTitle, CardGlassDescription, CardGlassContent } from "@/components/ui/card-glass";
+import { ButtonGlass } from "@/components/ui/button-glass";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface Quest {
   id: string;
@@ -73,13 +77,13 @@ const QuestCard: React.FC<QuestCardProps> = ({
   };
   
   return (
-    <div 
-      className={`glassmorphism-card transition-all duration-300 transform-gpu relative ${
-        locked ? 'opacity-60 hover:opacity-70' : 'hover:translate-y-[-2px] hover:shadow-xl'
-      } ${isCurrent ? 'border-l-2 border-l-[#C084FC]' : ''}`}
+    <CardGlass 
+      className="mb-4 overflow-hidden"
+      interactive={!locked}
+      variant={isCurrent ? "accent" : "secondary"}
       onClick={() => !locked && onClick && onClick()}
     >
-      <div className="space-y-3">
+      <div className="space-y-3 p-1">
         {/* Header with difficulty badge and theme */}
         <div className="flex justify-between items-start">
           <div className="space-y-1">
@@ -140,7 +144,7 @@ const QuestCard: React.FC<QuestCardProps> = ({
              "Upcoming"}
           </span>
           
-          <button 
+          <div 
             className={`w-6 h-6 rounded-full flex items-center justify-center ${
               locked ? "bg-black/40" : 
               isCompleted ? "bg-green-500/20" : 
@@ -148,10 +152,9 @@ const QuestCard: React.FC<QuestCardProps> = ({
               isCurrent ? "bg-[#C084FC]/20" : 
               "bg-white/10"
             }`}
-            disabled={locked}
           >
             {getStatusIcon()}
-          </button>
+          </div>
         </div>
       </div>
       
@@ -161,7 +164,7 @@ const QuestCard: React.FC<QuestCardProps> = ({
           <Lock className="w-6 h-6 text-white/40" />
         </div>
       )}
-    </div>
+    </CardGlass>
   );
 };
 
@@ -171,16 +174,14 @@ const FilterButton: React.FC<{
   isActive: boolean;
   onClick: () => void;
 }> = ({ label, isActive, onClick }) => (
-  <button
-    className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 ${
-      isActive 
-        ? "bg-[#C084FC] text-white shadow-md" 
-        : "bg-black/40 text-white/70 hover:bg-black/60"
-    }`}
+  <ButtonGlass
+    variant={isActive ? "primary" : "secondary"}
+    size="sm"
     onClick={onClick}
+    className={isActive ? "" : "opacity-70"}
   >
     {label}
-  </button>
+  </ButtonGlass>
 );
 
 // Stats card component
@@ -188,120 +189,133 @@ const StatCard: React.FC<{
   icon: React.ReactNode;
   value: string | number;
   label: string;
-  accentColor?: string;
-}> = ({ icon, value, label, accentColor = "bg-[#C084FC]" }) => (
-  <div className="glassmorphism-card">
-    <div className="flex items-center gap-3">
-      <div className={`w-10 h-10 rounded-full ${accentColor} bg-opacity-10 flex items-center justify-center`}>
+}> = ({ icon, value, label }) => (
+  <CardGlass variant="secondary" className="p-4">
+    <div className="flex flex-col items-center justify-center text-center">
+      <div className="w-12 h-12 rounded-full bg-black/40 border border-white/10 flex items-center justify-center mb-2">
         {icon}
       </div>
-      <div>
-        <p className="text-lg font-bold text-white">{value}</p>
-        <p className="text-xs text-white/60">{label}</p>
-      </div>
+      <p className="text-xl font-bold">{value}</p>
+      <p className="text-xs text-white/70">{label}</p>
     </div>
-  </div>
+  </CardGlass>
 );
 
-// Main Quests component
-const Quests: React.FC = () => {
-  const { selectedTheme } = useApp();
-  const [filter, setFilter] = useState<"all" | "current" | "upcoming" | "completed">("all");
+const Quests = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { selectedTheme, addXP } = useApp();
+  const [activeFilter, setActiveFilter] = useState<"all" | "current" | "completed" | "upcoming">("all");
   const [isLoading, setIsLoading] = useState(true);
-  const [showQuestComplete, setShowQuestComplete] = useState(false);
-  const [currentQuest, setCurrentQuest] = useState<Quest | null>(null);
-  const [upcomingQuests, setUpcomingQuests] = useState<Quest[]>([]);
-  const [completedQuests, setCompletedQuests] = useState<Quest[]>([]);
+  const [quests, setQuests] = useState<Quest[]>([]);
   
-  // Sample data loading
+  // Mock quest data - in a real app, this would come from an API or database
   useEffect(() => {
-    // Simulating API call
-    const loadData = async () => {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Sample quests data
-      const quest: Quest = {
-        id: "q1",
-        title: "Complete a 10-minute meditation",
-        description: "Focus on your breath and clear your mind for 10 minutes.",
-        xp: 100,
-        difficulty: "Easy",
-        status: "current",
-        theme: selectedTheme || "Focus",
-        tags: ["Mindfulness", "Morning"]
-      };
-      
-      const upcoming: Quest[] = [
+    // Simulate API loading delay
+    const timer = setTimeout(() => {
+      const mockQuests: Quest[] = [
         {
-          id: "q2",
-          title: "Read for 20 minutes",
-          description: "Choose a book that interests you and read for at least 20 minutes.",
+          id: "1",
+          title: "Track your time for 24 hours",
+          description: "Document how you spend your day to identify time-wasting activities and opportunities for improvement.",
           xp: 150,
           difficulty: "Medium",
-          status: "upcoming",
+          status: "current",
           theme: selectedTheme || "Focus",
-          tags: ["Learning", "Growth"]
+          tags: ["Time Management", "Self-awareness"]
         },
         {
-          id: "q3",
-          title: "Exercise for 30 minutes",
-          description: "Complete any physical activity for 30 minutes.",
+          id: "2",
+          title: "Complete a focused work session",
+          description: "Work for 45 minutes with no distractions, then take a 15-minute break.",
+          xp: 100,
+          difficulty: "Easy",
+          status: "completed",
+          theme: selectedTheme || "Focus",
+          completed: true,
+          tags: ["Deep Work", "Productivity"]
+        },
+        {
+          id: "3",
+          title: "Morning Routine Builder",
+          description: "Establish a productive morning routine to set the tone for your day.",
           xp: 200,
+          difficulty: "Hard",
+          status: "upcoming",
+          locked: true,
+          lockedReason: "Complete current quest first",
+          theme: selectedTheme || "Discipline",
+          tags: ["Routine", "Morning"]
+        },
+        {
+          id: "4",
+          title: "Digital Detox Challenge",
+          description: "Spend 4 hours without checking your phone or social media.",
+          xp: 180,
           difficulty: "Medium",
           status: "upcoming",
-          theme: selectedTheme || "Discipline",
-          locked: true,
-          lockedReason: "Complete meditation quest first"
-        },
-        {
-          id: "q4",
-          title: "Journal your thoughts",
-          description: "Write down your thoughts and reflections from the day.",
-          xp: 100,
-          difficulty: "Easy", 
-          status: "upcoming",
-          theme: selectedTheme || "Resilience"
-        }
-      ];
-      
-      const completed: Quest[] = [
-        {
-          id: "q5",
-          title: "Drink 8 glasses of water",
-          description: "Stay hydrated throughout the day.",
-          xp: 50,
-          difficulty: "Easy",
-          status: "completed",
-          theme: selectedTheme || "Discipline",
-          completed: true
-        },
-        {
-          id: "q6",
-          title: "Plan your day",
-          description: "Create a schedule for your day's tasks and priorities.",
-          xp: 75,
-          difficulty: "Easy",
-          status: "completed",
           theme: selectedTheme || "Focus",
-          completed: true
-        }
+          tags: ["Digital Wellbeing", "Focus"]
+        },
+        {
+          id: "5",
+          title: "Reflection Journal",
+          description: "Write a reflection on your progress and insights gained so far.",
+          xp: 120,
+          difficulty: "Easy",
+          status: "missed",
+          theme: selectedTheme || "Resilience",
+          tags: ["Reflection", "Mindfulness"]
+        },
       ];
       
-      setCurrentQuest(quest);
-      setUpcomingQuests(upcoming);
-      setCompletedQuests(completed);
+      setQuests(mockQuests);
       setIsLoading(false);
-    };
+    }, 1000);
     
-    loadData();
+    return () => clearTimeout(timer);
   }, [selectedTheme]);
   
-  const handleQuestComplete = (questId: string) => {
-    setShowQuestComplete(true);
+  // Filter quests based on active filter
+  const filteredQuests = quests.filter(quest => {
+    if (activeFilter === "all") return true;
+    return quest.status === activeFilter;
+  });
+  
+  const handleQuestClick = (quest: Quest) => {
+    if (quest.status === "current") {
+      navigate(`/quests/${quest.id}`);
+    } else if (quest.status === "completed") {
+      toast({
+        title: "Quest already completed",
+        description: "You've already completed this quest!",
+      });
+    } else if (quest.status === "upcoming" && !quest.locked) {
+      toast({
+        title: "Quest not yet available",
+        description: "This quest will be available soon.",
+      });
+    }
   };
   
-  const handleCloseQuestComplete = () => {
-    setShowQuestComplete(false);
+  const markCurrentQuestAsComplete = () => {
+    // Find the current quest
+    const currentQuest = quests.find(q => q.status === "current");
+    if (!currentQuest) return;
+    
+    // Update the quests
+    setQuests(quests.map(q => 
+      q.id === currentQuest.id ? {...q, status: "completed", completed: true} : q
+    ));
+    
+    // Add XP
+    addXP(currentQuest.xp);
+    
+    // Show success message
+    toast({
+      title: "Quest Completed!",
+      description: `You've earned ${currentQuest.xp} XP.`,
+    });
   };
   
   // Animation variants
@@ -316,208 +330,176 @@ const Quests: React.FC = () => {
   };
   
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { y: 20, opacity: 0 },
     visible: {
-      opacity: 1,
       y: 0,
+      opacity: 1,
       transition: { type: "spring", stiffness: 300, damping: 24 }
     }
   };
 
   return (
-    <div className="min-h-screen pb-32 bg-gradient-to-b from-[#0A0A0A] to-[#121212]">
-      <div className="px-5 pt-6 pb-24">
+    <div className="min-h-screen pb-24">
+      <div className="px-5 pt-6">
         <motion.div
+          className="flex justify-between items-center mb-6"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-2xl font-bold bg-gradient-to-b from-white to-white/80 bg-clip-text text-transparent">Quests</h1>
+          
+          <ButtonGlass
+            variant="secondary"
+            size="sm"
+            className="w-10 h-10 p-0 rounded-full flex items-center justify-center"
+          >
+            <Trophy size={18} />
+          </ButtonGlass>
+        </motion.div>
+        
+        {/* Stats Section */}
+        <motion.div 
+          className="grid grid-cols-3 gap-3 mb-6" 
+          variants={containerVariants}
           initial="hidden"
           animate="visible"
-          variants={containerVariants}
-          className="space-y-6"
         >
-          {/* Header Section */}
-          <motion.div variants={itemVariants} className="mb-6">
-            <h1 className="text-2xl font-bold bg-gradient-to-b from-white to-white/80 bg-clip-text text-transparent">
-              Quests
-            </h1>
-            <p className="text-white/70 mt-1">
-              Complete quests to level up and track your progress
-            </p>
-          </motion.div>
-          
-          {/* Stats Section */}
           <motion.div variants={itemVariants}>
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              <StatCard 
-                icon={<Flame className="w-5 h-5 text-orange-500" />}
-                value="7"
-                label="Day Streak"
-                accentColor="bg-orange-500"
-              />
-              <StatCard 
-                icon={<Award className="w-5 h-5 text-yellow-500" />}
-                value="680"
-                label="Total XP"
-                accentColor="bg-yellow-500"
-              />
-              <StatCard 
-                icon={<Trophy className="w-5 h-5 text-[#C084FC]" />}
-                value="6"
-                label="Completed"
-                accentColor="bg-[#C084FC]"
-              />
-            </div>
+            <StatCard 
+              icon={<Trophy size={20} className="text-soft-lime" />}
+              value={2}
+              label="Completed"
+            />
           </motion.div>
           
-          {/* Filter Section */}
-          <motion.div variants={itemVariants} className="mb-6">
-            <div className="flex space-x-2 overflow-x-auto pb-2 hide-scrollbar">
-              <FilterButton 
-                label="All"
-                isActive={filter === "all"}
-                onClick={() => setFilter("all")}
-              />
-              <FilterButton 
-                label="Current"
-                isActive={filter === "current"}
-                onClick={() => setFilter("current")}
-              />
-              <FilterButton 
-                label="Upcoming"
-                isActive={filter === "upcoming"}
-                onClick={() => setFilter("upcoming")}
-              />
-              <FilterButton 
-                label="Completed"
-                isActive={filter === "completed"}
-                onClick={() => setFilter("completed")}
-              />
-            </div>
+          <motion.div variants={itemVariants}>
+            <StatCard 
+              icon={<Flame size={20} className="text-soft-purple" />}
+              value={7}
+              label="Day Streak"
+            />
           </motion.div>
           
-          {/* Quests Section */}
+          <motion.div variants={itemVariants}>
+            <StatCard 
+              icon={<Award size={20} className="text-amber-400" />}
+              value={450}
+              label="XP Earned"
+            />
+          </motion.div>
+        </motion.div>
+        
+        {/* Filters Section */}
+        <motion.div 
+          className="flex space-x-2 mb-6 overflow-x-auto pb-2"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div variants={itemVariants}>
+            <FilterButton 
+              label="All"
+              isActive={activeFilter === "all"}
+              onClick={() => setActiveFilter("all")}
+            />
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <FilterButton 
+              label="Current"
+              isActive={activeFilter === "current"}
+              onClick={() => setActiveFilter("current")}
+            />
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <FilterButton 
+              label="Completed"
+              isActive={activeFilter === "completed"}
+              onClick={() => setActiveFilter("completed")}
+            />
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <FilterButton 
+              label="Upcoming"
+              isActive={activeFilter === "upcoming"}
+              onClick={() => setActiveFilter("upcoming")}
+            />
+          </motion.div>
+        </motion.div>
+        
+        {/* Current Quest with Complete Button */}
+        {filteredQuests.some(q => q.status === "current") && activeFilter !== "completed" && (
           <motion.div 
+            className="mb-6"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="space-y-6"
           >
-            {isLoading ? (
-              <motion.div variants={itemVariants} className="flex justify-center py-12">
-                <div className="flex flex-col items-center">
-                  <Loader2 className="animate-spin w-8 h-8 text-white/60 mb-4" />
-                  <p className="text-white/60">Loading your quests...</p>
+            <motion.div variants={itemVariants}>
+              <CardGlass 
+                className="mb-4 p-4" 
+                variant="accent" 
+                withGlow
+              >
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-neon-green to-soft-lime flex items-center justify-center flex-shrink-0">
+                    <Trophy size={24} className="text-black" />
+                  </div>
+                  <div>
+                    <CardGlassTitle className="mb-1">Current Quest</CardGlassTitle>
+                    <CardGlassDescription className="mb-3">
+                      Complete your active quest to unlock the next challenge.
+                    </CardGlassDescription>
+                    <ButtonGlass 
+                      variant="primary" 
+                      size="sm"
+                      onClick={markCurrentQuestAsComplete}
+                    >
+                      Mark as Complete
+                    </ButtonGlass>
+                  </div>
                 </div>
-              </motion.div>
-            ) : (
-              <>
-                {filter === 'all' && currentQuest && (
-                  <motion.div variants={itemVariants}>
-                    <div className="mb-2 flex justify-between items-center">
-                      <h2 className="text-lg font-medium">Current Quest</h2>
-                      <span className="text-xs text-white/60">Today</span>
-                    </div>
-                    
-                    <QuestCard 
-                      key={currentQuest.id}
-                      title={currentQuest.title}
-                      description={currentQuest.description}
-                      xpAmount={currentQuest.xp}
-                      status={currentQuest.status}
-                      theme={currentQuest.theme}
-                      locked={currentQuest.locked}
-                      lockedReason={currentQuest.lockedReason}
-                      tags={currentQuest.tags}
-                      onClick={() => handleQuestComplete(currentQuest.id)}
-                      difficulty={currentQuest.difficulty}
-                    />
-                  </motion.div>
-                )}
-
-                {(filter === 'all' || filter === 'upcoming') && upcomingQuests.length > 0 && (
-                  <motion.div variants={itemVariants} className="space-y-3">
-                    <div className="mb-2 flex justify-between items-center">
-                      <h2 className="text-lg font-medium">Upcoming Quests</h2>
-                      <span className="text-xs text-white/60">Next 3 days</span>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      {upcomingQuests.map(quest => (
-                        <QuestCard 
-                          key={quest.id}
-                          title={quest.title}
-                          description={quest.description}
-                          xpAmount={quest.xp}
-                          status={quest.status}
-                          theme={quest.theme}
-                          locked={quest.locked}
-                          lockedReason={quest.lockedReason}
-                          tags={quest.tags}
-                          onClick={() => handleQuestComplete(quest.id)}
-                          difficulty={quest.difficulty}
-                        />
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-                
-                {(filter === 'all' || filter === 'completed') && completedQuests.length > 0 && (
-                  <motion.div variants={itemVariants} className="space-y-3">
-                    <div className="mb-2 flex justify-between items-center">
-                      <h2 className="text-lg font-medium">Completed Quests</h2>
-                      <span className="text-xs text-white/60">Previous 7 days</span>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      {completedQuests.map(quest => (
-                        <QuestCard 
-                          key={quest.id}
-                          title={quest.title}
-                          description={quest.description}
-                          xpAmount={quest.xp}
-                          status={quest.status}
-                          theme={quest.theme}
-                          tags={quest.tags}
-                          difficulty={quest.difficulty}
-                        />
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </>
-            )}
+              </CardGlass>
+            </motion.div>
           </motion.div>
+        )}
+        
+        {/* Quests List */}
+        <motion.div
+          className="pb-20"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <Loader2 className="animate-spin text-white/50 mb-3" size={32} />
+              <p className="text-white/70">Loading quests...</p>
+            </div>
+          ) : filteredQuests.length > 0 ? (
+            filteredQuests.map((quest, index) => (
+              <motion.div key={quest.id} variants={itemVariants}>
+                <QuestCard 
+                  title={quest.title}
+                  description={quest.description}
+                  xpAmount={quest.xp}
+                  status={quest.status}
+                  theme={quest.theme}
+                  locked={quest.locked}
+                  lockedReason={quest.lockedReason}
+                  tags={quest.tags}
+                  difficulty={quest.difficulty}
+                  onClick={() => handleQuestClick(quest)}
+                />
+              </motion.div>
+            ))
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-white/70">No quests found in this category.</p>
+            </div>
+          )}
         </motion.div>
       </div>
-      
-      {/* Quest Complete Modal */}
-      {showQuestComplete && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="glassmorphism-card w-full max-w-md animate-pop-in">
-            <div className="space-y-4 text-center">
-              <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
-                <Check className="w-8 h-8 text-green-500" />
-              </div>
-              
-              <h2 className="text-xl font-bold text-white">Quest Completed!</h2>
-              <p className="text-white/70">You've earned 100 XP for completing your meditation.</p>
-              
-              <div className="bg-black/30 rounded-lg p-3 flex items-center justify-between">
-                <span className="text-white/80">Quest rewards:</span>
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-yellow-400" />
-                  <span className="text-white font-medium">+100 XP</span>
-                </div>
-              </div>
-              
-              <button
-                className="w-full bg-gradient-to-r from-[#C084FC] to-[#A855F7] text-white py-3 rounded-lg font-medium mt-4"
-                onClick={handleCloseQuestComplete}
-              >
-                Continue
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

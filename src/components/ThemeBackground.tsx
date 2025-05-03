@@ -1,147 +1,134 @@
 
 import React, { useEffect, useState } from "react";
-import { useApp } from "@/context/AppContext";
 import { motion } from "framer-motion";
-
-interface Particle {
-  id: number;
-  x: number;
-  y: number;
-  size: number;
-  duration: number;
-  delay: number;
-}
+import { useApp } from "@/context/AppContext";
 
 export const ThemeBackground: React.FC = () => {
   const { selectedTheme } = useApp();
-  const [mounted, setMounted] = useState(false);
-  const [particles, setParticles] = useState<Particle[]>([]);
+  const [bgColors, setBgColors] = useState<{
+    primary: string;
+    secondary: string;
+    accent: string;
+  }>({
+    primary: "rgba(0, 255, 133, 0.2)",
+    secondary: "rgba(167, 139, 250, 0.1)",
+    accent: "rgba(56, 189, 248, 0.1)"
+  });
 
   useEffect(() => {
-    setMounted(true);
-    
-    // Generate particles
-    const newParticles = Array.from({ length: 20 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 3 + 1,
-      duration: Math.random() * 10 + 10,
-      delay: Math.random() * 5
-    }));
-    
-    setParticles(newParticles);
-  }, []);
-
-  // Generate theme-specific colors
-  const getThemeColors = () => {
+    // Change background colors based on selected theme
     switch (selectedTheme) {
       case "Focus":
-        return {
-          primary: "rgba(106, 90, 205, 0.15)",
-          secondary: "rgba(90, 70, 185, 0.1)",
-          accent: "rgba(138, 116, 240, 0.08)"
-        };
+        setBgColors({
+          primary: "rgba(0, 255, 133, 0.2)",
+          secondary: "rgba(167, 139, 250, 0.1)",
+          accent: "rgba(56, 189, 248, 0.1)"
+        });
+        break;
       case "Discipline":
-        return {
-          primary: "rgba(220, 38, 38, 0.1)",
-          secondary: "rgba(180, 30, 30, 0.08)",
-          accent: "rgba(248, 113, 113, 0.06)"
-        };
+        setBgColors({
+          primary: "rgba(167, 139, 250, 0.2)",
+          secondary: "rgba(0, 255, 133, 0.1)",
+          accent: "rgba(255, 144, 31, 0.1)"
+        });
+        break;
       case "Resilience":
-        return {
-          primary: "rgba(16, 185, 129, 0.1)",
-          secondary: "rgba(12, 160, 110, 0.08)",
-          accent: "rgba(52, 211, 153, 0.06)"
-        };
+        setBgColors({
+          primary: "rgba(56, 189, 248, 0.2)",
+          secondary: "rgba(167, 139, 250, 0.1)",
+          accent: "rgba(0, 255, 133, 0.1)"
+        });
+        break;
+      case "Wildcards":
+        setBgColors({
+          primary: "rgba(255, 144, 31, 0.2)",
+          secondary: "rgba(0, 255, 133, 0.1)",
+          accent: "rgba(56, 189, 248, 0.1)"
+        });
+        break;
       default:
-        return {
-          primary: "rgba(0, 255, 133, 0.08)",
-          secondary: "rgba(191, 255, 0, 0.05)",
-          accent: "rgba(56, 189, 248, 0.05)"
-        };
+        setBgColors({
+          primary: "rgba(0, 255, 133, 0.2)",
+          secondary: "rgba(167, 139, 250, 0.1)",
+          accent: "rgba(56, 189, 248, 0.1)"
+        });
     }
-  };
-
-  const colors = getThemeColors();
-
-  if (!mounted) return null;
+  }, [selectedTheme]);
 
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden">
-      {/* Base gradient */}
-      <div 
-        className="absolute inset-0 bg-gradient-to-b from-rich-black via-rich-black to-dark-purple transition-all duration-1000"
-      />
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
+      {/* Background base color */}
+      <div className="absolute inset-0 bg-gradient-to-b from-rich-black via-rich-black to-dark-purple"></div>
       
-      {/* Ambient glow */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.8 }}
-        transition={{ duration: 2 }}
+      {/* Primary orb */}
+      <motion.div 
+        className="absolute blur-3xl rounded-full opacity-20"
         style={{
-          position: "absolute",
-          top: "-20%",
-          left: "-10%",
-          width: "120%",
-          height: "50%",
-          background: `radial-gradient(ellipse at center, ${colors.primary} 0%, transparent 60%)`,
-          filter: "blur(80px)",
-        }}
-      />
-      
-      {/* Secondary glow */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.6 }}
-        transition={{ duration: 2, delay: 0.2 }}
-        style={{
-          position: "absolute",
-          bottom: "-20%",
+          width: "60%",
+          height: "60%",
+          top: "-10%",
           right: "-10%",
-          width: "120%",
-          height: "50%",
-          background: `radial-gradient(ellipse at center, ${colors.secondary} 0%, transparent 60%)`,
-          filter: "blur(100px)",
+          background: bgColors.primary,
         }}
-      />
+        animate={{
+          x: [0, 30, 0],
+          y: [0, -30, 0],
+        }}
+        transition={{
+          duration: 20,
+          ease: "easeInOut",
+          repeat: Infinity,
+        }}
+      ></motion.div>
       
-      {/* Subtle moving particles/lights */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Floating particles */}
-        {particles.map((particle) => (
-          <motion.div
-            key={particle.id}
-            className="absolute w-2 h-2 rounded-full bg-white/5"
-            style={{
-              left: `${particle.x}%`,
-              top: `${particle.y}%`,
-              width: `${particle.size}px`,
-              height: `${particle.size}px`,
-            }}
-            animate={{
-              y: [0, -100, 0],
-              x: [0, Math.random() * 50 - 25, 0],
-              opacity: [0, 0.5, 0],
-            }}
-            transition={{
-              duration: particle.duration,
-              delay: particle.delay,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-      </div>
+      {/* Secondary orb */}
+      <motion.div 
+        className="absolute blur-3xl rounded-full opacity-20"
+        style={{
+          width: "50%",
+          height: "50%",
+          bottom: "-10%",
+          left: "-5%",
+          background: bgColors.secondary,
+        }}
+        animate={{
+          x: [0, -20, 0],
+          y: [0, 20, 0],
+        }}
+        transition={{
+          duration: 18,
+          ease: "easeInOut",
+          repeat: Infinity,
+          repeatType: "reverse"
+        }}
+      ></motion.div>
       
-      {/* Subtle grid pattern overlay */}
-      <div className="absolute inset-0 bg-grid-white opacity-[0.015]" />
+      {/* Accent orb */}
+      <motion.div 
+        className="absolute blur-3xl rounded-full opacity-10"
+        style={{
+          width: "30%",
+          height: "30%",
+          top: "40%",
+          left: "40%",
+          background: bgColors.accent,
+        }}
+        animate={{
+          x: [0, 40, 0],
+          y: [0, 40, 0],
+        }}
+        transition={{
+          duration: 25,
+          ease: "easeInOut",
+          repeat: Infinity,
+        }}
+      ></motion.div>
+      
+      {/* Fine grain overlay for texture */}
+      <div className="absolute inset-0 bg-noise opacity-20"></div>
       
       {/* Vignette effect */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/30" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30" />
+      <div className="absolute inset-0 bg-radial-dark opacity-50"></div>
     </div>
   );
 };
-
-export default ThemeBackground;
