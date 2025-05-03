@@ -201,6 +201,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signOut,
     skipAuthentication,
     setHasCompletedOnboarding,
+    setUser,     // Add this property to the context value
+    setSession   // Add this property to the context value
   };
   
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
