@@ -10,6 +10,7 @@ import Survey from '@/pages/Survey';
 import Coach from '@/pages/Coach';
 import Quests from '@/pages/Quests';
 import Profile from '@/pages/Profile';
+import Auth from '@/pages/Auth';
 import NotFound from '@/pages/NotFound';
 import './App.css';
 import { useAuth } from '@/context/AuthContext';
@@ -44,6 +45,7 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/welcome" element={<Welcome />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/survey" element={<Survey />} />
           
           {/* Protected routes */}
@@ -76,7 +78,7 @@ function App() {
           {/* Catch all route for 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <TabNavigation />
+        {isAuthenticated && <TabNavigation />}
       </div>
     </>
   );

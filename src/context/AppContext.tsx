@@ -7,6 +7,7 @@ interface AppContextType {
   xp: number;
   streak: number;
   selectedTheme: string;
+  completedQuests: number; // Adding the missing property
   addXP: (amount: number) => void;
   increaseStreak: () => void;
   resetStreak: () => void;
@@ -22,43 +23,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [xp, setXp] = useState<number>(0);
   const [streak, setStreak] = useState<number>(0);
   const [selectedTheme, setSelectedTheme] = useState<string>("Focus");
+  const [completedQuests, setCompletedQuests] = useState<number>(0);
   const [user, setUser] = useState<any>(null);
   
   // Load user data from local storage or Supabase
   useEffect(() => {
     const loadUserData = async () => {
       if (isAuthenticated && authUser) {
-        // Load from Supabase
+        // Load from Supabase profiles table instead of users_progress
         try {
           const { data: userData } = await supabase
-            .from('users_progress')
+            .from('profiles')
             .select('*')
-            .eq('user_id', authUser.id)
+            .eq('id', authUser.id)
             .maybeSingle();
           
           if (userData) {
             setXp(userData.xp || 0);
             setStreak(userData.streak || 0);
             setSelectedTheme(userData.theme || "Focus");
-          } else {
-            // Create initial record
-            await supabase
-              .from('users_progress')
-              .insert({
-                user_id: authUser.id,
-                xp: 0,
-                streak: 0,
-                theme: "Focus"
-              });
           }
           
+          // Get completed quests count
+          const { data: questsData, error: questsError } = await supabase
+            .from('quests')
+            .select('*')
+            .eq('user_id', authUser.id)
+            .eq('completed', true);
+          
+          setCompletedQuests(questsData?.length || 0);
           setUser(authUser);
+          
         } catch (error) {
           console.error("Error loading user data:", error);
           
           // Fallback to defaults
           setXp(0);
           setStreak(0);
+          setCompletedQuests(0);
           setSelectedTheme("Focus");
         }
       } else {
@@ -66,9 +68,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const storedXp = localStorage.getItem('anonymous_xp');
         const storedStreak = localStorage.getItem('anonymous_streak');
         const storedTheme = localStorage.getItem('anonymous_theme');
+        const storedQuests = localStorage.getItem('anonymous_completed_quests');
         
         setXp(storedXp ? parseInt(storedXp) : 0);
         setStreak(storedStreak ? parseInt(storedStreak) : 0);
+        setCompletedQuests(storedQuests ? parseInt(storedQuests) : 0);
         setSelectedTheme(storedTheme || "Focus");
         
         // Create basic anonymous user object
@@ -86,12 +90,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Save user data
   const saveUserData = async () => {
     if (isAuthenticated && authUser) {
-      // Save to Supabase
+      // Save to Supabase profiles table
       try {
         await supabase
-          .from('users_progress')
+          .from('profiles')
           .upsert({
-            user_id: authUser.id,
+            id: authUser.id,
             xp,
             streak,
             theme: selectedTheme
@@ -104,6 +108,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.setItem('anonymous_xp', xp.toString());
       localStorage.setItem('anonymous_streak', streak.toString());
       localStorage.setItem('anonymous_theme', selectedTheme);
+      localStorage.setItem('anonymous_completed_quests', completedQuests.toString());
     }
   };
   
@@ -112,7 +117,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (user) {
       saveUserData();
     }
-  }, [xp, streak, selectedTheme, user]);
+  }, [xp, streak, selectedTheme, completedQuests, user]);
   
   const addXP = (amount: number) => {
     setXp(prev => prev + amount);
@@ -129,6 +134,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const resetProgress = () => {
     setXp(0);
     setStreak(0);
+    setCompletedQuests(0);
     saveUserData();
   };
   
@@ -136,6 +142,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     xp,
     streak,
     selectedTheme,
+    completedQuests,
     addXP,
     increaseStreak,
     resetStreak,

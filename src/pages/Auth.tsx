@@ -5,7 +5,7 @@ import { Logo } from "@/components/Logo";
 import { GlassPane, GlassInput, GlassButton } from "@/components/ui/glass";
 import { AuthService } from "@/services/AuthService";
 import { useToast } from "@/hooks/use-toast";
-import { useApp } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { Mail, Lock, ArrowLeft, User, Fingerprint } from "lucide-react";
 
 interface LocationState {
@@ -24,7 +24,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { setUser, setSession, setLoading } = useApp();
+  const { user, setUser, session, setSession } = useAuth();
   
   const locationState = location.state as LocationState;
   const returnUrl = locationState?.returnUrl || "/";
