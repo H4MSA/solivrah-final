@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { ThemeBackground } from '@/components/ThemeBackground';
 import TabNavigation from '@/components/TabNavigation';
 import Welcome from '@/pages/Welcome';
@@ -11,7 +11,7 @@ import './App.css';
 
 function App() {
   return (
-    <Router>
+    <>
       <ThemeBackground />
       <div className="min-h-screen w-full dynamic-island-aware relative">
         <Routes>
@@ -22,7 +22,7 @@ function App() {
         </Routes>
         <TabNavigation />
       </div>
-    </Router>
+    </>
   );
 }
 

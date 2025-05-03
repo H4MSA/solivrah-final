@@ -1,9 +1,9 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { motion, HTMLMotionProps } from "framer-motion";
+import { motion } from "framer-motion";
 
-interface CardGlassProps extends HTMLMotionProps<"div"> {
+interface CardGlassProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: "primary" | "secondary" | "accent";
   interactive?: boolean;
   withBorder?: boolean;
@@ -56,8 +56,8 @@ const CardGlass = React.forwardRef<HTMLDivElement, CardGlassProps>(
           withGlow && "after:content-[''] after:absolute after:inset-0 after:z-[-1] after:rounded-2xl after:blur-lg after:bg-neon-green/10 after:opacity-0 hover:after:opacity-100 after:transition-opacity",
           className
         )}
-        whileHover={interactive ? { scale: 1.02, y: -2 } : {}}
-        whileTap={interactive ? { scale: 0.98 } : {}}
+        whileHover={interactive ? { scale: 1.02, y: -2 } : undefined}
+        whileTap={interactive ? { scale: 0.98 } : undefined}
         transition={{ type: "spring", stiffness: 400, damping: 17 }}
         {...props}
       >

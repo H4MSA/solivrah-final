@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter as Router } from 'react-router-dom';
 import App from './App.tsx';
 import { AppProvider } from '@/context/AppContext';
 import { AuthProvider } from '@/context/AuthContext';
@@ -12,11 +13,13 @@ if (!rootElement) throw new Error("Root element not found");
 
 createRoot(rootElement).render(
   <React.StrictMode>
-    <AuthProvider>
-      <AppProvider>
-        <App />
-        <Toaster />
-      </AppProvider>
-    </AuthProvider>
+    <Router>
+      <AuthProvider>
+        <AppProvider>
+          <App />
+          <Toaster />
+        </AppProvider>
+      </AuthProvider>
+    </Router>
   </React.StrictMode>
 );

@@ -64,36 +64,40 @@ const ButtonGlass = React.forwardRef<HTMLButtonElement, ButtonProps>(
     iconPosition = "left",
     ...props 
   }, ref) => {
-    const Comp = asChild ? Slot : motion.button;
+    const Comp = asChild ? Slot : "button";
     
     return (
-      <Comp
+      <motion.div
         className={cn(
           buttonVariants({ variant, size, fullWidth, withGlow, className }),
           loading && "opacity-80",
           "relative"
         )}
-        ref={ref}
-        disabled={disabled || loading}
         whileHover={{ scale: disabled || loading ? 1 : 1.02 }}
         whileTap={{ scale: disabled || loading ? 1 : 0.98 }}
         transition={{ type: "spring", stiffness: 400, damping: 17 }}
-        {...props}
       >
-        {loading && (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        )}
-        
-        {!loading && icon && iconPosition === "left" && (
-          <span className="mr-1">{icon}</span>
-        )}
-        
-        {children}
-        
-        {!loading && icon && iconPosition === "right" && (
-          <span className="ml-1">{icon}</span>
-        )}
-      </Comp>
+        <Comp
+          ref={ref}
+          disabled={disabled || loading}
+          {...props}
+          className="contents"
+        >
+          {loading && (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          )}
+          
+          {!loading && icon && iconPosition === "left" && (
+            <span className="mr-1">{icon}</span>
+          )}
+          
+          {children}
+          
+          {!loading && icon && iconPosition === "right" && (
+            <span className="ml-1">{icon}</span>
+          )}
+        </Comp>
+      </motion.div>
     );
   }
 );
