@@ -1,19 +1,21 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import type { Session, User } from "@supabase/supabase-js";
 
 interface AppContextType {
   xp: number;
   streak: number;
   selectedTheme: string;
-  completedQuests: number; // Adding the missing property
+  completedQuests: number;
   addXP: (amount: number) => void;
   increaseStreak: () => void;
   resetStreak: () => void;
   setSelectedTheme: (theme: string) => void;
   resetProgress: () => void;
-  user: any; // This should be replaced with a proper user type
+  user: any;
+  setUser: (user: User | null) => void;
+  setSession: (session: Session | null) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -25,6 +27,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedTheme, setSelectedTheme] = useState<string>("Focus");
   const [completedQuests, setCompletedQuests] = useState<number>(0);
   const [user, setUser] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
   
   // Load user data from local storage or Supabase
   useEffect(() => {
@@ -148,7 +151,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     resetStreak,
     setSelectedTheme,
     resetProgress,
-    user
+    user,
+    setUser,
+    setSession
   };
   
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

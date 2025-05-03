@@ -23,6 +23,9 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   skipAuthentication: () => void;
   setHasCompletedOnboarding: (value: boolean) => void;
+  // Add these two properties to fix the Auth.tsx errors
+  setUser: (user: User | null) => void;
+  setSession: (session: Session | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

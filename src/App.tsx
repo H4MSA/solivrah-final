@@ -12,6 +12,7 @@ import Quests from '@/pages/Quests';
 import Profile from '@/pages/Profile';
 import Auth from '@/pages/Auth';
 import NotFound from '@/pages/NotFound';
+import AuthCallback from '@/pages/AuthCallback'; // Add this import
 import './App.css';
 import { useAuth } from '@/context/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -46,6 +47,7 @@ function App() {
           {/* Public routes */}
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/callback" element={<AuthCallback />} /> {/* Add this route */}
           <Route path="/survey" element={<Survey />} />
           
           {/* Protected routes */}

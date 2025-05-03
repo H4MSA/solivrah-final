@@ -1,7 +1,10 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Settings, Award, Trophy, Star, Calendar, Medal, Clock, LogOut, Edit, Shield } from 'lucide-react';
+import { 
+  User, Settings, Award, Trophy, Star, Calendar, 
+  Medal, Clock, LogOut, Edit, Shield, Check, Lock
+} from 'lucide-react'; // Add the missing Check and Lock icons
 import { CardGlass, CardGlassHeader, CardGlassTitle, CardGlassContent } from '@/components/ui/card-glass';
 import { ButtonGlass } from '@/components/ui/button-glass';
 import { useApp } from '@/context/AppContext';
