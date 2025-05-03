@@ -1,9 +1,10 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, HTMLMotionProps } from "framer-motion";
 
-interface CardGlassProps extends React.HTMLAttributes<HTMLDivElement> {
+interface CardGlassProps extends Omit<HTMLMotionProps<"div">, "children"> {
+  children: React.ReactNode;
   variant?: "primary" | "secondary" | "accent";
   interactive?: boolean;
   withBorder?: boolean;
@@ -44,6 +45,13 @@ const CardGlass = React.forwardRef<HTMLDivElement, CardGlassProps>(
       }
     };
     
+    // Filter out any motion specific props that might cause conflicts
+    const motionProps = {
+      whileHover: interactive ? { scale: 1.02, y: -2 } : undefined,
+      whileTap: interactive ? { scale: 0.98 } : undefined,
+      transition: { type: "spring", stiffness: 400, damping: 17 }
+    };
+    
     return (
       <motion.div
         ref={ref}
@@ -56,9 +64,7 @@ const CardGlass = React.forwardRef<HTMLDivElement, CardGlassProps>(
           withGlow && "after:content-[''] after:absolute after:inset-0 after:z-[-1] after:rounded-2xl after:blur-lg after:bg-neon-green/10 after:opacity-0 hover:after:opacity-100 after:transition-opacity",
           className
         )}
-        whileHover={interactive ? { scale: 1.02, y: -2 } : undefined}
-        whileTap={interactive ? { scale: 0.98 } : undefined}
-        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        {...motionProps}
         {...props}
       >
         {children}
