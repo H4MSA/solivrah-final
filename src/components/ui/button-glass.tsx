@@ -7,28 +7,28 @@ import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all duration-200 active:scale-[0.98] focus-visible:outline-none disabled:opacity-40 disabled:pointer-events-none",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-normal transition-all duration-200 active:scale-[0.98] focus-visible:outline-none disabled:opacity-40 disabled:pointer-events-none",
   {
     variants: {
       variant: {
-        primary: "bg-gradient-to-r from-neon-green to-soft-lime text-black shadow-md hover:shadow-lg",
-        secondary: "backdrop-blur-md bg-white/10 text-white border border-white/20 hover:bg-white/20 shadow-sm hover:shadow-md",
-        outline: "border border-white/20 bg-transparent text-white hover:bg-white/5",
-        ghost: "bg-transparent text-white hover:bg-white/5",
-        destructive: "bg-destructive text-white hover:bg-destructive/90",
-        accent: "bg-gradient-to-r from-soft-purple to-electric-blue/80 text-white shadow-md hover:shadow-lg",
+        primary: "bg-off-white text-black border border-border-dark rounded-custom",
+        secondary: "bg-dark-gray text-white border border-border-medium rounded-xl",
+        outline: "border border-border-medium bg-transparent text-white rounded-custom",
+        ghost: "bg-transparent text-white hover:bg-white/5 rounded-custom",
+        destructive: "bg-destructive text-white hover:bg-destructive/90 rounded-custom",
+        accent: "bg-light-gray text-black rounded-custom",
       },
       size: {
         default: "h-12 px-6 py-3",
         sm: "h-9 rounded-lg px-3 py-2 text-xs",
-        lg: "h-14 px-8 py-4 text-base",
+        lg: "h-14 px-8 py-4 text-[13px]",
         icon: "h-10 w-10",
       },
       fullWidth: {
         true: "w-full",
       },
       withGlow: {
-        true: "after:content-[''] after:absolute after:inset-0 after:z-[-1] after:rounded-xl after:blur-xl after:bg-gradient-to-r after:from-neon-green/30 after:to-soft-lime/30 after:opacity-0 hover:after:opacity-100 after:transition-opacity",
+        true: "shadow-md",
       }
     },
     defaultVariants: {

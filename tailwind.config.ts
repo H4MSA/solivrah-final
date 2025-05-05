@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -30,16 +29,17 @@ export default {
 				'background-end': 'hsl(var(--background-end))',
 				foreground: 'hsl(var(--foreground))',
 				
-				// New color palette
-				'rich-black': '#000000',
-				'dark-purple': '#150F1E',
-				'neon-green': '#00FF85',
-				'soft-lime': '#BFFF00',
-				'soft-purple': '#A78BFA',
-				'electric-blue': '#38BDF8',
-				'subdued-orange': '#FF901F',
-				'success': '#2DD4BF',
-				'warning': '#FBBF24',
+				// New monochromatic color palette
+				'rich-black': '#212121',
+				'dark-gray': '#454545',
+				'medium-gray': '#676767',
+				'light-gray': '#ababab',
+				'off-white': '#ececec',
+				'text-light': '#ffffff',
+				'text-dark': '#000000',
+				'text-muted': '#a0a0a0',
+				'border-dark': '#434343',
+				'border-medium': '#464646',
 				
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
@@ -73,11 +73,14 @@ export default {
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				sm: 'calc(var(--radius) - 4px)',
+				xl: '14px',
+				'2xl': '16px',
+				'custom': '12.8px',
 			},
 			boxShadow: {
-				'glass': '0 8px 24px 0 rgba(0, 0, 0, 0.3)',
-				'glass-hover': '0 12px 28px 0 rgba(0, 0, 0, 0.4)'
+				'glass': '0 8px 24px 0 rgba(0, 0, 0, 0.2)',
+				'glass-hover': '0 12px 28px 0 rgba(0, 0, 0, 0.3)'
 			},
 			keyframes: {
 				'accordion-down': {
@@ -208,7 +211,8 @@ export default {
 			},
 			backgroundImage: {
 				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-				'accent-gradient': 'linear-gradient(to right, #00FF85, #BFFF00)',
+				'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+				'mono-gradient': 'linear-gradient(to bottom, var(--tw-gradient-stops))',
 			}
 		}
 	},

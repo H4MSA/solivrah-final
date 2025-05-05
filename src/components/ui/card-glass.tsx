@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { motion, HTMLMotionProps } from "framer-motion";
@@ -26,22 +25,23 @@ const CardGlass = React.forwardRef<HTMLDivElement, CardGlassProps>(
     const getVariantClasses = () => {
       switch (variant) {
         case "accent":
-          return "border-l-2 border-l-neon-green";
+          return "bg-gradient-to-b from-off-white/90 to-medium-gray/90";
         case "secondary":
-          return "bg-black/50";
+          return "bg-gradient-to-b from-medium-gray to-dark-gray";
         default:
-          return "bg-black/70";
+          return "bg-gradient-to-b from-light-gray to-dark-gray";
       }
     };
     
-    const getOpacityClasses = () => {
-      switch (glassOpacity) {
-        case "light":
-          return "bg-black/30";
-        case "heavy":
-          return "bg-black/80";
+    const getBorderClasses = () => {
+      if (!withBorder) return "border-0";
+      switch (variant) {
+        case "accent":
+          return "border border-border-dark";
+        case "secondary":
+          return "border border-border-medium";
         default:
-          return variant === "secondary" ? "bg-black/50" : "bg-black/70";
+          return "border border-border-dark";
       }
     };
     
@@ -56,21 +56,17 @@ const CardGlass = React.forwardRef<HTMLDivElement, CardGlassProps>(
       <motion.div
         ref={ref}
         className={cn(
-          "rounded-2xl backdrop-blur-xl border-t border-l border-white/10 border-b border-r border-black/20 shadow-glass overflow-hidden p-5 relative",
+          "rounded-custom backdrop-blur-md overflow-hidden p-5 relative",
           getVariantClasses(),
-          getOpacityClasses(),
+          getBorderClasses(),
           interactive && "cursor-pointer",
-          !withBorder && "border-0",
-          withGlow && "after:content-[''] after:absolute after:inset-0 after:z-[-1] after:rounded-2xl after:blur-lg after:bg-neon-green/10 after:opacity-0 hover:after:opacity-100 after:transition-opacity",
+          withGlow && "shadow-md",
           className
         )}
         {...motionProps}
         {...props}
       >
         {children}
-        
-        {/* Inner highlight effect */}
-        <div className="absolute inset-0 rounded-2xl pointer-events-none bg-gradient-to-b from-white/5 to-transparent" />
       </motion.div>
     );
   }

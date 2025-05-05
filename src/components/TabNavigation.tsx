@@ -46,7 +46,7 @@ export const TabNavigation: React.FC = () => {
     >
       <div className="pb-safe flex justify-center">
         <div className="w-full max-w-md mx-auto px-4 pb-2">
-          <div className="glass shadow-glass border-t border-l border-white/10 border-b border-r border-black/20 backdrop-blur-xl bg-black/60 rounded-2xl mb-2">
+          <div className="bg-gradient-to-b from-light-gray to-dark-gray border border-border-medium rounded-t-xl">
             <div className="flex items-center justify-between">
               {tabs.map((tab) => {
                 const isActive = (tab.path === '/' ? pathname === '/' : pathname.startsWith(tab.path));
@@ -54,28 +54,20 @@ export const TabNavigation: React.FC = () => {
                 return (
                   <button
                     key={tab.name}
-                    className="nav-tab relative flex-1 py-3"
+                    className="relative flex-1 py-3"
                     onClick={() => navigate(tab.path)}
                   >
                     <div className="flex flex-col items-center">
-                      <tab.icon className={`w-5 h-5 mb-1 transition-all ${isActive ? 'text-white' : 'text-white/40'}`} />
-                      <span className={`text-xs transition-all ${isActive ? 'text-white font-medium' : 'text-white/40'}`}>
+                      <tab.icon className={`w-5 h-5 mb-1 transition-all ${isActive ? 'text-black' : 'text-black/60'}`} />
+                      <span className={`text-xs transition-all ${isActive ? 'text-black font-medium' : 'text-black/60'}`}>
                         {tab.name}
                       </span>
                       
                       {isActive && (
                         <motion.div 
                           layoutId="activeTab"
-                          className="absolute -top-1 w-1 h-1 bg-neon-green rounded-full"
+                          className="absolute -bottom-1 w-10 h-0.5 bg-black rounded-full"
                           transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                        />
-                      )}
-                      
-                      {isActive && (
-                        <motion.div 
-                          layoutId="activeTabGlow"
-                          className="absolute -top-2 w-8 h-1 bg-neon-green/20 rounded-full blur-sm"
-                          transition={{ type: "spring", stiffness: 400, damping: 25 }}
                         />
                       )}
                     </div>
