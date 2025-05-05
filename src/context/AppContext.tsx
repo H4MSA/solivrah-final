@@ -1,168 +1,179 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/context/AuthContext";
-import type { Session, User } from "@supabase/supabase-js";
 
-interface AppContextType {
-  xp: number;
-  streak: number;
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
+
+export interface AppContextType {
+  user: User | null;
+  setUser: (user: User | null) => void;
+  session: Session | null;
+  setSession: (session: Session | null) => void;
   selectedTheme: string;
+  setSelectedTheme: (theme: string) => void;
+  signOut: () => Promise<void>;
+  streak: number;
+  xp: number;
   completedQuests: number;
   addXP: (amount: number) => void;
-  increaseStreak: () => void;
-  resetStreak: () => void;
-  setSelectedTheme: (theme: string) => void;
-  resetProgress: () => void;
-  user: any;
-  setUser: (user: User | null) => void;
-  setSession: (session: Session | null) => void;
+  resetProgress: () => Promise<void>;
+  incrementStreak: () => void;
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
+  isGuest: boolean;
+  setIsGuest: (isGuest: boolean) => void;
+  isAnonymous: boolean;
+  setIsAnonymous: (isAnonymous: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user: authUser, isAuthenticated } = useAuth();
-  const [xp, setXp] = useState<number>(0);
-  const [streak, setStreak] = useState<number>(0);
-  const [selectedTheme, setSelectedTheme] = useState<string>("Focus");
-  const [completedQuests, setCompletedQuests] = useState<number>(0);
-  const [user, setUser] = useState<any>(null);
+export const AppProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  
-  // Load user data from local storage or Supabase
+  const [selectedTheme, setSelectedTheme] = useState<string>('Focus');
+  const [streak, setStreak] = useState<number>(0);
+  const [xp, setXP] = useState<number>(0);
+  const [completedQuests, setCompletedQuests] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isGuest, setIsGuest] = useState<boolean>(false);
+  const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
+
   useEffect(() => {
-    const loadUserData = async () => {
-      if (isAuthenticated && authUser) {
-        // Load from Supabase profiles table instead of users_progress
-        try {
-          const { data: userData } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', authUser.id)
-            .maybeSingle();
+    // Load user data from localStorage if not in user state
+    const getUser = async () => {
+      try {
+        setLoading(true);
+        
+        // Check if user is skipping authentication
+        const isSkipping = localStorage.getItem('skipAuthentication') === 'true';
+        
+        if (isSkipping) {
+          setIsAnonymous(true);
+          // Create placeholder data for anonymous users
+          setStreak(Math.floor(Math.random() * 5));
+          setXP(Math.floor(Math.random() * 200));
+          setCompletedQuests(Math.floor(Math.random() * 3));
           
-          if (userData) {
-            setXp(userData.xp || 0);
-            setStreak(userData.streak || 0);
-            setSelectedTheme(userData.theme || "Focus");
+          // Load theme preference from localStorage if it exists
+          const savedTheme = localStorage.getItem('anonymous_theme');
+          if (savedTheme) {
+            setSelectedTheme(savedTheme);
           }
-          
-          // Get completed quests count
-          const { data: questsData, error: questsError } = await supabase
-            .from('quests')
-            .select('*')
-            .eq('user_id', authUser.id)
-            .eq('completed', true);
-          
-          setCompletedQuests(questsData?.length || 0);
-          setUser(authUser);
-          
-        } catch (error) {
-          console.error("Error loading user data:", error);
-          
-          // Fallback to defaults
-          setXp(0);
-          setStreak(0);
-          setCompletedQuests(0);
-          setSelectedTheme("Focus");
+          setLoading(false);
+          return;
         }
-      } else {
-        // Anonymous user, load from localStorage
-        const storedXp = localStorage.getItem('anonymous_xp');
-        const storedStreak = localStorage.getItem('anonymous_streak');
-        const storedTheme = localStorage.getItem('anonymous_theme');
-        const storedQuests = localStorage.getItem('anonymous_completed_quests');
         
-        setXp(storedXp ? parseInt(storedXp) : 0);
-        setStreak(storedStreak ? parseInt(storedStreak) : 0);
-        setCompletedQuests(storedQuests ? parseInt(storedQuests) : 0);
-        setSelectedTheme(storedTheme || "Focus");
-        
-        // Create basic anonymous user object
-        setUser({
-          id: 'anonymous',
-          email: 'anonymous@example.com',
-          user_metadata: { username: 'Guest' }
-        });
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+
+        // If user exists, load their data
+        if (user) {
+          // Check if user is a guest
+          const userMetadata = user.user_metadata || {};
+          setIsGuest(Boolean(userMetadata.isGuest));
+          
+          // In a real app, we would load the user's data from the database
+          // For now, we'll use some placeholder data
+          setStreak(Math.floor(Math.random() * 30));
+          setXP(Math.floor(Math.random() * 5000));
+          setCompletedQuests(Math.floor(Math.random() * 10));
+          
+          // Try to load theme preference from localStorage
+          const savedTheme = localStorage.getItem(`${user.id}_theme`);
+          if (savedTheme) {
+            setSelectedTheme(savedTheme);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user:', error);
+      } finally {
+        setLoading(false);
       }
     };
-    
-    loadUserData();
-  }, [isAuthenticated, authUser]);
-  
-  // Save user data
-  const saveUserData = async () => {
-    if (isAuthenticated && authUser) {
-      // Save to Supabase profiles table
-      try {
-        await supabase
-          .from('profiles')
-          .upsert({
-            id: authUser.id,
-            xp,
-            streak,
-            theme: selectedTheme
-          });
-      } catch (error) {
-        console.error("Error saving user data:", error);
-      }
-    } else {
-      // Anonymous user, save to localStorage
-      localStorage.setItem('anonymous_xp', xp.toString());
-      localStorage.setItem('anonymous_streak', streak.toString());
-      localStorage.setItem('anonymous_theme', selectedTheme);
-      localStorage.setItem('anonymous_completed_quests', completedQuests.toString());
-    }
-  };
-  
-  // Save data when it changes
+
+    getUser();
+  }, []);
+
+  // Save theme preference when it changes
   useEffect(() => {
-    if (user) {
-      saveUserData();
+    if (isAnonymous) {
+      localStorage.setItem('anonymous_theme', selectedTheme);
+    } else if (user) {
+      localStorage.setItem(`${user.id}_theme`, selectedTheme);
     }
-  }, [xp, streak, selectedTheme, completedQuests, user]);
-  
-  const addXP = (amount: number) => {
-    setXp(prev => prev + amount);
-  };
-  
-  const increaseStreak = () => {
-    setStreak(prev => prev + 1);
-  };
-  
-  const resetStreak = () => {
+  }, [selectedTheme, user, isAnonymous]);
+
+  const signOut = async () => {
+    // If anonymous user
+    if (isAnonymous) {
+      localStorage.removeItem('skipAuthentication');
+      localStorage.removeItem('anonymous_theme');
+      setIsAnonymous(false);
+    } else {
+      await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
+      setIsGuest(false);
+    }
+    
     setStreak(0);
-  };
-  
-  const resetProgress = () => {
-    setXp(0);
-    setStreak(0);
+    setXP(0);
     setCompletedQuests(0);
-    saveUserData();
   };
-  
-  const value = {
-    xp,
-    streak,
-    selectedTheme,
-    completedQuests,
-    addXP,
-    increaseStreak,
-    resetStreak,
-    setSelectedTheme,
-    resetProgress,
-    user,
-    setUser,
-    setSession
+
+  const addXP = (amount: number) => {
+    setXP(prevXP => prevXP + amount);
   };
-  
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+
+  const incrementStreak = () => {
+    setStreak(prevStreak => prevStreak + 1);
+  };
+
+  const resetProgress = async () => {
+    // In a real app, we would reset the user's data in the database
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        setStreak(0);
+        setXP(0);
+        setCompletedQuests(0);
+        resolve();
+      }, 1000);
+    });
+  };
+
+  return (
+    <AppContext.Provider
+      value={{
+        user,
+        setUser,
+        session,
+        setSession,
+        selectedTheme,
+        setSelectedTheme,
+        signOut,
+        streak,
+        xp,
+        completedQuests,
+        addXP,
+        resetProgress,
+        incrementStreak,
+        loading,
+        setLoading,
+        isGuest,
+        setIsGuest,
+        isAnonymous,
+        setIsAnonymous,
+      }}
+    >
+      {children}
+    </AppContext.Provider>
+  );
 };
 
 export const useApp = () => {
   const context = useContext(AppContext);
   if (context === undefined) {
-    throw new Error("useApp must be used within an AppProvider");
+    throw new Error('useApp must be used within an AppProvider');
   }
   return context;
 };

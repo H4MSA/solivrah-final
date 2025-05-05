@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -28,19 +29,6 @@ export default {
 				background: 'hsl(var(--background))',
 				'background-end': 'hsl(var(--background-end))',
 				foreground: 'hsl(var(--foreground))',
-				
-				// New monochromatic color palette
-				'rich-black': '#212121',
-				'dark-gray': '#454545',
-				'medium-gray': '#676767',
-				'light-gray': '#ababab',
-				'off-white': '#ececec',
-				'text-light': '#ffffff',
-				'text-dark': '#000000',
-				'text-muted': '#a0a0a0',
-				'border-dark': '#434343',
-				'border-medium': '#464646',
-				
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
@@ -73,14 +61,7 @@ export default {
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)',
-				xl: '14px',
-				'2xl': '16px',
-				'custom': '12.8px',
-			},
-			boxShadow: {
-				'glass': '0 8px 24px 0 rgba(0, 0, 0, 0.2)',
-				'glass-hover': '0 12px 28px 0 rgba(0, 0, 0, 0.3)'
+				sm: 'calc(var(--radius) - 4px)'
 			},
 			keyframes: {
 				'accordion-down': {
@@ -177,22 +158,6 @@ export default {
 					'100%': {
 						transform: 'scale(1)'
 					}
-				},
-				'glow': {
-					'0%': {
-						boxShadow: '0 0 5px rgba(0, 255, 133, 0.5), 0 0 10px rgba(0, 255, 133, 0.2)'
-					},
-					'50%': {
-						boxShadow: '0 0 10px rgba(0, 255, 133, 0.7), 0 0 20px rgba(0, 255, 133, 0.4)'
-					},
-					'100%': {
-						boxShadow: '0 0 5px rgba(0, 255, 133, 0.5), 0 0 10px rgba(0, 255, 133, 0.2)'
-					}
-				},
-				'particle-float': {
-					'0%': { transform: 'translateY(0) translateX(0) rotate(0deg)', opacity: '0' },
-					'50%': { opacity: '0.5' },
-					'100%': { transform: 'translateY(-100px) translateX(20px) rotate(180deg)', opacity: '0' }
 				}
 			},
 			animation: {
@@ -205,14 +170,7 @@ export default {
 				'pop-in': 'pop-in 0.5s forwards',
 				'blur-in': 'blur-in 0.5s ease-out',
 				'float': 'float 5s infinite ease-in-out',
-				'pulse': 'pulse 2s infinite ease-in-out',
-				'glow': 'glow 2s infinite ease-in-out',
-				'particle-float': 'particle-float 5s forwards'
-			},
-			backgroundImage: {
-				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-				'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-				'mono-gradient': 'linear-gradient(to bottom, var(--tw-gradient-stops))',
+				'pulse': 'pulse 2s infinite ease-in-out'
 			}
 		}
 	},

@@ -1,13 +1,13 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Logo } from "@/components/Logo";
 import { CheckCircle, ArrowRight, Shield, User, LogIn } from "lucide-react";
+import { GlassButton } from "@/components/ui/glass";
 import { useAuth } from "@/context/AuthContext";
 import { AuthService } from "@/services/AuthService";
 import { useToast } from "@/hooks/use-toast";
-import { CardGlass } from "@/components/ui/card-glass";
-import { ButtonGlass } from "@/components/ui/button-glass";
 
 const Feature = ({
   icon,
@@ -19,21 +19,15 @@ const Feature = ({
   delay?: number;
 }) => (
   <motion.div 
-    className="relative"
+    className="flex items-start gap-3.5 p-4 bg-black/60 backdrop-blur-xl rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 transform-gpu hover:scale-[1.02] shadow-lg active:scale-[0.98] touch-manipulation mb-3" 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: delay + 0.4, duration: 0.6, type: "spring" }}
   >
-    <CardGlass 
-      className="flex items-start gap-3.5 p-4 mb-3"
-      interactive
-      variant="secondary"
-    >
-      <div className="p-2 rounded-full bg-black/60 text-white flex-shrink-0 border border-white/10 shadow-md">
-        {icon}
-      </div>
-      <p className="text-white text-sm leading-tight">{text}</p>
-    </CardGlass>
+    <div className="p-2 rounded-full bg-black/80 text-white flex-shrink-0 border border-white/10 shadow-md">
+      {icon}
+    </div>
+    <p className="text-white text-sm leading-tight">{text}</p>
   </motion.div>
 );
 
@@ -123,15 +117,12 @@ const Welcome = () => {
         animate={isLoaded ? "visible" : "hidden"}
         variants={containerVariants}
       >
-        <motion.div variants={itemVariants} className="relative">
+        <motion.div variants={itemVariants}>
           <Logo className="mb-5 animate-float drop-shadow-lg" />
-          <div className="absolute -inset-4 bg-neon-green blur-2xl opacity-10 rounded-full z-[-1]" />
         </motion.div>
         
         <motion.div className="space-y-3" variants={itemVariants}>
-          <h1 className="text-white font-medium text-sm tracking-wider">
-            A QUICK START FOR A LIFE YOU WANT
-          </h1>
+          <h1 className="text-white font-medium text-sm tracking-wider">A QUICK START FOR A LIFE YOU WANT</h1>
         </motion.div>
         
         <motion.div className="space-y-6 w-full max-w-xs mx-auto" variants={itemVariants}>
@@ -154,50 +145,50 @@ const Welcome = () => {
           </div>
           
           <div className="flex flex-col w-full gap-4 mt-6">
-            <ButtonGlass
+            <GlassButton
               variant="primary"
               size="lg"
               fullWidth
-              withGlow
-              icon={<LogIn size={18} />}
-              iconPosition="right"
+              className="rounded-xl font-semibold"
               onClick={handleSkipLogin}
+              iconRight={<LogIn size={18} />}
             >
               Skip Login & Explore
-            </ButtonGlass>
+            </GlassButton>
             
-            <ButtonGlass
+            <GlassButton
               variant="secondary"
               size="lg"
               fullWidth
-              icon={<ArrowRight size={18} />}
-              iconPosition="right"
+              className="rounded-xl font-semibold"
               onClick={() => navigate("/auth")}
+              iconRight={<ArrowRight size={18} />}
             >
               Create Account
-            </ButtonGlass>
+            </GlassButton>
             
-            <ButtonGlass
-              variant="outline"
+            <GlassButton
+              variant="secondary"
               size="lg"
               fullWidth
+              className="rounded-xl font-medium"
               onClick={() => navigate("/auth", { state: { initialTab: 'login' } })}
             >
               Sign In
-            </ButtonGlass>
+            </GlassButton>
 
-            <ButtonGlass
-              variant="ghost"
+            <GlassButton
+              variant="outline"
               size="lg"
               fullWidth
-              icon={<User size={16} />}
-              iconPosition="left"
+              className="rounded-xl font-medium mt-2"
               onClick={handleGuestLogin}
               loading={isLoggingInAsGuest}
               disabled={isLoggingInAsGuest}
+              iconLeft={<User size={16} />}
             >
               Continue as Guest
-            </ButtonGlass>
+            </GlassButton>
           </div>
         </motion.div>
         
