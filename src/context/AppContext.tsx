@@ -1,164 +1,138 @@
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { Session, User } from "@supabase/supabase-js";
-import { useToast } from "@/hooks/use-toast";
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
-// Define types for our context
-interface AppContextType {
-  selectedTheme: string;
-  setSelectedTheme: (theme: string) => void;
+export interface AppContextType {
   user: User | null;
   setUser: (user: User | null) => void;
   session: Session | null;
   setSession: (session: Session | null) => void;
-  loading: boolean;
-  setLoading: (loading: boolean) => void;
-  isGuest: boolean;
-  setIsGuest: (isGuest: boolean) => void;
-  
-  // Add missing properties that are used in various components
+  selectedTheme: string;
+  setSelectedTheme: (theme: string) => void;
+  signOut: () => Promise<void>;
   streak: number;
   xp: number;
   completedQuests: number;
   addXP: (amount: number) => void;
+  resetProgress: () => Promise<void>;
   incrementStreak: () => void;
-  resetProgress: () => void;
-  signOut: () => Promise<void>;
+  loading: boolean;
+  isGuest: boolean;
+  setIsGuest: (isGuest: boolean) => void;
 }
 
-// Create the context with default values
-const AppContext = createContext<AppContextType>({
-  selectedTheme: "Focus",
-  setSelectedTheme: () => {},
-  user: null,
-  setUser: () => {},
-  session: null,
-  setSession: () => {},
-  loading: true,
-  setLoading: () => {},
-  isGuest: false,
-  setIsGuest: () => {},
-  
-  // Add default values for missing properties
-  streak: 0,
-  xp: 0,
-  completedQuests: 0,
-  addXP: () => {},
-  incrementStreak: () => {},
-  resetProgress: () => {},
-  signOut: async () => {},
-});
+const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// Custom hook for using the context
-export const useApp = () => {
-  const context = useContext(AppContext);
-  if (context === undefined) {
-    throw new Error("useApp must be used within an AppProvider");
-  }
-  return context;
-};
-
-// Provider component to wrap the app
-export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedTheme, setSelectedTheme] = useState<string>("Focus");
+export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [isGuest, setIsGuest] = useState<boolean>(false);
-  
-  // Add state for missing properties
+  const [selectedTheme, setSelectedTheme] = useState<string>('Focus');
   const [streak, setStreak] = useState<number>(0);
   const [xp, setXP] = useState<number>(0);
   const [completedQuests, setCompletedQuests] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isGuest, setIsGuest] = useState<boolean>(false);
 
-  // Load guest status from localStorage on initial load
   useEffect(() => {
-    const storedGuestStatus = localStorage.getItem("isGuest");
-    if (storedGuestStatus === "true") {
-      setIsGuest(true);
-    }
-    
-    // Load user progress from localStorage
-    const storedStreak = localStorage.getItem("streak");
-    const storedXP = localStorage.getItem("xp");
-    const storedCompletedQuests = localStorage.getItem("completedQuests");
-    
-    if (storedStreak) setStreak(parseInt(storedStreak));
-    if (storedXP) setXP(parseInt(storedXP));
-    if (storedCompletedQuests) setCompletedQuests(parseInt(storedCompletedQuests));
+    // Load user data from localStorage if not in user state
+    const getUser = async () => {
+      try {
+        setLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+
+        // If user exists, load their data
+        if (user) {
+          // In a real app, we would load the user's data from the database
+          // For now, we'll use some placeholder data
+          setStreak(Math.floor(Math.random() * 30));
+          setXP(Math.floor(Math.random() * 5000));
+          setCompletedQuests(Math.floor(Math.random() * 10));
+          
+          // Try to load theme preference from localStorage
+          const savedTheme = localStorage.getItem(`${user.id}_theme`);
+          if (savedTheme) {
+            setSelectedTheme(savedTheme);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getUser();
   }, []);
 
-  // Save guest status to localStorage whenever it changes
+  // Save theme preference when it changes
   useEffect(() => {
-    if (isGuest) {
-      localStorage.setItem("isGuest", "true");
-    } else {
-      localStorage.removeItem("isGuest");
+    if (user) {
+      localStorage.setItem(`${user.id}_theme`, selectedTheme);
     }
-  }, [isGuest]);
-  
-  // Save user progress to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem("streak", streak.toString());
-    localStorage.setItem("xp", xp.toString());
-    localStorage.setItem("completedQuests", completedQuests.toString());
-  }, [streak, xp, completedQuests]);
+  }, [selectedTheme, user]);
 
-  // Add XP function
-  const addXP = (amount: number) => {
-    setXP(prevXP => prevXP + amount);
-  };
-  
-  // Increment streak function
-  const incrementStreak = () => {
-    setStreak(prevStreak => prevStreak + 1);
-    // Give bonus XP for streak milestones
-    if ((streak + 1) % 7 === 0) {
-      addXP(100); // Bonus XP for weekly streak
-    } else {
-      addXP(10); // Regular streak XP
-    }
-  };
-  
-  // Reset progress function
-  const resetProgress = () => {
-    setStreak(0);
-    setXP(0);
-    setCompletedQuests(0);
-    localStorage.removeItem("streak");
-    localStorage.removeItem("xp");
-    localStorage.removeItem("completedQuests");
-  };
-  
-  // Sign out function
   const signOut = async () => {
-    // In a real app, this would call the authentication service
-    // For now, we'll just clear the user and session
+    await supabase.auth.signOut();
     setUser(null);
     setSession(null);
     setIsGuest(false);
-    localStorage.removeItem("isGuest");
+    setStreak(0);
+    setXP(0);
+    setCompletedQuests(0);
   };
 
-  const value = {
-    selectedTheme,
-    setSelectedTheme,
-    user,
-    setUser,
-    session,
-    setSession,
-    loading,
-    setLoading,
-    isGuest,
-    setIsGuest,
-    streak,
-    xp,
-    completedQuests,
-    addXP,
-    incrementStreak,
-    resetProgress,
-    signOut,
+  const addXP = (amount: number) => {
+    setXP(prevXP => prevXP + amount);
   };
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  const incrementStreak = () => {
+    setStreak(prevStreak => prevStreak + 1);
+  };
+
+  const resetProgress = async () => {
+    // In a real app, we would reset the user's data in the database
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        setStreak(0);
+        setXP(0);
+        setCompletedQuests(0);
+        resolve();
+      }, 1000);
+    });
+  };
+
+  return (
+    <AppContext.Provider
+      value={{
+        user,
+        setUser,
+        session,
+        setSession,
+        selectedTheme,
+        setSelectedTheme,
+        signOut,
+        streak,
+        xp,
+        completedQuests,
+        addXP,
+        resetProgress,
+        incrementStreak,
+        loading,
+        isGuest,
+        setIsGuest,
+      }}
+    >
+      {children}
+    </AppContext.Provider>
+  );
+};
+
+export const useApp = () => {
+  const context = useContext(AppContext);
+  if (context === undefined) {
+    throw new Error('useApp must be used within an AppProvider');
+  }
+  return context;
 };
