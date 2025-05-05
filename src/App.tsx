@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -33,16 +32,28 @@ const queryClient = new QueryClient({
 
 // SessionHandler component to manage authentication state
 const SessionHandler = ({ children }: { children: React.ReactNode }) => {
-  const { setUser, setSession } = useApp();
+  const { setUser, setSession, setIsGuest } = useApp();
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
+    // Check for guest mode first
+    const storedGuestStatus = localStorage.getItem("isGuest");
+    if (storedGuestStatus === "true") {
+      setIsGuest(true);
+    }
+    
     // Set up auth state listener FIRST (critical for avoiding auth deadlocks)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log("Auth state changed:", event);
         setSession(session);
         setUser(session?.user ?? null);
+        
+        // If user signs in, disable guest mode
+        if (session?.user) {
+          setIsGuest(false);
+          localStorage.removeItem("isGuest");
+        }
         
         // Store session in localStorage for persistence between page refreshes
         if (session) {
@@ -91,7 +102,7 @@ const SessionHandler = ({ children }: { children: React.ReactNode }) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [setUser, setSession]);
+  }, [setUser, setSession, setIsGuest]);
 
   if (checking) {
     return (
@@ -117,6 +128,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
+  // Allow access if user is authenticated OR in guest mode
   if (!user && !isGuest) {
     // Save the attempted URL for redirecting after login
     const returnUrl = location.pathname !== "/auth" ? location.pathname : "/home";
