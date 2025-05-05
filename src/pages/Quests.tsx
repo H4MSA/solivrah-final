@@ -573,7 +573,6 @@ const Quests = () => {
         </motion.div>
         
         {isLoading ? (
-          
           <motion.div variants={itemVariants} className="flex justify-center py-12">
             <div className="flex flex-col items-center">
               <Loader2 className="animate-spin w-8 h-8 text-white/60 mb-4" />
@@ -582,8 +581,7 @@ const Quests = () => {
           </motion.div>
         ) : (
           <>
-            {
- filter === 'all' && currentQuest && (
+            {filter === 'all' && currentQuest && (
               <motion.div variants={itemVariants}>
                 <div className="mb-2 flex justify-between items-center">
                   <h2 className="text-lg font-medium">Current Quest</h2>
@@ -603,8 +601,7 @@ const Quests = () => {
                   difficulty={currentQuest.difficulty as 'Easy' | 'Medium' | 'Hard'}
                 />
               </motion.div>
-            )
-}
+            )}
 
             {(filter === 'all' || filter === 'upcoming') && upcomingQuests.length > 0 && (
               <motion.div variants={itemVariants} className="space-y-3">
@@ -696,6 +693,7 @@ const Quests = () => {
         />
       )}
       
+      <TabNavigation />
     </div>
   );
 };
