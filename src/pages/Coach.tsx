@@ -207,7 +207,7 @@ const Coach = () => {
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 pb-28 chat-container">
+      <div className="flex-1 overflow-y-auto px-6 pb-4 chat-container">
         <div className="space-y-4 py-4">
           {messages.map((message, index) => (
             <div 

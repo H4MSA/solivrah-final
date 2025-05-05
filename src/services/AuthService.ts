@@ -80,45 +80,6 @@ export const AuthService = {
     }
   },
   
-  signInAsGuest: async (): Promise<AuthResponse> => {
-    try {
-      // Using a valid email format that Supabase will accept
-      const randomId = Math.floor(Math.random() * 100000);
-      const guestEmail = `guest.user${randomId}@mailinator.com`;
-      const guestPassword = `Guest${Math.random().toString(36).substring(2, 10)}!`;
-      
-      console.log("Attempting guest login with generated credentials");
-      
-      // Try to sign up as a new guest user
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: guestEmail,
-        password: guestPassword,
-        options: {
-          data: {
-            username: `Guest_${randomId}`,
-            isGuest: true,
-          },
-        },
-      });
-      
-      if (signUpError) {
-        console.error("Guest signup error:", signUpError);
-        throw signUpError;
-      }
-      
-      console.log("Guest account created successfully");
-      
-      // If signup is successful, return the session and user
-      return {
-        session: signUpData.session,
-        user: signUpData.user
-      };
-    } catch (error) {
-      console.error("Guest login error:", error);
-      throw error;
-    }
-  },
-  
   signInWithOAuth: async (provider: OAuthProvider): Promise<void> => {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({

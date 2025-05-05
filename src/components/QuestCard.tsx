@@ -1,9 +1,8 @@
 
 import React from "react";
-import { ArrowRight, Lock, CheckCircle } from "lucide-react";
+import { Lock } from "lucide-react";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { GlassPane } from "./ui/glass";
+import { PremiumCard } from "./PremiumCard";
 
 interface QuestCardProps {
   title: string;
@@ -12,10 +11,6 @@ interface QuestCardProps {
   onClick: () => void;
   completed?: boolean;
   current?: boolean;
-  day?: number;
-  difficulty?: 'Easy' | 'Medium' | 'Hard';
-  theme?: string;
-  xp?: number;
 }
 
 export const QuestCard: React.FC<QuestCardProps> = ({
@@ -24,158 +19,52 @@ export const QuestCard: React.FC<QuestCardProps> = ({
   locked = false,
   onClick,
   completed = false,
-  current = false,
-  day,
-  difficulty = 'Medium',
-  theme,
-  xp = 50
+  current = false
 }) => {
-  const getStatusLabel = () => {
-    if (completed) return 'Completed';
-    if (current) return 'Current';
-    if (locked) return 'Locked';
-    return 'Upcoming';
-  };
-
-  const getVariant = () => {
-    if (completed) return "standard";
-    if (current) return "ultra";
-    if (locked) return "frost";
-    return "light";
-  };
-
-  // Get background gradient based on theme
-  const getThemeGradient = () => {
-    switch (theme) {
-      case "Focus":
-        return "from-purple-400/20 to-purple-700/5";
-      case "Discipline":
-        return "from-red-400/20 to-red-700/5";
-      case "Resilience":
-        return "from-green-400/20 to-green-700/5";
-      case "Wildcards":
-        return "from-amber-400/20 to-amber-700/5";
-      default:
-        return "from-purple-400/20 to-purple-700/5";
-    }
-  };
-
-  // Get difficulty color
-  const getDifficultyColor = () => {
-    switch (difficulty) {
-      case 'Easy':
-        return 'text-green-500';
-      case 'Medium':
-        return 'text-yellow-500';
-      case 'Hard':
-        return 'text-red-500';
-      default:
-        return 'text-yellow-500';
-    }
-  };
-
   return (
-    <motion.div
-      whileHover={!locked ? { y: -4, scale: 1.01 } : {}}
-      whileTap={!locked ? { scale: 0.98 } : {}}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="relative"
+    <PremiumCard
+      variant={locked ? "subtle" : current ? "selected" : "default"}
+      className={`relative overflow-hidden transition-all duration-300 ${
+        locked ? 'opacity-70 hover:opacity-80' : ''
+      }`}
+      interactive={!locked}
+      onClick={!locked ? onClick : undefined}
     >
-      <GlassPane
-        variant={getVariant()}
-        className={cn(
-          "relative overflow-hidden transition-all duration-300",
-          locked ? "opacity-90" : "opacity-100",
-          current && "ring-2 ring-white/20 ring-offset-1 ring-offset-black/50"
-        )}
-        interactive={!locked}
-        onClick={!locked ? onClick : undefined}
-        glowEffect={current}
-        hoverEffect={!locked}
-        depth={current ? "high" : locked ? "low" : "medium"}
-      >
-        <div className={`absolute inset-0 bg-gradient-to-tr ${getThemeGradient()} opacity-30`}></div>
-        
-        <div className="relative z-10 p-5 space-y-3">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              {day && (
-                <span className="bg-black/40 text-white/90 text-xs font-medium px-2 py-1 rounded-full">
-                  Day {day}
-                </span>
-              )}
-              <h3 className="font-medium text-base text-white">{title}</h3>
-            </div>
-            
-            <motion.span 
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={cn(
-                "text-xs px-2.5 py-1 rounded-full border backdrop-blur-xl",
-                completed ? 'bg-white/10 text-white border-white/20' : 
-                current ? 'bg-white/5 text-white border-white/10' : 
-                locked ? 'bg-black/70 text-white/70 border-white/5' :
-                'bg-black/60 text-white/70 border-white/5'
-              )}
-            >
-              {getStatusLabel()}
-            </motion.span>
-          </div>
-          
-          <p className="text-sm text-white/80">{description}</p>
-          
-          <div className="flex items-center justify-between pt-2">
-            <div className="flex items-center space-x-3">
-              <span className="text-xs bg-black/40 px-2 py-1 rounded-full border border-white/5">
-                <span className="text-white/70">{xp} XP</span>
-              </span>
-              
-              {difficulty && (
-                <span className="text-xs bg-black/40 px-2 py-1 rounded-full border border-white/5">
-                  <span className={getDifficultyColor()}>{difficulty}</span>
-                </span>
-              )}
-            </div>
-
-            {theme && (
-              <span className="text-xs bg-black/40 px-2 py-1 rounded-full border border-white/5">
-                <span className="text-white/70">{theme}</span>
-              </span>
-            )}
-          </div>
-          
-          {!locked && !completed && (
-            <motion.button 
-              className="w-full mt-2 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-medium flex items-center justify-center gap-2 border border-white/10 backdrop-blur-lg transition-all"
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              {current ? 'Continue Quest' : 'Start Quest'} <ArrowRight size={16} />
-            </motion.button>
-          )}
-          
-          {completed && (
-            <div className="w-full mt-2 py-2.5 rounded-xl bg-white/5 text-white/80 font-medium flex items-center justify-center gap-2 border border-white/10">
-              <CheckCircle size={16} className="text-green-500" /> Completed
-            </div>
+      <div className="p-5 space-y-3">
+        <div className="flex justify-between items-center">
+          <h3 className="font-medium text-base">{title}</h3>
+          {locked ? (
+            <span className="text-xs bg-black/60 backdrop-blur-sm px-2.5 py-1 rounded-full text-white/70 flex items-center gap-1.5 border border-white/10">
+              <Lock size={12} />
+              <span>Locked</span>
+            </span>
+          ) : (
+            <span className={`text-xs px-2.5 py-1 rounded-full border ${
+              completed ? 'bg-white/10 text-white border-white/20' : 
+              current ? 'bg-white/5 text-white border-white/10' : 
+              'bg-black/50 text-white/70 border-white/5'
+            }`}>
+              {completed ? 'Completed' : current ? 'Current' : 'Upcoming'}
+            </span>
           )}
         </div>
         
+        <p className="text-sm text-white/70">{description}</p>
+        
+        {!locked && !completed && (
+          <button 
+            className="w-full mt-2 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-medium flex items-center justify-center gap-2 border border-white/10 transition-all"
+          >
+            {current ? 'Continue Quest' : 'Start Quest'}
+          </button>
+        )}
+        
         {locked && (
-          <div className="absolute inset-0 backdrop-blur-xl bg-black/60 flex items-center justify-center rounded-xl border border-white/5 z-20">
-            <motion.div
-              initial={{ opacity: 0.6 }}
-              animate={{ opacity: [0.6, 0.8, 0.6] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-12 h-12 flex items-center justify-center rounded-full bg-black/40 border border-white/10"
-            >
-              <Lock className="text-white/40 w-6 h-6" />
-            </motion.div>
+          <div className="absolute inset-0 backdrop-blur-[6px] bg-black/40 flex items-center justify-center">
+            <Lock className="text-white/30 w-8 h-8 animate-pulse-slow" />
           </div>
         )}
-      </GlassPane>
-    </motion.div>
+      </div>
+    </PremiumCard>
   );
 };

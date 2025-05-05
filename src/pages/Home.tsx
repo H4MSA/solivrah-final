@@ -2,14 +2,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { TabNavigation } from "@/components/TabNavigation";
 import { useApp } from "@/context/AppContext";
 import { QRScanner } from "@/components/QRScanner";
 import { DailyAffirmation } from "@/components/DailyAffirmation";
 import { PremiumCard, OptionCard } from "@/components/PremiumCard";
 import { Progress } from "@/components/ui/progress";
 import { CameraUpload } from "@/components/CameraUpload";
-import { GlassPane, GlassCard, GlassButton, GlassInput } from "@/components/ui/glass";
-import { QuestCard } from "@/components/QuestCard";
 import { 
   Camera, 
   Star, 
@@ -28,63 +27,76 @@ const CollapsibleSection = ({ title, children, defaultOpen = true }: { title: st
   const [isOpen, setIsOpen] = useState(defaultOpen);
   
   return (
-    <motion.div 
-      className="space-y-3"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
+    <div className="space-y-3">
       <div 
         className="flex justify-between items-center cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
       >
         <h2 className="text-lg font-semibold text-white">{title}</h2>
-        <button className="p-1.5 rounded-full bg-white/5 border border-white/5 active:scale-95 transition-all hover:bg-white/10">
+        <button className="p-1 rounded-full bg-white/5 border border-white/5 active:scale-95 transition-all">
           {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
         </button>
       </div>
       
-      <motion.div 
-        className="space-y-3"
-        initial={false}
-        animate={{
-          maxHeight: isOpen ? 1000 : 0,
-          opacity: isOpen ? 1 : 0,
-          marginTop: isOpen ? 12 : 0
-        }}
-        transition={{ 
-          duration: 0.4, 
-          ease: [0.23, 1, 0.32, 1]
-        }}
-      >
-        {isOpen && children}
-      </motion.div>
-    </motion.div>
+      <div className={`space-y-3 transition-all duration-300 ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+        {children}
+      </div>
+    </div>
   );
 };
 
+const QuestCard = ({ title, description, locked = false, onClick }: { title: string, description: string, locked?: boolean, onClick: () => void }) => (
+  <PremiumCard
+    variant="default"
+    className={`p-5 ${locked ? 'opacity-60' : ''}`}
+    interactive={!locked}
+    onClick={!locked ? onClick : undefined}
+  >
+    <div className="flex justify-between items-center mb-3">
+      <h3 className="text-base font-medium">{title}</h3>
+      {locked ? (
+        <span className="text-xs bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full text-white flex items-center gap-1 border border-white/5">
+          <Lock size={12} />
+          <span>Locked</span>
+        </span>
+      ) : (
+        <span className="text-xs bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full text-white border border-white/10">Active</span>
+      )}
+    </div>
+    <p className="text-sm text-white/80">{description}</p>
+    
+    {!locked && (
+      <button 
+        className="w-full mt-4 py-2.5 rounded-xl bg-white/10 backdrop-blur-xl hover:bg-white/15 text-white font-medium flex items-center justify-center gap-2 border border-white/10 transition-all"
+        onClick={onClick}
+      >
+        Start <ArrowRight size={16} />
+      </button>
+    )}
+    
+    {locked && (
+      <div className="absolute inset-0 backdrop-blur-sm bg-black/40 rounded-xl flex items-center justify-center">
+        <Lock className="text-white/30 text-4xl animate-pulse-slow" />
+      </div>
+    )}
+  </PremiumCard>
+);
+
 const MoodButton = ({ emoji, label, selected, onClick }: { emoji: string, label: string, selected?: boolean, onClick: () => void }) => (
   <PremiumCard
-    variant={selected ? "selected" : "frost"}
+    variant={selected ? "selected" : "default"}
     className="p-3 flex flex-col items-center"
     interactive={true}
     onClick={onClick}
-    glowEffect={selected}
   >
-    <motion.span 
-      className="text-2xl mb-1"
-      animate={{ scale: selected ? [1, 1.2, 1] : 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      {emoji}
-    </motion.span>
+    <span className="text-2xl mb-1">{emoji}</span>
     <span className="text-xs font-medium">{label}</span>
   </PremiumCard>
 );
 
 const ActionCard = ({ icon, label, onClick }: { icon: React.ReactNode, label: string, onClick: () => void }) => (
-  <GlassPane
-    variant="frost"
+  <PremiumCard
+    variant="default"
     className="p-4 flex flex-col items-center justify-center gap-2"
     interactive={true}
     onClick={onClick}
@@ -92,7 +104,7 @@ const ActionCard = ({ icon, label, onClick }: { icon: React.ReactNode, label: st
   >
     <div className="text-xl text-white">{icon}</div>
     <span className="text-xs font-medium text-white">{label}</span>
-  </GlassPane>
+  </PremiumCard>
 );
 
 const Home = () => {
@@ -158,7 +170,7 @@ const Home = () => {
   };
   
   return (
-    <div className="min-h-screen text-white overflow-y-auto">
+    <div className="min-h-screen pb-24 text-white">
       {showScanner && (
         <QRScanner 
           onClose={() => setShowScanner(false)} 
@@ -175,7 +187,7 @@ const Home = () => {
       )}
       
       <motion.div 
-        className="px-5 pt-6 pb-28 space-y-6"
+        className="px-5 pt-6 pb-24 space-y-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -189,31 +201,32 @@ const Home = () => {
           </div>
           
           <div className="flex items-center gap-3">
-            <GlassButton 
-              variant="secondary"
-              size="sm"
-              className="w-10 h-10 p-0 rounded-full flex items-center justify-center"
+            <button 
+              className="w-10 h-10 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 flex items-center justify-center transition-all duration-300 hover:bg-white/10 hover:border-white/15 active:scale-[0.95]"
               onClick={() => setShowCamera(true)}
             >
-              <Camera size={18} className="text-white" />
-            </GlassButton>
-            <GlassButton 
-              variant="secondary"
-              size="sm"
-              className="w-10 h-10 p-0 rounded-full flex items-center justify-center"
+              <Camera size={20} className="text-white" />
+            </button>
+            <button 
+              className="w-10 h-10 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 flex items-center justify-center transition-all duration-300 hover:bg-white/10 hover:border-white/15 active:scale-[0.95]"
               onClick={() => navigate("/profile")}
             >
-              <User size={18} className="text-white" />
-            </GlassButton>
+              <User size={20} className="text-white" />
+            </button>
           </div>
         </motion.div>
         
         <motion.div variants={itemVariants}>
-          <GlassInput 
-            icon={<Search size={18} />}
-            placeholder="Search for quests or tasks..." 
-            className="w-full h-11 bg-white/5"
-          />
+          <div className="relative">
+            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/50">
+              <Search size={18} />
+            </div>
+            <input 
+              type="text" 
+              placeholder="Search for quests or tasks..." 
+              className="w-full h-11 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full pl-11 pr-4 text-white placeholder:text-white/50 focus:outline-none focus:ring-1 focus:ring-white/20 focus:border-white/20 transition-all duration-300"
+            />
+          </div>
         </motion.div>
         
         <motion.div variants={itemVariants}>
@@ -226,54 +239,46 @@ const Home = () => {
               title="Track your time for 24 hours" 
               description="Document how you spend your day to identify time-wasting activities and opportunities for improvement."
               onClick={() => navigate("/quests")}
-              current={true}
             />
           </CollapsibleSection>
         </motion.div>
         
         <motion.div variants={itemVariants}>
-          <GlassCard
-            title="Progress"
-            headerClassName="px-1"
-            className="relative overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-gradient-to-tr from-black/40 to-transparent rounded-xl pointer-events-none" />
-            
-            <div className="flex justify-between items-center mb-3 relative z-10">
+          <PremiumCard className="p-4">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="text-lg font-semibold">Progress</h2>
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5 bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
+                <div className="flex items-center gap-1 bg-white/5 px-2 py-1 rounded-full border border-white/5">
                   <Star size={14} className="text-white/70" />
-                  <span className="text-xs text-white/70 font-medium">{streak} day streak</span>
+                  <span className="text-xs text-white/70">{streak} day streak</span>
                 </div>
-                <div className="flex items-center gap-1.5 bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
+                <div className="flex items-center gap-1 bg-white/5 px-2 py-1 rounded-full border border-white/5">
                   <Zap size={14} className="text-white/70" />
-                  <span className="text-xs text-white/70 font-medium">{xp} XP</span>
+                  <span className="text-xs text-white/70">{xp} XP</span>
                 </div>
               </div>
             </div>
             
-            <div className="space-y-2 relative z-10">
+            <div className="space-y-2">
               <div className="flex justify-between text-xs">
-                <span className="text-white/70 font-medium">Level {level}</span>
+                <span className="text-white/70">Level {level}</span>
                 <span className="text-white/70">{Math.floor(progress)}%</span>
               </div>
-              <Progress 
-                value={progress} 
-                className="h-3" 
-                indicatorClassName="bg-gradient-to-r from-white/40 via-white/30 to-white/20"
-                levelIndicator
-                glassMorphism
-                glowEffect
-              />
+              <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                <div 
+                  className="h-full bg-white/30 rounded-full"
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
               <div className="text-xs text-white/70 text-right">{1000 - (xp % 1000)} XP to Level {level + 1}</div>
             </div>
-          </GlassCard>
+          </PremiumCard>
         </motion.div>
         
         <motion.div variants={itemVariants}>
           <CollapsibleSection title="How do you feel today?" defaultOpen={true}>
             <div className="flex justify-end mb-2">
-              <span className="text-xs text-white/70 bg-white/5 px-2.5 py-1 rounded-full border border-white/5">Daily check-in</span>
+              <span className="text-xs text-white/70 bg-white/5 px-2 py-1 rounded-full border border-white/5">Daily check-in</span>
             </div>
             
             <div className="grid grid-cols-3 gap-3">
@@ -301,7 +306,7 @@ const Home = () => {
               <ActionCard 
                 icon={<Users size={20} />} 
                 label="Community" 
-                onClick={() => navigate("/social")} 
+                onClick={() => navigate("/community")} 
               />
               <ActionCard 
                 icon={<Camera size={20} />} 
@@ -323,6 +328,8 @@ const Home = () => {
           </CollapsibleSection>
         </motion.div>
       </motion.div>
+      
+      <TabNavigation />
     </div>
   );
 };

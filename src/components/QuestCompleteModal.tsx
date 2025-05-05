@@ -1,127 +1,134 @@
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { X, Upload, Camera, CheckCircle } from 'lucide-react';
-import { GlassButton } from '@/components/ui/glass';
-import { QuestCompletePhotoUpload } from '@/components/QuestCompletePhotoUpload';
-import { QuestCompleteModalProps } from '@/types/quest';
+import React, { useState } from "react";
+import { GlassCard } from "@/components/GlassCard";
+import { CheckCircle, Camera, Award, ArrowRight } from "lucide-react";
+import { useApp } from "@/context/AppContext";
+import { useToast } from "@/hooks/use-toast";
+import { QuestCompletePhotoUpload } from "./QuestCompletePhotoUpload";
 
-export const QuestCompleteModal: React.FC<QuestCompleteModalProps> = ({ 
-  onClose, 
-  onComplete, 
-  questId, 
-  requiresPhoto 
+interface QuestCompleteModalProps {
+  questId: string;
+  title: string;
+  xp: number;
+  requiresPhoto?: boolean;
+  onClose: () => void;
+  onComplete?: (photoUrl?: string) => void;
+}
+
+export const QuestCompleteModal: React.FC<QuestCompleteModalProps> = ({
+  questId,
+  title,
+  xp,
+  requiresPhoto = false,
+  onClose,
+  onComplete
 }) => {
-  const [showPhotoUpload, setShowPhotoUpload] = useState(false);
-  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState<string | undefined>();
-  const [isUploading, setIsUploading] = useState(false);
-  
-  const handleComplete = async () => {
-    await onComplete(uploadedPhotoUrl);
-  };
-  
-  const handlePhotoUpload = (url: string) => {
-    setUploadedPhotoUrl(url);
-    setShowPhotoUpload(false);
-  };
+  const { addXP, incrementStreak } = useApp();
+  const [stage, setStage] = useState<'initial' | 'photo' | 'complete'>(requiresPhoto ? 'photo' : 'initial');
+  const { toast } = useToast();
 
-  const modalVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 20
+  const handleComplete = () => {
+    // Add XP and increment streak
+    addXP(xp);
+    incrementStreak();
+    
+    // Show success message
+    toast({
+      title: "Quest Completed!",
+      description: `You earned ${xp} XP for completing "${title}"`,
+    });
+    
+    // If we were in the photo stage, update to complete
+    if (stage === 'photo') {
+      setStage('complete');
+    } else {
+      // Call the onComplete callback if provided
+      if (onComplete) {
+        onComplete();
       }
-    },
-    exit: {
-      opacity: 0,
-      y: 20,
-      transition: {
-        duration: 0.2
-      }
+      onClose();
     }
   };
   
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <motion.div 
-        className="relative bg-black/80 backdrop-blur-xl w-full max-w-md rounded-3xl p-6 border border-white/10 text-white shadow-2xl"
-        variants={modalVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-      >
-        <button 
-          className="absolute top-3 right-3 text-white/60 hover:text-white transition-colors"
-          onClick={onClose}
-        >
-          <X size={20} />
-        </button>
-        
-        <h2 className="text-2xl font-semibold mb-4">Complete Quest</h2>
-        <p className="text-white/80 mb-6">
-          {requiresPhoto ? 
-            "This quest requires photo verification. Upload a photo to complete it." :
-            "Are you sure you want to complete this quest?"
-          }
-        </p>
-        
-        {requiresPhoto && !showPhotoUpload && !uploadedPhotoUrl && (
-          <div className="flex flex-col items-center justify-center space-y-4">
-            <GlassButton
-              variant="secondary"
-              className="w-full"
-              onClick={() => setShowPhotoUpload(true)}
-            >
-              <Camera size={18} className="mr-2" />
-              Take Photo
-            </GlassButton>
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-sm">
+        {stage === 'initial' && (
+          <GlassCard variant="dark" className="relative p-4 rounded-2xl">
+            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 w-24 h-24 rounded-full bg-black flex items-center justify-center border-4 border-background">
+              <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+                <CheckCircle className="w-10 h-10 text-primary" />
+              </div>
+            </div>
             
-            <GlassButton
-              variant="secondary"
-              className="w-full"
-              onClick={() => setShowPhotoUpload(true)}
-            >
-              <Upload size={18} className="mr-2" />
-              Upload Photo
-            </GlassButton>
-          </div>
+            <div className="mt-14 text-center space-y-3">
+              <h2 className="text-xl font-medium">Quest Complete!</h2>
+              <p className="text-white/70">{title}</p>
+              
+              <div className="bg-secondary/30 p-3 rounded-lg flex items-center justify-center gap-2 mt-4">
+                <Award className="text-yellow-300" />
+                <span className="text-lg font-medium">{xp} XP Earned</span>
+              </div>
+              
+              {requiresPhoto ? (
+                <button
+                  onClick={() => setStage('photo')}
+                  className="w-full py-3 rounded-xl bg-white text-black flex items-center justify-center gap-2 mt-4 font-medium"
+                >
+                  <Camera size={18} />
+                  <span>Continue with Photo</span>
+                </button>
+              ) : (
+                <button
+                  onClick={handleComplete}
+                  className="w-full py-3 rounded-xl bg-white text-black flex items-center justify-center gap-2 mt-4 font-medium"
+                >
+                  <span>Claim Reward</span>
+                  <ArrowRight size={18} />
+                </button>
+              )}
+            </div>
+          </GlassCard>
         )}
         
-        {showPhotoUpload && (
+        {stage === 'photo' && (
           <QuestCompletePhotoUpload 
-            onPhotoUploaded={handlePhotoUpload}
-            onCancel={() => setShowPhotoUpload(false)}
-            isUploading={isUploading}
             questId={questId}
+            onSuccess={handleComplete}
+            onCancel={() => setStage('initial')}
           />
         )}
         
-        {uploadedPhotoUrl && (
-          <div className="mt-4">
-            <img 
-              src={uploadedPhotoUrl} 
-              alt="Uploaded quest proof" 
-              className="w-full rounded-xl shadow-md border border-white/10" 
-            />
-          </div>
+        {stage === 'complete' && (
+          <GlassCard variant="dark" className="relative p-4 rounded-2xl">
+            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 w-24 h-24 rounded-full bg-black flex items-center justify-center border-4 border-background">
+              <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+                <CheckCircle className="w-10 h-10 text-primary" />
+              </div>
+            </div>
+            
+            <div className="mt-14 text-center space-y-3">
+              <h2 className="text-xl font-medium">Verification Submitted!</h2>
+              <p className="text-white/70">
+                Your photo has been submitted for verification. You'll be notified once it's approved.
+              </p>
+              
+              <div className="bg-secondary/30 p-3 rounded-lg flex items-center justify-center gap-2 mt-4">
+                <Award className="text-yellow-300" />
+                <span className="text-lg font-medium">{xp} XP Earned</span>
+              </div>
+              
+              <button
+                onClick={onClose}
+                className="w-full py-3 rounded-xl bg-white text-black flex items-center justify-center gap-2 mt-4 font-medium"
+              >
+                <span>Continue</span>
+                <ArrowRight size={18} />
+              </button>
+            </div>
+          </GlassCard>
         )}
-        
-        <div className="mt-6 flex gap-3">
-          <GlassButton
-            variant="primary"
-            fullWidth
-            onClick={handleComplete}
-            disabled={requiresPhoto && !uploadedPhotoUrl}
-          >
-            <CheckCircle size={18} className="mr-2" />
-            Complete Quest
-          </GlassButton>
-        </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
