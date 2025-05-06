@@ -9,12 +9,10 @@ export const Logo: React.FC<LogoProps> = ({
   className = ""
 }) => {
   return (
-    <div className={`${className} relative flex items-center justify-center`}>
-      <img 
-        src="/lovable-uploads/6d4f6130-d1ed-446d-a625-8598edecee49.png" 
-        alt="Solivrah" 
-        className="w-[210px] object-contain filter blur-[0.3px]" 
-      />
+    <div className={`${className} flex items-center justify-center`}>
+      <div className="bg-black border border-white/80 rounded-md px-2 py-1">
+        <p className="text-white font-bold text-lg tracking-wider">SOLIVRAH</p>
+      </div>
     </div>
   );
 };
