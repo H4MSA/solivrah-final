@@ -19,10 +19,12 @@ export default {
 			}
 		},
 		extend: {
-			fontFamily: {
-				sans: ["Inter", "SF Pro Display", "system-ui", "sans-serif"],
-			},
 			colors: {
+				"solivrah-bg": "#0F0F0F",
+				"solivrah-button": "#2C2C2C",
+				"solivrah-button-start": "#373737",
+				"solivrah-button-end": "#212121",
+				"solivrah-border": "#464646",
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
@@ -158,6 +160,28 @@ export default {
 					'100%': {
 						transform: 'scale(1)'
 					}
+				},
+				'pulse-soft': {
+					'0%': {
+						opacity: '0.8'
+					},
+					'50%': {
+						opacity: '1'
+					},
+					'100%': {
+						opacity: '0.8'
+					}
+				},
+				'glow': {
+					'0%': {
+						boxShadow: '0 0 5px rgba(255, 255, 255, 0.1)'
+					},
+					'50%': {
+						boxShadow: '0 0 15px rgba(255, 255, 255, 0.2)'
+					},
+					'100%': {
+						boxShadow: '0 0 5px rgba(255, 255, 255, 0.1)'
+					}
 				}
 			},
 			animation: {
@@ -170,8 +194,19 @@ export default {
 				'pop-in': 'pop-in 0.5s forwards',
 				'blur-in': 'blur-in 0.5s ease-out',
 				'float': 'float 5s infinite ease-in-out',
-				'pulse': 'pulse 2s infinite ease-in-out'
-			}
+				'pulse': 'pulse 2s infinite ease-in-out',
+				'pulse-soft': 'pulse-soft 2.5s infinite ease-in-out',
+				'glow': 'glow 2s infinite ease-in-out'
+			},
+			backdropBlur: {
+				xs: '2px'
+			},
+			backgroundImage: {
+				'button-gradient': 'radial-gradient(206.3% 53.42% at 50% 50.94%, #373737 0%, #212121 100%)'
+			},
+			fontFamily: {
+				sans: ["Inter", "SF Pro Display", "system-ui", "sans-serif"],
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

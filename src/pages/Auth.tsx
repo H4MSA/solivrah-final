@@ -1,96 +1,72 @@
-import React, { useState } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
-import { AuthService } from "@/services/AuthService";
-import { Eye, EyeOff, Mail, Lock, ChevronLeft } from "lucide-react";
-import { GlassCard } from "@/components/GlassCard";
-import { motion, AnimatePresence } from "framer-motion";
-import { Logo } from "@/components/Logo";
-import { useToast } from "@/hooks/use-toast";
-import { useApp } from "@/context/AppContext";
 
-type AuthMode = "login" | "signup" | "reset";
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Logo } from "@/components/Logo";
+import { useApp } from "@/context/AppContext";
+import { motion } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
-  const [mode, setMode] = useState<AuthMode>("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
   const { setIsGuest } = useApp();
-  
-  // Get return URL from state or default to home
-  const returnUrl = (location.state as { returnUrl?: string })?.returnUrl || "/survey";
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSignup, setIsSignup] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleEmailAuth = async (e: React.FormEvent) => {
+  // Get the redirect URL from state, or default to "/home"
+  const returnUrl = location.state?.returnUrl || "/home";
+
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setLoading(true);
-    
+
     try {
-      // Input validation
-      if (!email.trim()) {
-        throw new Error("Email is required");
-      }
-      
-      if (mode !== "reset" && !password.trim()) {
-        throw new Error("Password is required");
-      }
-      
-      if (mode === "signup") {
-        // Signup checks
-        if (password.length < 6) {
-          throw new Error("Password must be at least 6 characters");
-        }
-        
-        if (password !== confirmPassword) {
-          throw new Error("Passwords do not match");
-        }
-        
-        await AuthService.signUp({ email, password });
-        toast({
-          title: "Account created successfully!",
-          description: "Welcome to your personal growth journey.",
+      if (isSignup) {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          }
         });
-        navigate("/survey");
-      } else if (mode === "login") {
-        // Login
-        await AuthService.signIn({ email, password });
+
+        if (error) {
+          throw error;
+        }
+
         toast({
-          title: "Welcome back!",
-          description: "You've successfully signed in.",
+          title: "Account created!",
+          description: "Check your email for the confirmation link.",
         });
-        navigate("/survey");
+
+        // Auto-login if email confirmation is disabled
+        if (data?.user && !data.user.email_confirmed_at) {
+          navigate("/home");
+        }
+
       } else {
-        // Password reset
-        await AuthService.resetPassword(email);
-        toast({
-          title: "Reset email sent",
-          description: "Check your inbox for instructions to reset your password.",
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
         });
-        setMode("login");
-      }
-    } catch (error) {
-      let message = "An unexpected error occurred";
-      
-      if (error instanceof Error) {
-        message = error.message;
-        
-        // Handle common Supabase error messages with more user-friendly language
-        if (message.includes("User already registered")) {
-          message = "This email is already registered. Please sign in instead.";
-        } else if (message.includes("Email not confirmed")) {
-          message = "Please verify your email before signing in.";
-        } else if (message.includes("Invalid login credentials")) {
-          message = "Incorrect email or password. Please try again.";
+
+        if (error) {
+          throw error;
         }
+
+        navigate(returnUrl);
       }
-      
+    } catch (error: any) {
+      setError(error.message || "An error occurred");
       toast({
         title: "Authentication error",
-        description: message,
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -98,392 +74,116 @@ const Auth = () => {
     }
   };
 
-  const handleGoogleAuth = async () => {
-    try {
-      setLoading(true);
-      await AuthService.signInWithOAuth("google");
-      // No toast needed, will redirect to callback
-    } catch (error) {
-      toast({
-        title: "Google sign-in failed",
-        description: error instanceof Error ? error.message : "Please try again later",
-        variant: "destructive",
-      });
-      setLoading(false);
-    }
-  };
-  
-  const handleGuestMode = () => {
+  const handleGuestLogin = () => {
     setIsGuest(true);
-    toast({
-      title: "Guest mode active",
-      description: "You can explore the app, but your data won't be saved.",
-    });
-    navigate("/survey");
-  };
-  
-  const formVariants = {
-    hidden: { opacity: 0, x: 20 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.3 } },
-    exit: { opacity: 0, x: -20, transition: { duration: 0.2 } }
+    navigate("/home");
   };
 
-  const renderForm = () => {
-    switch (mode) {
-      case "login":
-        return (
-          <motion.form 
-            key="login"
-            variants={formVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            onSubmit={handleEmailAuth}
-            className="space-y-4"
-          >
-            <h1 className="text-2xl font-bold text-white mb-1">Welcome Back</h1>
-            <p className="text-white/60 text-sm mb-4">Sign in to continue your journey</p>
-            
-            <div className="space-y-4">
-              <div>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 w-5 h-5" />
-                  <input
-                    type="email"
-                    placeholder="Email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3.5 bg-[#121212] border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                    autoComplete="email"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 w-5 h-5" />
-                  <input 
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-12 py-3.5 bg-[#121212] border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                    autoComplete="current-password"
-                  />
-                  <button 
-                    type="button"
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white"
-                    onClick={() => setShowPassword(!showPassword)}
-                    tabIndex={-1}
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-                <div className="flex justify-end mt-1">
-                  <button
-                    type="button"
-                    onClick={() => setMode("reset")}
-                    className="text-sm text-white/50 hover:text-white"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            <button
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-solivrah-bg px-6 py-12">
+      <motion.div 
+        className="w-full max-w-sm space-y-8"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="flex flex-col items-center justify-center">
+          <Logo className="h-40 w-auto" />
+          <h2 className="mt-6 text-center text-xl font-bold text-white">
+            {isSignup ? "Create your account" : "Sign in to your account"}
+          </h2>
+        </div>
+
+        {error && (
+          <div className="rounded-lg bg-red-500/10 border border-red-500/30 p-3 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+
+        <form className="mt-8 space-y-4" onSubmit={handleAuth}>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-1">
+              Email address
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="relative block w-full appearance-none rounded-md border border-[#464646] bg-[#222222] px-4 py-3 text-white focus:border-white focus:outline-none focus:ring-0"
+              placeholder="Email address"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-200 mb-1">
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete={isSignup ? "new-password" : "current-password"}
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="relative block w-full appearance-none rounded-md border border-[#464646] bg-[#222222] px-4 py-3 text-white focus:border-white focus:outline-none focus:ring-0"
+              placeholder="Password"
+            />
+          </div>
+
+          <div>
+            <motion.button
               type="submit"
+              whileTap={{ scale: 0.97 }}
+              className="group relative flex w-full justify-center rounded-xl border border-transparent bg-white px-4 py-3.5 text-black font-medium transition-all hover:bg-[#EEEEEE] active:scale-[0.98]"
               disabled={loading}
-              className="w-full py-3.5 bg-white text-black rounded-xl font-medium transition-all hover:bg-white/90 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? (
-                <span className="flex justify-center items-center">
-                  <span className="h-5 w-5 border-2 border-black/30 border-t-black rounded-full animate-spin mr-2"></span>
-                  Signing in...
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
                 </span>
               ) : (
-                "Sign In"
+                <span>
+                  {isSignup ? "Create Account" : "Sign In"}
+                </span>
               )}
-            </button>
-            
-            <div className="relative flex items-center py-2">
-              <div className="flex-grow border-t border-white/10"></div>
-              <span className="flex-shrink mx-3 text-white/40 text-sm">or continue with</span>
-              <div className="flex-grow border-t border-white/10"></div>
-            </div>
-            
-            <button
+            </motion.button>
+          </div>
+
+          <div className="flex items-center justify-center">
+            <motion.button
               type="button"
-              onClick={handleGoogleAuth}
-              disabled={loading}
-              className="w-full flex justify-center items-center gap-2 py-3.5 bg-[#121212] border border-white/10 hover:bg-[#222] text-white rounded-xl font-medium transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27c3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10c5.35 0 9.25-3.67 9.25-9.09c0-1.15-.15-1.81-.15-1.81Z"
-                />
-              </svg>
-              Google
-            </button>
-            
-            <button 
-              type="button"
-              onClick={handleGuestMode}
-              className="w-full bg-transparent hover:bg-white/5 text-white/70 py-3.5 rounded-xl font-medium transition-all"
+              whileTap={{ scale: 0.97 }}
+              className="text-sm text-gray-300 hover:text-white transition-colors"
+              onClick={handleGuestLogin}
             >
               Continue as Guest
-            </button>
-            
-            <div className="text-center">
-              <p className="text-white/50">
-                Don't have an account?{" "}
-                <button
-                  type="button"
-                  onClick={() => setMode("signup")}
-                  className="text-white hover:underline font-medium"
-                >
-                  Sign Up
-                </button>
-              </p>
-            </div>
-          </motion.form>
-        );
+            </motion.button>
+          </div>
+        </form>
 
-      case "signup":
-        return (
-          <motion.form
-            key="signup"
-            variants={formVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            onSubmit={handleEmailAuth}
-            className="space-y-4"
+        <div className="text-center mt-4">
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            className="text-sm text-white hover:underline transition-colors"
+            onClick={() => setIsSignup(!isSignup)}
           >
-            <div className="flex items-center mb-2">
-              <button
-                type="button"
-                onClick={() => setMode("login")}
-                className="p-1 -ml-1 rounded-full hover:bg-white/10"
-              >
-                <ChevronLeft className="w-5 h-5 text-white" />
-              </button>
-              <h1 className="text-2xl font-bold text-white ml-1">Create Account</h1>
-            </div>
-            <p className="text-white/60 text-sm mb-4">Start your personal growth journey today</p>
-            
-            <div className="space-y-4">
-              <div>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 w-5 h-5" />
-                  <input
-                    type="email"
-                    placeholder="Email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3.5 bg-[#121212] border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                    autoComplete="email"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 w-5 h-5" />
-                  <input 
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Create password (min 6 characters)"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-12 py-3.5 bg-[#121212] border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                    autoComplete="new-password"
-                  />
-                  <button 
-                    type="button"
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white"
-                    onClick={() => setShowPassword(!showPassword)}
-                    tabIndex={-1}
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-              </div>
-              
-              <div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 w-5 h-5" />
-                  <input 
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Confirm password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3.5 bg-[#121212] border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                    autoComplete="new-password"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <button
-              type="submit"
-              disabled={loading || !email || !password || !confirmPassword}
-              className="w-full py-3.5 bg-white text-black rounded-xl font-medium transition-all hover:bg-white/90 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <span className="flex justify-center items-center">
-                  <span className="h-5 w-5 border-2 border-black/30 border-t-black rounded-full animate-spin mr-2"></span>
-                  Creating account...
-                </span>
-              ) : (
-                "Create Account"
-              )}
-            </button>
-            
-            <div className="relative flex items-center py-2">
-              <div className="flex-grow border-t border-white/10"></div>
-              <span className="flex-shrink mx-3 text-white/40 text-sm">or sign up with</span>
-              <div className="flex-grow border-t border-white/10"></div>
-            </div>
-            
-            <button
-              type="button"
-              onClick={handleGoogleAuth}
-              disabled={loading}
-              className="w-full flex justify-center items-center gap-2 py-3.5 bg-[#121212] border border-white/10 hover:bg-[#222] text-white rounded-xl font-medium transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27c3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10c5.35 0 9.25-3.67 9.25-9.09c0-1.15-.15-1.81-.15-1.81Z"
-                />
-              </svg>
-              Google
-            </button>
-            
-            <div className="text-center">
-              <p className="text-white/50">
-                Already have an account?{" "}
-                <button
-                  type="button"
-                  onClick={() => setMode("login")}
-                  className="text-white hover:underline font-medium"
-                >
-                  Sign In
-                </button>
-              </p>
-            </div>
-          </motion.form>
-        );
-
-      case "reset":
-        return (
-          <motion.form
-            key="reset"
-            variants={formVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            onSubmit={handleEmailAuth}
-            className="space-y-4"
-          >
-            <div className="flex items-center mb-2">
-              <button
-                type="button"
-                onClick={() => setMode("login")}
-                className="p-1 -ml-1 rounded-full hover:bg-white/10"
-              >
-                <ChevronLeft className="w-5 h-5 text-white" />
-              </button>
-              <h1 className="text-2xl font-bold text-white ml-1">Reset Password</h1>
-            </div>
-            <p className="text-white/60 text-sm mb-4">Enter your email to receive reset instructions</p>
-            
-            <div className="space-y-4">
-              <div>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 w-5 h-5" />
-                  <input
-                    type="email"
-                    placeholder="Email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3.5 bg-[#121212] border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                    autoComplete="email"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <button
-              type="submit"
-              disabled={loading || !email}
-              className="w-full py-3.5 bg-white text-black rounded-xl font-medium transition-all hover:bg-white/90 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <span className="flex justify-center items-center">
-                  <span className="h-5 w-5 border-2 border-black/30 border-t-black rounded-full animate-spin mr-2"></span>
-                  Sending reset email...
-                </span>
-              ) : (
-                "Send Reset Instructions"
-              )}
-            </button>
-            
-            <div className="text-center">
-              <p className="text-white/50">
-                <button
-                  type="button"
-                  onClick={() => setMode("login")}
-                  className="text-white hover:underline font-medium"
-                >
-                  Back to Sign In
-                </button>
-              </p>
-            </div>
-          </motion.form>
-        );
-    }
-  };
-  
-  return (
-    <div className="min-h-screen flex flex-col p-6 relative">
-      {/* Enhanced Background with grid and gradient effects */}
-      <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-[#0A0A0A] bg-grid-white/[0.02]"></div>
-        <div className="absolute inset-0">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/[0.03] rounded-full blur-[100px] animate-float-slow"></div>
-          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-white/[0.04] rounded-full blur-[100px] animate-float-reverse"></div>
+            {isSignup ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
+          </motion.button>
         </div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:44px_44px]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000000_100%)] opacity-70"></div>
-      </div>
-      
-      {/* Logo */}
-      <div className="flex justify-center mb-4">
-        <Logo className="h-12" />
-      </div>
-      
-      {/* Auth container */}
-      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-md mx-auto">
-        <GlassCard 
-          variant="elevated" 
-          className="w-full p-6 md:p-8 backdrop-blur-xl bg-black/40 border border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.2)]"
-        >
-          <AnimatePresence mode="wait">
-            {renderForm()}
-          </AnimatePresence>
-        </GlassCard>
         
-        <div className="text-center mt-6">
-          <p className="text-white/50 text-xs">
-            By continuing, you agree to our{" "}
-            <Link to="#" className="text-white/70 hover:text-white underline">Terms of Service</Link>
-            {" "}and{" "}
-            <Link to="#" className="text-white/70 hover:text-white underline">Privacy Policy</Link>
-          </p>
+        <div className="text-[#999999] text-[9px] text-center mt-10">
+          © 2025 Solivrah. All rights reserved.
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

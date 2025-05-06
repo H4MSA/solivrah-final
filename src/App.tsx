@@ -117,6 +117,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
+  // Allow access if user is authenticated or is a guest
   if (!user && !isGuest) {
     // Save the attempted URL for redirecting after login
     const returnUrl = location.pathname !== "/auth" ? location.pathname : "/home";

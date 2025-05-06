@@ -1,138 +1,151 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { Session, User } from '@supabase/supabase-js';
+import { useToast } from '@/hooks/use-toast';
 
-export interface AppContextType {
-  user: User | null;
-  setUser: (user: User | null) => void;
-  session: Session | null;
-  setSession: (session: Session | null) => void;
+interface AppContextType {
   selectedTheme: string;
   setSelectedTheme: (theme: string) => void;
+  user: User | null;
+  session: Session | null;
+  setUser: (user: User | null) => void;
+  setSession: (session: Session | null) => void;
+  loading: boolean;
+  isGuest: boolean;
+  setIsGuest: (isGuest: boolean) => void;
   signOut: () => Promise<void>;
   streak: number;
   xp: number;
   completedQuests: number;
   addXP: (amount: number) => void;
-  resetProgress: () => Promise<void>;
   incrementStreak: () => void;
-  loading: boolean;
-  isGuest: boolean;
-  setIsGuest: (isGuest: boolean) => void;
+  resetProgress: () => void;
 }
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
+const AppContext = createContext<AppContextType>({
+  selectedTheme: 'Focus',
+  setSelectedTheme: () => {},
+  user: null,
+  session: null,
+  setUser: () => {},
+  setSession: () => {},
+  loading: true,
+  isGuest: false,
+  setIsGuest: () => {},
+  signOut: async () => {},
+  streak: 0,
+  xp: 0,
+  completedQuests: 0,
+  addXP: () => {},
+  incrementStreak: () => {},
+  resetProgress: () => {}
+});
 
-export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const useApp = () => useContext(AppContext);
+
+export const AppProvider = ({ children }: { children: ReactNode }) => {
+  const [selectedTheme, setSelectedTheme] = useState<string>('Focus');
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [selectedTheme, setSelectedTheme] = useState<string>('Focus');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isGuest, setIsGuest] = useState<boolean>(false);
+  const { toast } = useToast();
+  
+  // User stats
   const [streak, setStreak] = useState<number>(0);
   const [xp, setXP] = useState<number>(0);
   const [completedQuests, setCompletedQuests] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [isGuest, setIsGuest] = useState<boolean>(false);
 
   useEffect(() => {
-    // Load user data from localStorage if not in user state
-    const getUser = async () => {
-      try {
-        setLoading(true);
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
-
-        // If user exists, load their data
-        if (user) {
-          // In a real app, we would load the user's data from the database
-          // For now, we'll use some placeholder data
-          setStreak(Math.floor(Math.random() * 30));
-          setXP(Math.floor(Math.random() * 5000));
-          setCompletedQuests(Math.floor(Math.random() * 10));
-          
-          // Try to load theme preference from localStorage
-          const savedTheme = localStorage.getItem(`${user.id}_theme`);
-          if (savedTheme) {
-            setSelectedTheme(savedTheme);
-          }
-        }
-      } catch (error) {
-        console.error('Error loading user:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getUser();
+    // Load user stats from localStorage
+    const savedStreak = localStorage.getItem('userStreak');
+    const savedXP = localStorage.getItem('userXP');
+    const savedQuests = localStorage.getItem('completedQuests');
+    const savedTheme = localStorage.getItem('selectedTheme');
+    const guestStatus = localStorage.getItem('isGuest');
+    
+    if (savedStreak) setStreak(parseInt(savedStreak));
+    if (savedXP) setXP(parseInt(savedXP));
+    if (savedQuests) setCompletedQuests(parseInt(savedQuests));
+    if (savedTheme) setSelectedTheme(savedTheme);
+    if (guestStatus) setIsGuest(guestStatus === 'true');
+    
+    setLoading(false);
   }, []);
 
-  // Save theme preference when it changes
+  // Save user stats to localStorage whenever they change
   useEffect(() => {
-    if (user) {
-      localStorage.setItem(`${user.id}_theme`, selectedTheme);
-    }
-  }, [selectedTheme, user]);
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setIsGuest(false);
-    setStreak(0);
-    setXP(0);
-    setCompletedQuests(0);
-  };
+    localStorage.setItem('userStreak', streak.toString());
+    localStorage.setItem('userXP', xp.toString());
+    localStorage.setItem('completedQuests', completedQuests.toString());
+    localStorage.setItem('selectedTheme', selectedTheme);
+    localStorage.setItem('isGuest', isGuest.toString());
+  }, [streak, xp, completedQuests, selectedTheme, isGuest]);
 
   const addXP = (amount: number) => {
-    setXP(prevXP => prevXP + amount);
+    setXP(prev => prev + amount);
+    toast({
+      title: `+${amount} XP`,
+      description: "Experience points added!",
+      duration: 3000
+    });
   };
 
   const incrementStreak = () => {
-    setStreak(prevStreak => prevStreak + 1);
+    setStreak(prev => prev + 1);
+    toast({
+      title: "Streak Increased!",
+      description: `You're on a ${streak + 1} day streak!`,
+      duration: 3000
+    });
   };
 
-  const resetProgress = async () => {
-    // In a real app, we would reset the user's data in the database
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        setStreak(0);
-        setXP(0);
-        setCompletedQuests(0);
-        resolve();
-      }, 1000);
+  const resetProgress = () => {
+    setStreak(0);
+    setXP(0);
+    setCompletedQuests(0);
+    localStorage.removeItem('userStreak');
+    localStorage.removeItem('userXP');
+    localStorage.removeItem('completedQuests');
+    toast({
+      title: "Progress Reset",
+      description: "All progress has been reset",
+      duration: 3000
     });
+  };
+
+  const signOut = async () => {
+    if (isGuest) {
+      setIsGuest(false);
+    } else {
+      await supabase.auth.signOut();
+    }
+    localStorage.removeItem('isGuest');
   };
 
   return (
     <AppContext.Provider
       value={{
-        user,
-        setUser,
-        session,
-        setSession,
         selectedTheme,
         setSelectedTheme,
+        user,
+        session,
+        setUser,
+        setSession,
+        loading,
+        isGuest,
+        setIsGuest,
         signOut,
         streak,
         xp,
         completedQuests,
         addXP,
-        resetProgress,
         incrementStreak,
-        loading,
-        isGuest,
-        setIsGuest,
+        resetProgress
       }}
     >
       {children}
     </AppContext.Provider>
   );
-};
-
-export const useApp = () => {
-  const context = useContext(AppContext);
-  if (context === undefined) {
-    throw new Error('useApp must be used within an AppProvider');
-  }
-  return context;
 };
