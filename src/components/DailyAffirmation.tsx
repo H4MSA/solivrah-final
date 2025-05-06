@@ -2,32 +2,18 @@
 import React, { useState, useEffect } from "react";
 import { Quote, RefreshCw } from "lucide-react";
 import { useApp } from "@/context/AppContext";
-
-const affirmations = [
-  "I am capable of creating positive change in my life.",
-  "My potential to succeed is limitless.",
-  "Today, I choose progress over perfection.",
-  "I have the power to overcome any obstacle.",
-  "Every challenge helps me grow stronger.",
-  "I embrace the journey of self-improvement.",
-  "Each small step forward is meaningful.",
-  "My discipline creates freedom in my life.",
-  "I celebrate my progress, no matter how small.",
-  "I am worthy of success and happiness.",
-  "My focus determines my reality.",
-  "I trust in my ability to figure things out.",
-  "Today's efforts create tomorrow's achievements.",
-  "I am becoming better every day.",
-  "My resilience is stronger than any setback."
-];
+import { AIService } from "@/services/AIService";
 
 export const DailyAffirmation = () => {
-  const { selectedTheme } = useApp();
+  const { selectedTheme, user } = useApp();
   const [affirmation, setAffirmation] = useState<string>("");
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
+  
+  const aiService = new AIService();
   
   useEffect(() => {
-    // Get a random affirmation or use stored one
+    // Get a personalized affirmation or use stored one
     const storedAffirmation = localStorage.getItem("dailyAffirmation");
     const storedDate = localStorage.getItem("affirmationDate");
     const today = new Date().toDateString();
@@ -37,22 +23,45 @@ export const DailyAffirmation = () => {
     } else {
       getNewAffirmation();
     }
-  }, []);
+  }, [selectedTheme]);
   
-  const getNewAffirmation = () => {
+  const getNewAffirmation = async () => {
     setRefreshing(true);
-    const randomIndex = Math.floor(Math.random() * affirmations.length);
-    const newAffirmation = affirmations[randomIndex];
+    setError(false);
     
-    // Save to localStorage
-    localStorage.setItem("dailyAffirmation", newAffirmation);
-    localStorage.setItem("affirmationDate", new Date().toDateString());
-    
-    // Fade effect
-    setTimeout(() => {
+    try {
+      // Get user's information for personalization
+      const username = user?.user_metadata?.username || user?.email?.split('@')[0] || "";
+      
+      // Use AI service to generate personalized affirmation
+      const newAffirmation = await aiService.generateDailyAffirmation(
+        selectedTheme,
+        username
+      );
+      
+      // Save to localStorage
+      localStorage.setItem("dailyAffirmation", newAffirmation);
+      localStorage.setItem("affirmationDate", new Date().toDateString());
+      
+      // Update state
       setAffirmation(newAffirmation);
+    } catch (err) {
+      console.error("Failed to generate affirmation:", err);
+      setError(true);
+      
+      // Fallback to default affirmation if API call fails
+      const fallbacks = [
+        "I am capable of creating positive change in my life.",
+        "My potential to succeed is limitless.",
+        "Today, I choose progress over perfection.",
+        "I have the power to overcome any obstacle.",
+        "Every challenge helps me grow stronger.",
+      ];
+      const randomIndex = Math.floor(Math.random() * fallbacks.length);
+      setAffirmation(fallbacks[randomIndex]);
+    } finally {
       setRefreshing(false);
-    }, 300);
+    }
   };
   
   return (
@@ -69,6 +78,9 @@ export const DailyAffirmation = () => {
         <p className={`text-white text-base font-medium ${refreshing ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}>
           {affirmation}
         </p>
+        {error && !refreshing && (
+          <p className="text-xs text-white/50 mt-1">Offline mode</p>
+        )}
       </div>
       
       <button 

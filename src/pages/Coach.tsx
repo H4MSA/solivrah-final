@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { Send, User, Smile, Meh, Frown, ChevronDown, ChevronUp } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
+import { AIService } from "@/services/AIService";
+import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 
 interface Message {
@@ -23,19 +25,64 @@ const Coach = () => {
   const [selectedMood, setSelectedMood] = useState<string>("neutral");
   const [showMoodSelector, setShowMoodSelector] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+  const aiService = new AIService();
+
+  useEffect(() => {
+    scrollToBottom();
+    
+    // Load chat history if the user is logged in
+    if (user?.id) {
+      loadChatHistory();
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
+  const loadChatHistory = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('chat_history')
+        .select('message, response, timestamp')
+        .eq('user_id', user?.id)
+        .order('timestamp', { ascending: false })
+        .limit(5);
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        // Transform to our message format and add to state (oldest first)
+        const historicalMessages: Message[] = [];
+        data.reverse().forEach(item => {
+          historicalMessages.push({ sender: "user", text: item.message });
+          historicalMessages.push({ sender: "ai", text: item.response });
+        });
+        
+        setMessages(prev => [
+          prev[0], // Keep the greeting
+          ...historicalMessages
+        ]);
+      }
+    } catch (error) {
+      console.error("Failed to load chat history:", error);
+    }
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const generateSystemPrompt = () => {
-    return `You are an AI life coach specializing in ${selectedTheme || 'personal development'}. 
-    Your responses should be encouraging, practical, and tailored to the user's needs.
-    Keep responses concise and actionable.`;
+  const getConversationHistory = (): string => {
+    // Get the last 5 message pairs to provide as context
+    const contextMessages = messages
+      .filter(m => !m.error)
+      .slice(-10)
+      .map(m => `${m.sender === "user" ? "User" : "Coach"}: ${m.text}`)
+      .join("\n");
+    
+    return contextMessages;
   };
 
   const handleSend = async () => {
@@ -47,38 +94,49 @@ const Coach = () => {
     setIsLoading(true);
 
     try {
-      const messages = [{
-        role: "system",
-        content: generateSystemPrompt()
-      }, {
-        role: "user",
-        content: input
-      }];
+      // Get user profile data for context
+      const { data: profileData } = user?.id ? await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle() : { data: null };
+        
+      const userProfile = {
+        theme: selectedTheme,
+        ...(profileData || {})
+      };
+      
+      // Get conversation history for context
+      const conversationContext = getConversationHistory();
+      
+      // Call AI service for coaching response
+      const aiResponse = await aiService.generateCoachingReply(
+        input,
+        selectedMood,
+        conversationContext,
+        userProfile
+      );
 
-      const response = await fetch('http://0.0.0.0:5000/assistant', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          userId: user?.id || 'anonymous',
-          message: input,
-          mood: selectedMood || 'neutral'
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const aiResponse = data.choices[0].message.content;
-
-      const aiMessage: Message = { sender: "ai", text: aiResponse };
+      // Add AI response to messages
+      const aiMessage: Message = { 
+        sender: "ai", 
+        text: aiResponse,
+        timestamp: new Date().toISOString()
+      };
       setMessages(prev => [...prev, aiMessage]);
 
-      if (user) {
+      // Save to database if user is logged in
+      if (user?.id) {
         await saveMessageToSupabase(input, aiResponse);
+      }
+      
+      // Show toast on insightful responses (randomly, to avoid too many notifications)
+      if (Math.random() > 0.7) {
+        toast({
+          title: "Coach insight",
+          description: "Your coach has provided a valuable insight",
+          duration: 3000,
+        });
       }
     } catch (error) {
       console.error("Error getting AI response:", error);
@@ -224,7 +282,7 @@ const Coach = () => {
                     : "border-white/5"
               }`}
             >
-              <p className="text-sm leading-relaxed">{message.text}</p>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
             </div>
           ))}
 

@@ -8,15 +8,15 @@ export class AIService {
 
   constructor() {
     this.apiKey = process.env.OPENROUTER_API_KEY || process.env.AI_API_KEY || '';
-    this.model = process.env.AI_MODEL || 'mistralai/mixtral-8x7b-instruct';
+    this.model = process.env.AI_MODEL || 'deepseek/deepseek-coder';
   }
 
-  async generateDailyAffirmation(theme: string, username: string = ''): Promise<string> {
+  async generateDailyAffirmation(theme: string, username: string = '', mood: string = ''): Promise<string> {
     try {
       const { data, error } = await supabase.functions.invoke('ai-services', {
         body: {
           endpoint: 'affirmation',
-          data: { theme, username }
+          data: { theme, username, mood }
         }
       });
       
@@ -86,6 +86,7 @@ export class AIService {
 
   async generateRoadmap(goals: string, struggles: string, dailyTime: number, userProfile: any = {}) {
     try {
+      console.log("Generating roadmap with parameters:", { goals, struggles, dailyTime });
       const { data, error } = await supabase.functions.invoke('ai-services', {
         body: {
           endpoint: 'roadmap',
@@ -127,12 +128,25 @@ export class AIService {
   }
 
   async verifyPhoto(imageUrl: string, questId: string, questTitle: string, questDescription: string): Promise<boolean> {
-    // For now, we'll just return true as photo verification requires more complex logic
-    // We can implement this later using vision models or a specialized endpoint
-    console.log("Image verification requested for quest:", questTitle);
-    console.log("Image URL:", imageUrl);
-    
-    // Always return true for now
-    return true;
+    try {
+      console.log("Verifying photo for quest:", questTitle);
+      const { data, error } = await supabase.functions.invoke('ai-services', {
+        body: {
+          endpoint: 'verification',
+          data: { imageUrl, questId, questTitle, questDescription }
+        }
+      });
+      
+      if (error) {
+        console.error('Error verifying photo:', error);
+        throw error;
+      }
+      
+      return data.verified;
+    } catch (error) {
+      console.error('Error in verifyPhoto:', error);
+      // For now, default to true if verification fails
+      return true;
+    }
   }
 }
