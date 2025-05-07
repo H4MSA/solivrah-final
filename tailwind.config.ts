@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -20,11 +19,15 @@ export default {
 		},
 		extend: {
 			colors: {
-				"solivrah-bg": "#0F0F0F",
-				"solivrah-button": "#2C2C2C",
-				"solivrah-button-start": "#373737",
-				"solivrah-button-end": "#212121",
-				"solivrah-border": "#464646",
+				"solivrah-bg": "#0A0A0A",
+				"solivrah-card": "#151515",
+				"solivrah-card-hover": "#1A1A1A",
+				"solivrah-button": "#222222",
+				"solivrah-button-hover": "#2A2A2A",
+				"solivrah-border": "#333333",
+				"solivrah-border-hover": "#444444",
+				"solivrah-text": "#FFFFFF",
+				"solivrah-text-muted": "#999999",
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
@@ -64,6 +67,10 @@ export default {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			fontFamily: {
+				sans: ["Poppins", "system-ui", "sans-serif"],
+				poppins: ["Poppins", "sans-serif"],
 			},
 			keyframes: {
 				'accordion-down': {
@@ -182,7 +189,29 @@ export default {
 					'100%': {
 						boxShadow: '0 0 5px rgba(255, 255, 255, 0.1)'
 					}
-				}
+				},
+				'float-3d': {
+					'0%': { transform: 'translateY(0) translateZ(0) rotateX(0deg) rotateY(0deg)' },
+					'50%': { transform: 'translateY(-5px) translateZ(5px) rotateX(2deg) rotateY(-2deg)' },
+					'100%': { transform: 'translateY(0) translateZ(0) rotateX(0deg) rotateY(0deg)' },
+				},
+				'pulse-subtle': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.85' },
+				},
+				'shimmer': {
+					'0%': { backgroundPosition: '-200% 0' },
+					'100%': { backgroundPosition: '200% 0' },
+				},
+				'gradient-shift': {
+					'0%': { backgroundPosition: '0% 50%' },
+					'50%': { backgroundPosition: '100% 50%' },
+					'100%': { backgroundPosition: '0% 50%' },
+				},
+				'card-hover': {
+					'0%': { transform: 'translateY(0) scale(1)' },
+					'100%': { transform: 'translateY(-5px) scale(1.01)' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -196,17 +225,32 @@ export default {
 				'float': 'float 5s infinite ease-in-out',
 				'pulse': 'pulse 2s infinite ease-in-out',
 				'pulse-soft': 'pulse-soft 2.5s infinite ease-in-out',
-				'glow': 'glow 2s infinite ease-in-out'
+				'glow': 'glow 2s infinite ease-in-out',
+				'float-3d': 'float-3d 6s ease-in-out infinite',
+				'pulse-subtle': 'pulse-subtle 3s ease-in-out infinite',
+				'shimmer': 'shimmer 3s linear infinite',
+				'gradient-shift': 'gradient-shift 6s ease infinite',
+				'card-hover': 'card-hover 0.3s forwards',
 			},
 			backdropBlur: {
 				xs: '2px'
 			},
 			backgroundImage: {
-				'button-gradient': 'radial-gradient(206.3% 53.42% at 50% 50.94%, #373737 0%, #212121 100%)'
+				'button-gradient': 'linear-gradient(180deg, #2A2A2A 0%, #1A1A1A 100%)',
+				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+				'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+				'dark-gradient': 'linear-gradient(180deg, #0A0A0A 0%, #121212 100%)',
+				'glass-gradient': 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
+				'card-gradient': 'linear-gradient(135deg, #181818 0%, #101010 100%)',
 			},
-			fontFamily: {
-				sans: ["Inter", "SF Pro Display", "system-ui", "sans-serif"],
-			},
+			boxShadow: {
+				'glass': '0 4px 20px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.05)',
+				'glass-hover': '0 8px 30px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.07)',
+				'premium': '0 10px 25px -3px rgba(0,0,0,0.3), 0 1px 10px -2px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.05)',
+				'card-3d': '0 20px 40px -15px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.07)',
+				'button': '0 2px 5px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.05)',
+				'button-hover': '0 4px 10px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1)',
+			}
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

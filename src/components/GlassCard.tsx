@@ -7,7 +7,7 @@ import { motion, HTMLMotionProps } from "framer-motion";
 interface GlassCardProps extends Omit<HTMLMotionProps<"div">, "animate"> {
   children: React.ReactNode;
   className?: string;
-  variant?: "default" | "elevated" | "subtle" | "primary" | "interactive" | "dark" | "theme" | "ultra-glass";
+  variant?: "default" | "elevated" | "subtle" | "primary" | "interactive" | "dark" | "theme" | "premium" | "ultra-glass";
   animate?: "fade" | "pop" | "blur" | "none";
   interactive?: boolean;
   depth?: "low" | "medium" | "high";
@@ -57,12 +57,10 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   };
 
   const getDepthStyle = () => {
-    const baseStyle = "0 4px 16px rgba(0,0,0,0.2)";
-    
     switch (depth) {
-      case "low": return "0 2px 10px rgba(0,0,0,0.15)";
-      case "high": return "0 8px 30px rgba(0,0,0,0.3)";
-      default: return baseStyle;
+      case "low": return "0 4px 15px rgba(0,0,0,0.15), 0 1px 5px rgba(0,0,0,0.1)";
+      case "high": return "0 20px 40px rgba(0,0,0,0.3), 0 10px 15px rgba(0,0,0,0.2)";
+      default: return "0 10px 25px rgba(0,0,0,0.2), 0 4px 10px rgba(0,0,0,0.1)";
     }
   };
 
@@ -84,7 +82,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
     animate: {
       y: isHovered ? -4 : 0,
       boxShadow: isHovered 
-        ? `0 20px 25px rgba(0, 0, 0, 0.25)` 
+        ? `0 20px 40px rgba(0, 0, 0, 0.3), 0 8px 15px rgba(0, 0, 0, 0.15)` 
         : getDepthStyle()
     },
     transition: { 
@@ -94,18 +92,27 @@ export const GlassCard: React.FC<GlassCardProps> = ({
     }
   };
 
+  const getBgClass = () => {
+    switch (variant) {
+      case "default": return "bg-black/50";
+      case "elevated": return "bg-black/30 border-white/20";
+      case "subtle": return "bg-black/20 border-white/5";
+      case "primary": return "bg-gradient-to-b from-white/95 to-white/90 text-black border-transparent";
+      case "interactive": return "bg-black/40 hover:bg-black/30";
+      case "dark": return "bg-[#0A0A0A]/95";
+      case "theme": return "bg-black/40";
+      case "premium": return "bg-gradient-to-br from-[#1A1A1A] to-[#101010]";
+      case "ultra-glass": return "bg-black/30 backdrop-blur-2xl border-white/20";
+      default: return "bg-black/50";
+    }
+  };
+
   return (
     <motion.div 
       className={cn(
-        "relative backdrop-blur-xl border rounded-xl transition-all duration-300 transform-gpu will-change-transform shadow-lg overflow-hidden",
-        variant === "default" && "bg-black/50 border-white/10 text-white",
-        variant === "elevated" && "bg-black/30 border-white/20 text-white shadow-xl",
-        variant === "subtle" && "bg-black/20 border-white/5 text-white",
-        variant === "primary" && "bg-gradient-to-b from-white/95 to-white/90 text-black border-transparent",
-        variant === "interactive" && "bg-black/40 border-white/10 hover:bg-black/30 hover:border-white/20 cursor-pointer active:scale-[0.98]",
-        variant === "dark" && "bg-[#121212]/95 border-white/10 hover:border-white/20",
-        variant === "theme" && "bg-black/40 border-white/10 hover:border-white/20",
-        variant === "ultra-glass" && "bg-black/30 backdrop-blur-2xl border-white/20 shadow-2xl",
+        "relative backdrop-blur-xl border rounded-xl transition-all duration-300 transform-gpu will-change-transform overflow-hidden",
+        getBgClass(),
+        "border-white/10",
         interactive && "cursor-pointer active:scale-[0.98]",
         isPressed && "scale-[0.98]",
         getAnimationClass(),
@@ -120,11 +127,20 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       onMouseLeave={handleMouseLeave}
       {...props}
     >
-      {children}
+      <div className="relative z-10">
+        {children}
+      </div>
+      
+      {/* Glass effect lighting */}
       <div className="absolute inset-0 rounded-xl bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
+      
+      {/* 3D highlight effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-50 rounded-xl pointer-events-none" />
+      
       {variant === "ultra-glass" && (
         <div className="absolute inset-0 rounded-xl overflow-hidden">
-          <div className="absolute -inset-[100%] opacity-[0.02] bg-[radial-gradient(circle_at_50%_50%,white,transparent_60%)]" />
+          <div className="absolute -inset-[100%] opacity-[0.03] bg-[radial-gradient(circle_at_50%_50%,white,transparent_60%)]" />
+          <div className="absolute inset-0 backdrop-blur-2xl" />
         </div>
       )}
     </motion.div>

@@ -2,29 +2,26 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
-
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[8px] text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-        neumorphic: "bg-[#111] text-white shadow-[5px_5px_10px_rgba(0,0,0,0.5),-5px_-5px_10px_rgba(255,255,255,0.05)]",
+        default: "bg-white text-black hover:bg-white/90 shadow-lg",
+        destructive: "bg-red-500/90 text-white hover:bg-red-500/80 shadow-md",
+        outline: "border border-white/20 bg-black/20 hover:bg-black/30 hover:border-white/30 text-white backdrop-blur-md",
+        secondary: "bg-solivrah-button text-white hover:bg-solivrah-button-hover shadow-md border border-white/5",
+        ghost: "hover:bg-white/5 text-white",
+        link: "text-white underline-offset-4 hover:underline",
+        neumorphic: "bg-gradient-to-b from-solivrah-button-start to-solivrah-button-end text-white border border-white/5 shadow-lg hover:shadow-xl",
+        premium: "bg-gradient-to-b from-[#1A1A1A] to-[#0A0A0A] text-white border border-white/10 shadow-button hover:shadow-button-hover",
       },
       size: {
-        default: "h-12 px-4 py-2", // Standardized to 48px height
-        sm: "h-9 rounded-[8px] px-3",
-        lg: "h-12 rounded-[8px] px-8", // Also 48px height
+        default: "h-12 px-4 py-2",
+        sm: "h-9 rounded-lg px-3",
+        lg: "h-12 rounded-xl px-8",
         icon: "h-10 w-10",
       },
     },
