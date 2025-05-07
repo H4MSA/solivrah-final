@@ -7,8 +7,8 @@ export class AIService {
   private model: string;
 
   constructor() {
-    this.apiKey = process.env.OPENROUTER_API_KEY || process.env.AI_API_KEY || '';
-    this.model = process.env.AI_MODEL || 'deepseek/deepseek-coder';
+    this.apiKey = import.meta.env.VITE_OPENROUTER_API_KEY || '';
+    this.model = import.meta.env.VITE_AI_MODEL || 'deepseek/deepseek-coder';
   }
 
   async generateDailyAffirmation(theme: string, username: string = '', mood: string = ''): Promise<string> {
