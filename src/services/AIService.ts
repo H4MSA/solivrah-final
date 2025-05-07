@@ -29,16 +29,19 @@ export class AIService {
     } catch (error) {
       console.error('Error in generateDailyAffirmation:', error);
       // Provide a fallback affirmation if API call fails
-      return `Today I am focused on my ${theme} journey, taking one step at a time toward my goals.`;
+      return `Today I embrace growth and progress on my ${theme} journey.`;
     }
   }
 
   async generateCoachingReply(message: string, mood: string, context: string, userProfile: any = {}) {
     try {
+      // Check if it's a simple question to potentially optimize response
+      const isSimpleQuestion = message.trim().length < 20;
+      
       const { data, error } = await supabase.functions.invoke('ai-services', {
         body: {
           endpoint: 'coaching',
-          data: { message, mood, context, userProfile }
+          data: { message, mood, context, userProfile, isSimpleQuestion }
         }
       });
       
@@ -57,6 +60,7 @@ export class AIService {
   async generateChatbotReply(message: string, personality: 'playful' | 'professional', history: string, userProfile: any = {}) {
     // This can use the coaching endpoint with slightly modified parameters
     try {
+      const isSimpleQuestion = message.trim().length < 20;
       const tone = personality === 'playful' ? 
         'Be friendly, witty and casual in your responses' : 
         'Maintain a professional, structured and supportive tone';
@@ -67,7 +71,8 @@ export class AIService {
           data: { 
             message, 
             context: `Tone: ${tone}. History: ${history}`, 
-            userProfile 
+            userProfile,
+            isSimpleQuestion
           }
         }
       });

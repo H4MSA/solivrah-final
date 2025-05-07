@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
@@ -103,6 +102,10 @@ async function callOpenRouter(apiKey: string, messages: OpenRouterMessage[], mod
 async function handleCoaching(apiKey: string, data: any, corsHeaders: HeadersInit): Promise<Response> {
   const { message, mood, context, userProfile } = data;
   
+  // Analyze message length to determine response type
+  const isSimpleQuestion = message.trim().length < 15 || 
+                          /^(what|who|when|where|why|how|is|are|do|can|could|will|would)\s.{1,30}\??$/i.test(message);
+  
   const userTheme = userProfile?.theme || 'general personal development';
   const userProgress = userProfile?.xp ? `Current progress: ${userProfile.xp} XP earned, ${userProfile.streak || 0} day streak.` : '';
   
@@ -114,13 +117,19 @@ async function handleCoaching(apiKey: string, data: any, corsHeaders: HeadersIni
       ${userProgress}
       Previous conversation context: ${context || 'This is a new conversation'}
       
-      Respond with empathy and practical guidance. Be concise, conversational, and motivational.
-      Focus on actionable advice that helps the user grow. Maintain an encouraging tone.`
+      RESPONSE LENGTH INSTRUCTIONS:
+      - For simple questions (who, what, when, where, why, how) or short queries, provide brief 1-2 sentence answers.
+      - For deeper questions about personal development, provide more detailed guidance but still be concise.
+      - Always prioritize quality advice over length.
+      
+      Your tone should be friendly, motivational, and supportive. Use simple language and focus on actionable advice.`
     },
     { role: 'user', content: message }
   ];
 
-  const reply = await callOpenRouter(apiKey, messages, 'deepseek/deepseek-coder', 0.7, 800);
+  // Adjust token limit based on question complexity
+  const maxTokens = isSimpleQuestion ? 200 : 800;
+  const reply = await callOpenRouter(apiKey, messages, 'deepseek/deepseek-coder', 0.7, maxTokens);
   
   return new Response(
     JSON.stringify({ reply }),
@@ -215,15 +224,16 @@ async function handleAffirmationGeneration(apiKey: string, data: any, corsHeader
   const messages: OpenRouterMessage[] = [
     { 
       role: 'system', 
-      content: 'You are an inspiring personal development coach. Generate a short, powerful daily affirmation that is motivating and positive. Keep it concise (1-2 sentences maximum) and directly applicable.' 
+      content: 'You are an inspiring personal development coach. Generate a short, powerful daily affirmation that is motivating and positive. KEEP IT VERY CONCISE - ONE SHORT SENTENCE ONLY. Make it impactful and memorable.' 
     },
     { 
       role: 'user', 
-      content: `Create a daily affirmation ${userContext} focused on the theme: ${theme} ${moodContext}. Make it personal, uplifting, and actionable.` 
+      content: `Create a daily affirmation ${userContext} focused on the theme: ${theme} ${moodContext}. Make it personal, uplifting, and actionable. IMPORTANT: Keep it to one short sentence only.` 
     }
   ];
 
-  const affirmation = await callOpenRouter(apiKey, messages, 'deepseek/deepseek-coder', 0.7, 200);
+  // Limit to a very short response for punchier affirmations
+  const affirmation = await callOpenRouter(apiKey, messages, 'deepseek/deepseek-coder', 0.7, 100);
   
   return new Response(
     JSON.stringify({ affirmation }),

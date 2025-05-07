@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Quote, RefreshCw } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { AIService } from "@/services/AIService";
+import { motion } from "framer-motion";
 
 export const DailyAffirmation = () => {
   const { selectedTheme, user } = useApp();
@@ -33,10 +34,14 @@ export const DailyAffirmation = () => {
       // Get user's information for personalization
       const username = user?.user_metadata?.username || user?.email?.split('@')[0] || "";
       
+      // Get user's mood from local storage if available
+      const userMood = localStorage.getItem("currentMood") || "";
+      
       // Use AI service to generate personalized affirmation
       const newAffirmation = await aiService.generateDailyAffirmation(
         selectedTheme,
-        username
+        username,
+        userMood
       );
       
       // Save to localStorage
@@ -51,11 +56,11 @@ export const DailyAffirmation = () => {
       
       // Fallback to default affirmation if API call fails
       const fallbacks = [
-        "I am capable of creating positive change in my life.",
-        "My potential to succeed is limitless.",
-        "Today, I choose progress over perfection.",
-        "I have the power to overcome any obstacle.",
-        "Every challenge helps me grow stronger.",
+        "I am capable of growth.",
+        "Progress over perfection.",
+        "I embrace challenges.",
+        "Today's efforts shape tomorrow.",
+        "My potential is limitless.",
       ];
       const randomIndex = Math.floor(Math.random() * fallbacks.length);
       setAffirmation(fallbacks[randomIndex]);
@@ -65,19 +70,31 @@ export const DailyAffirmation = () => {
   };
   
   return (
-    <div 
-      className="relative overflow-hidden backdrop-blur-xl bg-[#1E1E1E]/80 border border-white/10 rounded-xl p-4 shadow-lg transform-gpu"
-      style={{ transform: 'translateZ(5px)' }}
+    <motion.div 
+      className="relative overflow-hidden backdrop-blur-xl bg-gradient-to-br from-[#1E1E1E]/90 to-[#2A2A2A]/80 border border-white/10 rounded-xl p-4 shadow-lg"
+      whileHover={{ scale: 1.01, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
+      transition={{ type: "spring", stiffness: 300 }}
     >
       <div className="absolute top-3 left-3">
         <Quote size={18} className="text-white/30" />
       </div>
       
       <div className="ml-7 mr-7">
-        <h3 className="text-sm uppercase tracking-wider text-white/60 font-medium mb-1">Daily Affirmation</h3>
-        <p className={`text-white text-base font-medium ${refreshing ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}>
+        <h3 className="text-sm uppercase tracking-wider text-white/60 font-medium mb-2 flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-purple-400/70 inline-block"></span>
+          <span>Daily Affirmation</span>
+        </h3>
+        
+        <motion.p 
+          key={affirmation} // Key helps with animation when content changes
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className={`text-white text-base font-medium ${refreshing ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+        >
           {affirmation}
-        </p>
+        </motion.p>
+        
         {error && !refreshing && (
           <p className="text-xs text-white/50 mt-1">Offline mode</p>
         )}
@@ -85,11 +102,11 @@ export const DailyAffirmation = () => {
       
       <button 
         onClick={getNewAffirmation}
-        className="absolute top-3 right-3 text-white/50 hover:text-white transition-all active:scale-90"
+        className="absolute top-3 right-3 text-white/50 hover:text-white hover:bg-white/10 transition-all active:scale-90 p-1.5 rounded-full"
         disabled={refreshing}
       >
         <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
       </button>
-    </div>
+    </motion.div>
   );
 };

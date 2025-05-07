@@ -5,6 +5,7 @@ import { useApp } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AIService } from "@/services/AIService";
 import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
 import type { Database } from "@/integrations/supabase/types";
 
 interface Message {
@@ -35,7 +36,10 @@ const Coach = () => {
     if (user?.id) {
       loadChatHistory();
     }
-  }, [user?.id]);
+    
+    // Save current mood to localStorage for affirmation context
+    localStorage.setItem("currentMood", selectedMood);
+  }, [user?.id, selectedMood]);
 
   useEffect(() => {
     scrollToBottom();
@@ -191,128 +195,180 @@ const Coach = () => {
         return <Meh className="text-white/70" />;
     }
   };
+  
+  const messageVariants = {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -10 }
+  };
 
   return (
-    <div className="min-h-screen pb-24 flex flex-col bg-black">
-      <div className="p-6 flex-shrink-0 border-b border-white/10 backdrop-blur-md bg-black/70 z-10 sticky top-0">
+    <div className="min-h-screen pb-24 flex flex-col bg-gradient-to-b from-black to-[#0F0F1A]">
+      <motion.div 
+        className="p-6 flex-shrink-0 border-b border-white/10 backdrop-blur-md bg-black/70 z-10 sticky top-0"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-medium text-gradient">AI Coach</h1>
+          <h1 className="text-xl font-medium bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-pink-300">AI Coach</h1>
           <div className="flex items-center gap-2">
-            <button 
+            <motion.button 
               onClick={() => setShowMoodSelector(!showMoodSelector)}
               className="flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-[#121212] hover:bg-[#1A1A1A] border border-white/10 transition-all duration-300 text-sm"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
             >
               <span>Mood</span>
               {getMoodIcon(selectedMood)}
               {showMoodSelector ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-            </button>
+            </motion.button>
             
-            <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center border border-white/10 hover:border-white/20 transition-all hover:bg-[#222222]">
+            <motion.div 
+              className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center border border-white/10 hover:border-white/20 transition-all hover:bg-[#222222]"
+              whileHover={{ scale: 1.05, borderColor: "rgba(255,255,255,0.3)" }}
+              whileTap={{ scale: 0.95 }}
+            >
               <User className="text-white h-5 w-5" />
-            </div>
+            </motion.div>
           </div>
         </div>
 
         {showMoodSelector && (
-          <div className="absolute right-6 mt-2 bg-[#1A1A1A] border border-white/10 rounded-xl p-2 shadow-xl backdrop-blur-lg z-20 transform origin-top animate-fade-in">
+          <motion.div 
+            className="absolute right-6 mt-2 bg-[#1A1A1A] border border-white/10 rounded-xl p-2 shadow-xl backdrop-blur-lg z-20"
+            initial={{ opacity: 0, scale: 0.9, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: -10 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
             <div className="grid grid-cols-3 gap-2">
-              <button 
+              <motion.button 
                 onClick={() => {
                   setSelectedMood('happy');
                   setShowMoodSelector(false);
                 }}
                 className={`flex flex-col items-center p-3 rounded-lg transition-all duration-300 ${
                   selectedMood === 'happy' 
-                    ? 'bg-[#222222] border border-white/15' 
+                    ? 'bg-[#222222] border border-white/15 shadow-inner' 
                     : 'hover:bg-[#222222]/50'
                 }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 <Smile size={22} className="text-amber-400 mb-1" />
                 <span className="text-xs font-medium">Happy</span>
-              </button>
+              </motion.button>
               
-              <button 
+              <motion.button 
                 onClick={() => {
                   setSelectedMood('neutral');
                   setShowMoodSelector(false);
                 }}
                 className={`flex flex-col items-center p-3 rounded-lg transition-all duration-300 ${
                   selectedMood === 'neutral' 
-                    ? 'bg-[#222222] border border-white/15' 
+                    ? 'bg-[#222222] border border-white/15 shadow-inner' 
                     : 'hover:bg-[#222222]/50'
                 }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 <Meh size={22} className="text-white mb-1" />
                 <span className="text-xs font-medium">Neutral</span>
-              </button>
+              </motion.button>
               
-              <button 
+              <motion.button 
                 onClick={() => {
                   setSelectedMood('sad');
                   setShowMoodSelector(false);
                 }}
                 className={`flex flex-col items-center p-3 rounded-lg transition-all duration-300 ${
                   selectedMood === 'sad' 
-                    ? 'bg-[#222222] border border-white/15' 
+                    ? 'bg-[#222222] border border-white/15 shadow-inner' 
                     : 'hover:bg-[#222222]/50'
                 }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 <Frown size={22} className="text-blue-400 mb-1" />
                 <span className="text-xs font-medium">Sad</span>
-              </button>
+              </motion.button>
             </div>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
 
       <div className="flex-1 overflow-y-auto px-6 pb-4 chat-container">
         <div className="space-y-4 py-4">
           {messages.map((message, index) => (
-            <div 
+            <motion.div 
               key={index}
+              variants={messageVariants}
+              initial="initial"
+              animate="animate"
               className={`${
                 message.sender === "user" 
-                  ? "ml-auto bg-[#222222] text-white" 
-                  : "mr-auto bg-[#121212] text-white"
-              } p-4 rounded-xl max-w-[80%] animate-fade-in shadow-sm border ${
+                  ? "ml-auto bg-gradient-to-br from-[#333333] to-[#222222] text-white" 
+                  : "mr-auto bg-gradient-to-br from-[#1A1A1A] to-[#121212] text-white"
+              } p-4 rounded-xl max-w-[80%] shadow-lg border ${
                 message.sender === "user" 
                   ? "border-white/10" 
                   : message.error 
                     ? "border-red-500/20" 
                     : "border-white/5"
               }`}
+              style={{ 
+                boxShadow: message.sender === "user" 
+                  ? "0 4px 15px rgba(255,255,255,0.05)" 
+                  : "0 4px 15px rgba(255,255,255,0.02)" 
+              }}
             >
               <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
-            </div>
+            </motion.div>
           ))}
 
           {isLoading && (
-            <div className="mr-auto bg-[#121212] p-4 rounded-xl max-w-[80%] animate-fade-in border border-white/5">
+            <motion.div 
+              className="mr-auto bg-[#121212] p-4 rounded-xl max-w-[80%] border border-white/5"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
               <div className="flex items-center space-x-3">
                 <div className="flex space-x-2">
-                  <div className="w-2 h-2 bg-white/40 rounded-full animate-pulse"></div>
-                  <div className="w-2 h-2 bg-white/40 rounded-full animate-pulse delay-150"></div>
-                  <div className="w-2 h-2 bg-white/40 rounded-full animate-pulse delay-300"></div>
+                  <div className="w-2 h-2 bg-purple-400/60 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-purple-400/60 rounded-full animate-pulse delay-150"></div>
+                  <div className="w-2 h-2 bg-purple-400/60 rounded-full animate-pulse delay-300"></div>
                 </div>
                 <span className="text-sm text-white/50">AI is thinking...</span>
               </div>
-            </div>
+            </motion.div>
           )}
           
           {messages.some(m => m.error) && (
-            <div className="mx-auto my-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+            <motion.div 
+              className="mx-auto my-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
               <p className="text-sm text-red-400">
                 There was an error connecting to the AI. Please try again.
               </p>
-            </div>
+            </motion.div>
           )}
           
           <div ref={messagesEndRef} />
         </div>
       </div>
 
-      <div className="fixed left-0 right-0 bottom-[72px] p-4 bg-black/90 backdrop-blur-lg z-10 mx-auto max-w-[430px]">
-        <div className="flex items-center gap-2 bg-[#121212] rounded-full p-1 pr-2 border border-white/10 hover:border-white/20 transition-all shadow-lg">
+      <motion.div 
+        className="fixed left-0 right-0 bottom-[72px] p-4 bg-black/90 backdrop-blur-lg z-10 mx-auto max-w-[430px]"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.3 }}
+      >
+        <div className="flex items-center gap-2 bg-gradient-to-br from-[#121212] to-[#1A1A1A] rounded-full p-1 pr-2 border border-white/10 hover:border-white/20 transition-all shadow-lg">
           <input 
             type="text" 
             value={input}
@@ -322,18 +378,20 @@ const Coach = () => {
             className="flex-1 bg-transparent border-none outline-none text-sm text-white px-4 py-3"
             disabled={isLoading}
           />
-          <button 
-            className={`bg-white text-black rounded-full p-2.5 transition-all ${
-              input.trim() ? 'hover:bg-white/90 active:scale-95' : 'opacity-50 cursor-not-allowed'
+          <motion.button 
+            className={`bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full p-2.5 transition-all ${
+              input.trim() ? 'hover:opacity-90 active:scale-95' : 'opacity-50 cursor-not-allowed'
             }`}
             onClick={handleSend}
             disabled={isLoading || !input.trim()}
             aria-label="Send message"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             <Send size={16} />
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
