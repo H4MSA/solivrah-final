@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface CollapsibleSectionProps {
   title: string;
@@ -16,20 +17,32 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   const [isOpen, setIsOpen] = useState(defaultOpen);
   
   return (
-    <div className="space-y-4">
+    <div className="space-y-5 mb-6">
       <div 
         className="flex justify-between items-center cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
       >
         <h2 className="text-xl font-semibold text-white">{title}</h2>
-        <button className="p-2 rounded-full bg-white/5 border border-white/5 active:scale-95 transition-all">
+        <button className="p-3 rounded-full bg-white/5 border border-white/5 active:scale-95 transition-all">
           {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
         </button>
       </div>
       
-      <div className={`space-y-4 transition-all duration-300 ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-        {children}
-      </div>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="space-y-4">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

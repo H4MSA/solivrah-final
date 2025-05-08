@@ -20,14 +20,14 @@ export const ActionCard: React.FC<ActionCardProps> = ({ icon, label, onClick }) 
   >
     <PremiumCard
       variant="premium"
-      className="p-5 flex flex-col items-center justify-center gap-4"
+      className="p-6 flex flex-col items-center justify-center gap-5"
       interactive={true}
       onClick={onClick}
     >
-      <div className="w-14 h-14 flex items-center justify-center rounded-full bg-white/10 shadow-inner">
-        <div className="text-2xl text-white">{icon}</div>
+      <div className="w-16 h-16 flex items-center justify-center rounded-full bg-white/10 shadow-inner">
+        <div className="text-3xl text-white">{icon}</div>
       </div>
-      <span className="text-sm font-medium text-white">{label}</span>
+      <span className="text-base font-medium text-white">{label}</span>
     </PremiumCard>
   </motion.div>
 );

@@ -23,7 +23,7 @@ export const TabNavigation = () => {
   return (
     <div className="fixed inset-x-0 bottom-4 z-50 px-6 flex justify-center">
       <motion.div 
-        className="flex items-center justify-between px-6 py-3 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 shadow-lg max-w-[430px] w-full"
+        className="flex items-center justify-between px-8 py-4 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 shadow-xl max-w-[430px] w-full"
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -42,7 +42,7 @@ export const TabNavigation = () => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                className="relative"
+                className="relative p-1"
               >
                 {isActive && (
                   <motion.div
@@ -61,7 +61,7 @@ export const TabNavigation = () => {
               </motion.div>
               
               <span 
-                className={`mt-1 text-xs font-semibold ${isActive ? 'text-white' : 'text-white/50'}`}
+                className={`mt-2 text-sm font-semibold ${isActive ? 'text-white' : 'text-white/50'}`}
               >
                 {tab.label}
               </span>

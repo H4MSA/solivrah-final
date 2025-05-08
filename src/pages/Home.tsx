@@ -9,7 +9,7 @@ import { DailyAffirmation } from "@/components/DailyAffirmation";
 import { CameraUpload } from "@/components/CameraUpload";
 import { ThemeBackground } from "@/components/ThemeBackground";
 
-// Import the new components
+// Import the components
 import { HeaderSection } from "@/components/home/HeaderSection";
 import { SearchBar } from "@/components/home/SearchBar";
 import { QuestCard } from "@/components/home/QuestCard";
@@ -65,7 +65,7 @@ const Home = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.05
+        staggerChildren: 0.07
       }
     }
   };
@@ -98,7 +98,7 @@ const Home = () => {
       )}
       
       <motion.div 
-        className="px-5 pt-6 pb-24 space-y-6"
+        className="px-6 pt-6 pb-24 space-y-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"

@@ -1,7 +1,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { motion, HTMLMotionProps } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface PremiumCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -23,14 +23,9 @@ export const PremiumCard: React.FC<PremiumCardProps> = ({
   depth = "medium",
   ...props
 }) => {
-  // Prepare motion props separately to avoid type conflicts
+  // Simplified motion props for better performance
   const motionProps: any = {
-    ...(hoverEffect ? { 
-      whileHover: { 
-        y: -4, 
-        boxShadow: "0 15px 30px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.07)"
-      } 
-    } : {}),
+    ...(hoverEffect ? { whileHover: { y: -4 } } : {}),
     ...(interactive ? { whileTap: { scale: 0.98 } } : {})
   };
 
@@ -45,7 +40,7 @@ export const PremiumCard: React.FC<PremiumCardProps> = ({
   return (
     <motion.div
       className={cn(
-        "rounded-2xl backdrop-blur-xl transition-all duration-300 overflow-hidden",
+        "rounded-2xl backdrop-blur-xl p-6 mb-5 transition-all duration-300 overflow-hidden",
         variant === "default" && "bg-solivrah-card border-solivrah-border text-white",
         variant === "selected" && "bg-solivrah-card-hover border-white/30 text-white",
         variant === "dark" && "bg-black/90 text-white",
@@ -55,18 +50,17 @@ export const PremiumCard: React.FC<PremiumCardProps> = ({
         variant === "glass" && "bg-black/40 backdrop-blur-xl text-white",
         withBorder && "border border-white/10",
         interactive && "cursor-pointer hover:border-white/20",
-        hoverEffect && "hover:-translate-y-1 transition-transform",
         getDepthStyle(),
         className
       )}
       {...motionProps}
       {...props}
     >
-      <div className="relative">
+      <div className="relative flex flex-col">
         {children}
       </div>
       
-      {/* Simple gradient overlay for premium feel without performance cost */}
+      {/* Simplified gradient overlay for premium feel */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
     </motion.div>
   );
@@ -91,15 +85,15 @@ export const OptionCard: React.FC<PremiumCardProps & {
   return (
     <PremiumCard
       variant={selected ? "selected" : "default"}
-      className={cn("p-5", className)}
+      className={cn("p-6", className)}
       interactive={true}
       onClick={onClick}
       {...props}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-5">
         {icon && (
           <div className={cn(
-            "flex items-center justify-center w-10 h-10 rounded-full", 
+            "flex items-center justify-center w-12 h-12 rounded-full", 
             selected ? "bg-white text-black shadow-lg" : "bg-white/10 text-white"
           )}>
             {icon}
@@ -108,7 +102,7 @@ export const OptionCard: React.FC<PremiumCardProps & {
         <div>
           <h3 className="text-lg font-semibold">{title}</h3>
           {description && (
-            <p className="text-base text-white/70 mt-1">{description}</p>
+            <p className="text-base text-white/70 mt-2 leading-relaxed">{description}</p>
           )}
         </div>
       </div>

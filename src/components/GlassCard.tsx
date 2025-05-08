@@ -64,19 +64,14 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   const handleTouchStart = () => interactive && setIsPressed(true);
   const handleTouchEnd = () => interactive && setIsPressed(false);
 
+  // Simplified animation props for better performance
   const motionProps: any = {
     initial: false,
     style: {
       ...getThemeStyle(),
-      transform: `${isPressed ? 'scale(0.98)' : 'scale(1)'}`
+      transform: isPressed ? 'scale(0.98)' : 'scale(1)'
     },
-    animate: hoverEffect ? {
-      y: 0,
-    } : {},
-    whileHover: hoverEffect ? {
-      y: -4,
-      transition: { type: "spring", stiffness: 400, damping: 17 }
-    } : {},
+    whileHover: hoverEffect ? { y: -4 } : {},
     whileTap: interactive ? { scale: 0.98 } : {}
   };
 
@@ -98,11 +93,10 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   return (
     <motion.div 
       className={cn(
-        "backdrop-blur-xl border rounded-2xl transition-all duration-300",
+        "backdrop-blur-xl border rounded-2xl p-6 mb-5 transition-all duration-300",
         getBgClass(),
         "border-white/10",
         interactive && "cursor-pointer",
-        isPressed && "scale-[0.98]",
         getAnimationClass(),
         getDepthStyle(),
         className
@@ -118,7 +112,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
         {children}
       </div>
       
-      {/* Single gradient overlay for performance */}
+      {/* Single, simplified gradient overlay for premium feel without performance cost */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
     </motion.div>
   );
