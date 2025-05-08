@@ -13,26 +13,26 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({ greeting, displayN
   const navigate = useNavigate();
   
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between items-center mb-4">
       <div>
-        <h1 className="text-xl text-white font-medium">
-          {greeting}, <span className="font-semibold">{displayName}</span>
+        <h1 className="text-sm text-white font-medium">
+          {greeting},
         </h1>
-        <p className="text-sm text-white/80">Let's make progress today</p>
+        <h2 className="text-base text-white font-semibold">{displayName}</h2>
       </div>
       
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <button 
-          className="w-10 h-10 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 flex items-center justify-center transition-all duration-300 hover:bg-white/10 hover:border-white/15 active:scale-[0.95]"
+          className="w-8 h-8 rounded-full bg-black/60 border border-[#333333] flex items-center justify-center transition-all hover:bg-black/70 active:scale-95"
           onClick={onCameraClick}
         >
-          <Camera size={20} className="text-white" />
+          <Camera size={16} className="text-white" />
         </button>
         <button 
-          className="w-10 h-10 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 flex items-center justify-center transition-all duration-300 hover:bg-white/10 hover:border-white/15 active:scale-[0.95]"
+          className="w-8 h-8 rounded-full bg-black/60 border border-[#333333] flex items-center justify-center transition-all hover:bg-black/70 active:scale-95"
           onClick={() => navigate("/profile")}
         >
-          <User size={20} className="text-white" />
+          <User size={16} className="text-white" />
         </button>
       </div>
     </div>

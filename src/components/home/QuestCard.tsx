@@ -1,48 +1,75 @@
 
 import React from "react";
-import { PremiumCard } from "@/components/PremiumCard";
-import { Lock, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { Lock, Calendar } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { StartButton } from "@/components/ui/start-button";
 
 interface QuestCardProps {
   title: string;
   description: string;
-  locked?: boolean;
   onClick: () => void;
+  locked?: boolean;
+  active?: boolean;
+  date?: string;
+  progress?: number;
+  className?: string;
 }
 
-export const QuestCard: React.FC<QuestCardProps> = ({ title, description, locked = false, onClick }) => (
-  <PremiumCard
-    variant="default"
-    className={`p-5 mb-5 ${locked ? 'opacity-70' : ''}`}
-    interactive={!locked}
-    onClick={!locked ? onClick : undefined}
-  >
-    <div className="flex justify-between items-center mb-4">
-      <h3 className="text-lg font-semibold">{title}</h3>
-      {locked ? (
-        <span className="text-xs bg-black/60 backdrop-blur-sm px-4 py-2 rounded-full text-white flex items-center gap-2 border border-white/5">
-          <Lock size={16} />
-          <span>Locked</span>
-        </span>
-      ) : (
-        <span className="text-xs bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full text-white border border-white/10">Active</span>
+export const QuestCard: React.FC<QuestCardProps> = ({
+  title,
+  description,
+  onClick,
+  locked = false,
+  active = false,
+  date,
+  progress,
+  className
+}) => {
+  return (
+    <motion.div
+      whileHover={!locked ? { scale: 1.01 } : {}}
+      className={cn(
+        "relative overflow-hidden",
+        className
       )}
-    </div>
-    <p className="text-base text-white/80 leading-relaxed">{description}</p>
-    
-    {!locked && (
-      <button 
-        className="w-full mt-5 py-4 rounded-xl bg-white/10 backdrop-blur-xl hover:bg-white/15 text-white font-medium flex items-center justify-center gap-2 border border-white/10 transition-all"
-        onClick={onClick}
-      >
-        Start <ArrowRight size={20} />
-      </button>
-    )}
-    
-    {locked && (
-      <div className="absolute inset-0 backdrop-blur-sm bg-black/40 rounded-xl flex items-center justify-center">
-        <Lock className="text-white/30 text-5xl" />
+    >
+      <div className={cn(
+        "p-4 bg-black/80 border border-[#333333] rounded-xl shadow-sm",
+        active && "border-white/20"
+      )}>
+        {active && (
+          <div className="absolute top-0 right-0">
+            <div className="bg-white/10 text-white/80 text-xs py-0.5 px-2 rounded-bl-lg">
+              Active
+            </div>
+          </div>
+        )}
+        
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-white leading-tight">{title}</h3>
+          <p className="text-xs text-white/70 leading-relaxed">{description}</p>
+          
+          {!locked ? (
+            <StartButton onClick={onClick}>Start</StartButton>
+          ) : (
+            <div className="flex items-center justify-center py-2 text-xs text-white/50">
+              <Lock size={12} className="mr-1" />
+              <span>Complete previous quests to unlock</span>
+            </div>
+          )}
+        </div>
+        
+        {/* Overlay for locked quests */}
+        {locked && (
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] rounded-xl flex flex-col items-center justify-center">
+            <Lock size={24} className="text-white/60 mb-2" />
+            <p className="text-xs text-white/60 text-center px-6">
+              Complete previous quests to unlock
+            </p>
+          </div>
+        )}
       </div>
-    )}
-  </PremiumCard>
-);
+    </motion.div>
+  );
+};

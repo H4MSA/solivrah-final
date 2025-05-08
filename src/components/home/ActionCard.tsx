@@ -1,7 +1,6 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { PremiumCard } from "@/components/PremiumCard";
 
 interface ActionCardProps {
   icon: React.ReactNode;
@@ -11,23 +10,18 @@ interface ActionCardProps {
 
 export const ActionCard: React.FC<ActionCardProps> = ({ icon, label, onClick }) => (
   <motion.div
-    whileHover={{ 
-      y: -4,
-      boxShadow: "0 15px 30px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1)" 
-    }}
+    whileHover={{ scale: 1.03 }}
     whileTap={{ scale: 0.95 }}
     className="transform-gpu will-change-transform"
   >
-    <PremiumCard
-      variant="premium"
-      className="p-6 flex flex-col items-center justify-center gap-5"
-      interactive={true}
+    <div
+      className="p-3 flex flex-col items-center justify-center gap-3 bg-black/90 border border-[#333333] rounded-xl shadow-sm"
       onClick={onClick}
     >
-      <div className="w-16 h-16 flex items-center justify-center rounded-full bg-white/10 shadow-inner">
-        <div className="text-3xl text-white">{icon}</div>
+      <div className="w-12 h-12 flex items-center justify-center rounded-full bg-black/60">
+        <div className="text-white">{icon}</div>
       </div>
-      <span className="text-base font-medium text-white">{label}</span>
-    </PremiumCard>
+      <span className="text-xs font-medium text-white">{label}</span>
+    </div>
   </motion.div>
 );

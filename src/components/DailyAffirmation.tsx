@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Quote, RefreshCw } from "lucide-react";
 import { useApp } from "@/context/AppContext";
@@ -70,27 +69,25 @@ export const DailyAffirmation = () => {
   };
   
   return (
-    <motion.div 
-      className="relative overflow-hidden backdrop-blur-xl bg-gradient-to-br from-[#1E1E1E]/90 to-[#2A2A2A]/80 border border-white/10 rounded-xl p-4 shadow-lg"
-      whileHover={{ scale: 1.01, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
-      transition={{ type: "spring", stiffness: 300 }}
+    <div 
+      className="relative overflow-hidden bg-black/80 border border-[#333333] rounded-xl p-3 shadow-sm mb-4"
     >
       <div className="absolute top-3 left-3">
-        <Quote size={18} className="text-white/30" />
+        <Quote size={14} className="text-white/30" />
       </div>
       
-      <div className="ml-7 mr-7">
-        <h3 className="text-sm uppercase tracking-wider text-white/60 font-medium mb-2 flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-purple-400/70 inline-block"></span>
+      <div className="ml-6 mr-6">
+        <h3 className="text-xs uppercase tracking-wider text-white/60 font-medium mb-1.5 flex items-center gap-1">
+          <span className="w-1 h-1 rounded-full bg-purple-400/70 inline-block"></span>
           <span>Daily Affirmation</span>
         </h3>
         
         <motion.p 
-          key={affirmation} // Key helps with animation when content changes
+          key={affirmation}
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className={`text-white text-base font-medium ${refreshing ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+          className={`text-white text-sm font-medium ${refreshing ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
         >
           {affirmation}
         </motion.p>
@@ -102,11 +99,11 @@ export const DailyAffirmation = () => {
       
       <button 
         onClick={getNewAffirmation}
-        className="absolute top-3 right-3 text-white/50 hover:text-white hover:bg-white/10 transition-all active:scale-90 p-1.5 rounded-full"
+        className="absolute top-2 right-2 text-white/50 hover:text-white hover:bg-white/10 transition-all active:scale-90 p-1 rounded-full"
         disabled={refreshing}
       >
-        <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
+        <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
       </button>
-    </motion.div>
+    </div>
   );
 };

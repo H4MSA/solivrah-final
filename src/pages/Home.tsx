@@ -5,9 +5,9 @@ import { motion } from "framer-motion";
 import { TabNavigation } from "@/components/TabNavigation";
 import { useApp } from "@/context/AppContext";
 import { QRScanner } from "@/components/QRScanner";
-import { DailyAffirmation } from "@/components/DailyAffirmation";
 import { CameraUpload } from "@/components/CameraUpload";
 import { ThemeBackground } from "@/components/ThemeBackground";
+import { DailyAffirmation } from "@/components/DailyAffirmation";
 
 // Import the components
 import { HeaderSection } from "@/components/home/HeaderSection";
@@ -60,27 +60,8 @@ const Home = () => {
   
   const displayName = user?.user_metadata?.username || user?.email?.split('@')[0] || "Friend";
   
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.07
-      }
-    }
-  };
-  
-  const itemVariants = {
-    hidden: { y: 10, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { type: "spring", stiffness: 300, damping: 24 }
-    }
-  };
-  
   return (
-    <div className="min-h-screen pb-24 text-white">
+    <div className="min-h-screen pb-20 text-white">
       <ThemeBackground />
       {showScanner && (
         <QRScanner 
@@ -97,72 +78,50 @@ const Home = () => {
         />
       )}
       
-      <motion.div 
-        className="px-6 pt-6 pb-24 space-y-6"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <motion.div variants={itemVariants}>
-          <HeaderSection 
-            greeting={greeting} 
-            displayName={displayName} 
-            onCameraClick={() => setShowCamera(true)} 
+      <div className="px-4 pt-4 pb-20 space-y-2 max-w-[340px] mx-auto">
+        <HeaderSection 
+          greeting={greeting} 
+          displayName={displayName} 
+          onCameraClick={() => setShowCamera(true)} 
+        />
+        
+        <SearchBar />
+        
+        <DailyAffirmation />
+        
+        <CollapsibleSection title="Today's Quest">
+          <QuestCard 
+            title="Track your time for 24 hours" 
+            description="Document how you spend your day to identify time-wasting activities and opportunities for improvement."
+            onClick={() => navigate("/quests")}
+            active={true}
           />
-        </motion.div>
+        </CollapsibleSection>
         
-        <motion.div variants={itemVariants}>
-          <SearchBar />
-        </motion.div>
+        <ProgressCard 
+          streak={streak} 
+          xp={xp} 
+          level={level} 
+          progress={progress} 
+        />
         
-        <motion.div variants={itemVariants}>
-          <DailyAffirmation />
-        </motion.div>
+        <MoodSection 
+          moods={moods} 
+          selectedMood={selectedMood} 
+          setSelectedMood={setSelectedMood} 
+        />
         
-        <motion.div variants={itemVariants}>
-          <CollapsibleSection title="Today's Quest" defaultOpen={true}>
-            <QuestCard 
-              title="Track your time for 24 hours" 
-              description="Document how you spend your day to identify time-wasting activities and opportunities for improvement."
-              onClick={() => navigate("/quests")}
-            />
-          </CollapsibleSection>
-        </motion.div>
+        <QuickActionSection onScannerClick={() => setShowScanner(true)} />
         
-        <motion.div variants={itemVariants}>
-          <ProgressCard 
-            streak={streak} 
-            xp={xp} 
-            level={level} 
-            progress={progress} 
+        <CollapsibleSection title="Coming Up">
+          <QuestCard 
+            title="Day 2: Morning Routine" 
+            description="Establish a productive morning routine to set the tone for your day."
+            locked={true}
+            onClick={() => {}}
           />
-        </motion.div>
-        
-        <motion.div variants={itemVariants}>
-          <MoodSection 
-            moods={moods} 
-            selectedMood={selectedMood} 
-            setSelectedMood={setSelectedMood} 
-          />
-        </motion.div>
-        
-        <motion.div variants={itemVariants}>
-          <QuickActionSection onScannerClick={() => setShowScanner(true)} />
-        </motion.div>
-        
-        <motion.div variants={itemVariants}>
-          <CollapsibleSection title="Coming Up" defaultOpen={true}>
-            <QuestCard 
-              title="Day 2: Morning Routine" 
-              description="Establish a productive morning routine to set the tone for your day."
-              locked={true}
-              onClick={() => {}}
-            />
-          </CollapsibleSection>
-        </motion.div>
-      </motion.div>
-      
-      <TabNavigation />
+        </CollapsibleSection>
+      </div>
     </div>
   );
 };
