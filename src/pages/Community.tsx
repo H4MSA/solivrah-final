@@ -35,20 +35,20 @@ const Community = () => {
     switch (activeTab) {
       case "leaderboards":
         return (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {leaderboards.map((user, index) => (
-              <GlassCard key={index} className="flex items-center gap-3">
-                <div className="bg-secondary/40 rounded-full w-10 h-10 flex items-center justify-center">
+              <GlassCard key={index} className="p-5 flex items-center gap-4">
+                <div className="bg-white/10 backdrop-blur-sm rounded-full w-12 h-12 flex items-center justify-center font-semibold border border-white/10">
                   #{index + 1}
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-medium">{user.name}</h3>
-                  <div className="flex items-center gap-2 text-xs text-muted">
-                    <span className="flex items-center gap-1">
-                      <FiStar className="text-primary" /> {user.streak}
+                  <h3 className="text-lg font-semibold">{user.name}</h3>
+                  <div className="flex items-center gap-4 mt-1 text-sm text-white/70">
+                    <span className="flex items-center gap-2">
+                      <FiStar className="text-white/80" /> {user.streak} day streak
                     </span>
                     <span>{user.xp} XP</span>
-                    <span>{user.theme}</span>
+                    <span className="bg-white/10 px-2 py-1 rounded-full text-xs">{user.theme}</span>
                   </div>
                 </div>
               </GlassCard>
@@ -57,17 +57,17 @@ const Community = () => {
         );
       case "groups":
         return (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {groups.map((group, index) => (
-              <GlassCard key={index}>
-                <h3 className="font-medium">{group.name}</h3>
-                <div className="flex items-center gap-2 text-xs text-muted mt-1">
-                  <span className="flex items-center gap-1">
+              <GlassCard key={index} className="p-5 space-y-3">
+                <h3 className="text-lg font-semibold">{group.name}</h3>
+                <div className="flex items-center gap-4 text-sm text-white/70">
+                  <span className="flex items-center gap-2">
                     <FiUsers /> {group.members} members
                   </span>
-                  <span>{group.theme}</span>
+                  <span className="bg-white/10 px-2 py-1 rounded-full text-xs">{group.theme}</span>
                 </div>
-                <button className="bg-secondary/40 text-white text-sm px-4 py-2 rounded-lg mt-3 w-full">
+                <button className="w-full bg-white/10 backdrop-blur-sm text-white text-base font-medium px-5 py-3 rounded-xl mt-3 border border-white/10 hover:bg-white/15 transition-all active:scale-[0.98]">
                   Join Group
                 </button>
               </GlassCard>
@@ -76,30 +76,32 @@ const Community = () => {
         );
       case "posts":
         return (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {posts.map((post, index) => (
-              <GlassCard key={index}>
-                <div className="flex justify-between items-start">
-                  <h3 className="font-medium">{post.name}</h3>
-                  <span className="text-xs text-muted">{post.time}</span>
+              <GlassCard key={index} className="p-5 space-y-3">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">{post.name}</h3>
+                  <span className="text-sm text-white/60">{post.time}</span>
                 </div>
-                <p className="text-sm my-2">{post.content}</p>
-                <div className="flex items-center justify-between">
-                  <div className="text-xs text-muted">{post.theme}</div>
-                  <button className="flex items-center gap-1 text-xs text-muted">
+                <p className="text-base leading-relaxed py-1">{post.content}</p>
+                <div className="flex items-center justify-between pt-2">
+                  <div className="text-sm text-white/70 bg-white/10 px-2 py-1 rounded-full">{post.theme}</div>
+                  <button className="flex items-center gap-2 text-sm text-white/70 bg-white/10 px-3 py-1.5 rounded-full hover:bg-white/15 transition-all">
                     <FiHeart className={post.likes > 30 ? "text-red-400" : ""} /> {post.likes}
                   </button>
                 </div>
               </GlassCard>
             ))}
             
-            <GlassCard>
+            <GlassCard className="p-5 space-y-4">
               <textarea
                 placeholder="Share your journey..."
-                className="w-full bg-transparent border-none outline-none resize-none h-20"
+                className="w-full bg-black/20 border border-white/10 rounded-xl p-4 outline-none resize-none h-24 text-white placeholder:text-white/50"
               />
               <div className="flex justify-end">
-                <button className="btn-primary px-4 py-2 text-sm">Post</button>
+                <button className="bg-white text-black px-5 py-3 rounded-xl font-medium hover:bg-white/90 transition-all active:scale-[0.98]">
+                  Post
+                </button>
               </div>
             </GlassCard>
           </div>
@@ -107,51 +109,53 @@ const Community = () => {
       default:
         return (
           <div className="flex items-center justify-center h-40">
-            <p className="text-muted">Coming soon...</p>
+            <p className="text-white/70">Coming soon...</p>
           </div>
         );
     }
   };
   
   return (
-    <div className="min-h-screen pb-20">
-      <div className="p-6 space-y-4">
-        <h1 className="text-xl font-medium">Community</h1>
+    <div className="min-h-screen pb-28">
+      <div className="p-6 space-y-6">
+        <h1 className="text-2xl font-bold mb-6">Community</h1>
         
-        <div className="flex space-x-2 overflow-x-auto pb-2">
+        <div className="flex gap-3 overflow-x-auto pb-3 -mx-1 px-1">
           <button 
-            className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${
+            className={`px-5 py-3 rounded-xl text-base font-medium whitespace-nowrap ${
               activeTab === "leaderboards" 
-                ? "bg-primary text-primary-foreground" 
-                : "glass text-white"
+                ? "bg-white text-black shadow-lg" 
+                : "bg-white/10 backdrop-blur-sm text-white border border-white/10"
             }`}
             onClick={() => setActiveTab("leaderboards")}
           >
-            <FiStar className="inline mr-1" /> Leaderboards
+            <FiStar className="inline mr-2" /> Leaderboards
           </button>
           <button 
-            className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${
+            className={`px-5 py-3 rounded-xl text-base font-medium whitespace-nowrap ${
               activeTab === "groups" 
-                ? "bg-primary text-primary-foreground" 
-                : "glass text-white"
+                ? "bg-white text-black shadow-lg" 
+                : "bg-white/10 backdrop-blur-sm text-white border border-white/10"
             }`}
             onClick={() => setActiveTab("groups")}
           >
-            <FiUsers className="inline mr-1" /> Groups
+            <FiUsers className="inline mr-2" /> Groups
           </button>
           <button 
-            className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${
+            className={`px-5 py-3 rounded-xl text-base font-medium whitespace-nowrap ${
               activeTab === "posts" 
-                ? "bg-primary text-primary-foreground" 
-                : "glass text-white"
+                ? "bg-white text-black shadow-lg" 
+                : "bg-white/10 backdrop-blur-sm text-white border border-white/10"
             }`}
             onClick={() => setActiveTab("posts")}
           >
-            <FiMessageCircle className="inline mr-1" /> Posts
+            <FiMessageCircle className="inline mr-2" /> Posts
           </button>
         </div>
         
-        {renderTabContent()}
+        <div className="pt-2">
+          {renderTabContent()}
+        </div>
       </div>
       
       <TabNavigation />

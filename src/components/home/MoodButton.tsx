@@ -18,21 +18,21 @@ export const MoodButton: React.FC<MoodButtonProps> = ({ emoji, label, selected, 
     <PremiumCard
       variant={selected ? "selected" : "default"}
       className={cn(
-        "p-3 flex flex-col items-center justify-center transition-all",
+        "p-4 flex flex-col items-center justify-center gap-3 transition-all",
         selected && "border-white/30 shadow-xl"
       )}
       interactive={true}
       onClick={onClick}
     >
       <div className={cn(
-        "flex items-center justify-center w-12 h-12 rounded-full mb-2 text-2xl",
+        "flex items-center justify-center w-16 h-16 rounded-full mb-2 text-3xl",
         selected 
           ? "bg-gradient-to-br from-white/20 to-white/5 shadow-lg" 
           : "bg-white/5"
       )}>
         {emoji}
       </div>
-      <span className="text-xs font-medium">{label}</span>
+      <span className="text-sm font-medium">{label}</span>
     </PremiumCard>
   </motion.div>
 );

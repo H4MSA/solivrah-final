@@ -14,19 +14,19 @@ export const QuickActionSection: React.FC<QuickActionSectionProps> = ({ onScanne
   
   return (
     <CollapsibleSection title="Quick Actions" defaultOpen={true}>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-4">
         <ActionCard 
-          icon={<MessageCircle size={20} />} 
+          icon={<MessageCircle size={24} />} 
           label="AI Coach" 
           onClick={() => navigate("/coach")} 
         />
         <ActionCard 
-          icon={<Users size={20} />} 
+          icon={<Users size={24} />} 
           label="Community" 
           onClick={() => navigate("/community")} 
         />
         <ActionCard 
-          icon={<Camera size={20} />} 
+          icon={<Camera size={24} />} 
           label="Scan QR" 
           onClick={onScannerClick} 
         />

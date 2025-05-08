@@ -20,12 +20,12 @@ export const ActionCard: React.FC<ActionCardProps> = ({ icon, label, onClick }) 
   >
     <PremiumCard
       variant="premium"
-      className="p-4 flex flex-col items-center justify-center gap-3"
+      className="p-5 flex flex-col items-center justify-center gap-4"
       interactive={true}
       onClick={onClick}
     >
-      <div className="w-12 h-12 flex items-center justify-center rounded-full bg-white/10 shadow-inner">
-        <div className="text-xl text-white">{icon}</div>
+      <div className="w-14 h-14 flex items-center justify-center rounded-full bg-white/10 shadow-inner">
+        <div className="text-2xl text-white">{icon}</div>
       </div>
       <span className="text-sm font-medium text-white">{label}</span>
     </PremiumCard>
