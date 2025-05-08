@@ -25,48 +25,45 @@ export const PremiumCard: React.FC<PremiumCardProps> = ({
 }) => {
   // Simplified motion props for better performance
   const motionProps: any = {
-    ...(hoverEffect ? { whileHover: { y: -4 } } : {}),
+    ...(hoverEffect ? { whileHover: { y: -2 } } : {}),
     ...(interactive ? { whileTap: { scale: 0.98 } } : {})
   };
 
   const getDepthStyle = () => {
     switch (depth) {
-      case "low": return "shadow-md";
-      case "high": return "shadow-xl";
-      default: return "shadow-lg";
+      case "low": return "shadow-sm";
+      case "high": return "shadow-lg";
+      default: return "shadow-md";
     }
   };
 
   return (
     <motion.div
       className={cn(
-        "rounded-2xl backdrop-blur-xl p-6 mb-5 transition-all duration-300 overflow-hidden",
-        variant === "default" && "bg-solivrah-card border-solivrah-border text-white",
-        variant === "selected" && "bg-solivrah-card-hover border-white/30 text-white",
+        "rounded-2xl p-5 mb-5 transition-colors duration-200",
+        variant === "default" && "bg-[#1A1A1A] text-white",
+        variant === "selected" && "bg-[#222222] border-white/20 text-white",
         variant === "dark" && "bg-black/90 text-white",
         variant === "subtle" && "bg-black/20 border-white/5 text-white",
         variant === "black" && "bg-black text-white",
-        variant === "premium" && "bg-gradient-to-br from-[#1A1A1A] to-[#101010] text-white",
-        variant === "glass" && "bg-black/40 backdrop-blur-xl text-white",
-        withBorder && "border border-white/10",
-        interactive && "cursor-pointer hover:border-white/20",
+        variant === "premium" && "bg-[#1A1A1A] text-white",
+        variant === "glass" && "bg-black/40 text-white",
+        withBorder && "border border-[#333333]",
+        interactive && "cursor-pointer",
         getDepthStyle(),
         className
       )}
       {...motionProps}
       {...props}
     >
-      <div className="relative flex flex-col">
+      <div className="relative">
         {children}
       </div>
-      
-      {/* Simplified gradient overlay for premium feel */}
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
     </motion.div>
   );
 };
 
-// Variant for option selection cards like in the images
+// Variant for option selection cards
 export const OptionCard: React.FC<PremiumCardProps & {
   selected?: boolean;
   icon?: React.ReactNode;
@@ -85,24 +82,24 @@ export const OptionCard: React.FC<PremiumCardProps & {
   return (
     <PremiumCard
       variant={selected ? "selected" : "default"}
-      className={cn("p-6", className)}
+      className={cn("p-5", className)}
       interactive={true}
       onClick={onClick}
       {...props}
     >
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-4">
         {icon && (
           <div className={cn(
-            "flex items-center justify-center w-12 h-12 rounded-full", 
-            selected ? "bg-white text-black shadow-lg" : "bg-white/10 text-white"
+            "flex items-center justify-center w-10 h-10 rounded-full", 
+            selected ? "bg-white text-black shadow-md" : "bg-white/10 text-white"
           )}>
             {icon}
           </div>
         )}
         <div>
-          <h3 className="text-lg font-semibold">{title}</h3>
+          <h3 className="text-base font-semibold">{title}</h3>
           {description && (
-            <p className="text-base text-white/70 mt-2 leading-relaxed">{description}</p>
+            <p className="text-sm text-white/70 mt-1 leading-relaxed">{description}</p>
           )}
         </div>
       </div>
