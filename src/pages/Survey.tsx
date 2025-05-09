@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -87,7 +86,7 @@ const struggleSuggestions = {
 
 const Survey = () => {
   const navigate = useNavigate();
-  const { setSelectedTheme, user } = useApp();
+  const { setSelectedTheme, user, isGuest } = useApp();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -101,6 +100,14 @@ const Survey = () => {
   const [showStruggleSuggestions, setShowStruggleSuggestions] = useState<boolean>(false);
   
   const aiService = new AIService();
+
+  // Apply fixed background to prevent display issues
+  useEffect(() => {
+    document.body.classList.add('bg-black');
+    return () => {
+      document.body.classList.remove('bg-black');
+    };
+  }, []);
 
   // Set up theme-specific suggestions when theme changes
   useEffect(() => {
@@ -166,59 +173,88 @@ const Survey = () => {
   };
   
   const handleSubmit = async () => {
-    if (!user && !user?.id) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to create your personalized plan",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     setIsLoading(true);
     
     try {
-      // Save survey responses
-      const { error: surveyError } = await supabase
-        .from("survey_responses")
-        .insert({
-          user_id: user.id,
-          theme: selectedThemeId,
-          goal: goal,
-          biggest_struggle: struggle,
-          daily_commitment: dailyTime
+      // Generate a unique ID for guest users
+      const guestId = isGuest ? `guest_${Date.now()}_${Math.random().toString(36).substring(2, 9)}` : null;
+      
+      if (!isGuest && !user?.id) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in to create your personalized plan",
+          variant: "destructive"
         });
+        setIsLoading(false);
+        return;
+      }
       
-      if (surveyError) throw surveyError;
-      
-      // Update user profile with selected theme
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({ theme: selectedThemeId })
-        .eq("id", user.id);
-      
-      if (profileError) throw profileError;
-      
-      // Set theme in context
+      // Set theme in context regardless of auth status
       setSelectedTheme(selectedThemeId);
       
-      // Generate AI roadmap
+      // For authenticated users, save survey responses
+      if (!isGuest && user?.id) {
+        // Save survey responses
+        const { error: surveyError } = await supabase
+          .from("survey_responses")
+          .insert({
+            user_id: user.id,
+            theme: selectedThemeId,
+            goal: goal,
+            biggest_struggle: struggle,
+            daily_commitment: dailyTime
+          });
+        
+        if (surveyError) throw surveyError;
+        
+        // Update user profile with selected theme
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({ theme: selectedThemeId })
+          .eq("id", user.id);
+        
+        if (profileError) throw profileError;
+      }
+      
+      // For guest mode, set completed survey flag in localStorage
+      if (isGuest) {
+        localStorage.setItem('hasCompletedSurvey', 'true');
+        localStorage.setItem('guestTheme', selectedThemeId);
+        localStorage.setItem('guestGoal', goal);
+        localStorage.setItem('guestStruggle', struggle);
+        localStorage.setItem('guestDailyTime', dailyTime.toString());
+        localStorage.setItem('guestId', guestId || '');
+      }
+      
+      // Show creating roadmap toast
       toast({
         title: "Creating your personalized journey",
         description: "We're crafting a plan just for you...",
       });
-
-      // For guest mode, set completed survey flag in localStorage
-      if (!user.id) {
-        localStorage.setItem('hasCompletedSurvey', 'true');
+      
+      // Get user profile for context (or use guest data)
+      let profileData = {};
+      
+      if (!isGuest && user?.id) {
+        const { data: userData } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+        
+        if (userData) {
+          profileData = userData;
+        }
+      } else {
+        // For guests, create a simplified profile object
+        profileData = {
+          id: guestId,
+          theme: selectedThemeId,
+          is_guest: true
+        };
       }
       
-      // Get user profile for context
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+      console.log("Generating roadmap with profile:", { ...profileData, theme: selectedThemeId });
       
       // Generate roadmap using AI
       const roadmap = await aiService.generateRoadmap(
@@ -227,6 +263,11 @@ const Survey = () => {
         dailyTime,
         { ...profileData, theme: selectedThemeId }
       );
+      
+      // Store the generated roadmap for guest users
+      if (isGuest) {
+        localStorage.setItem('guestRoadmap', JSON.stringify(roadmap));
+      }
       
       // Navigate to home when done
       toast({
@@ -268,7 +309,7 @@ const Survey = () => {
   };
   
   return (
-    <div className="min-h-screen bg-transparent pt-10 px-6 pb-20 z-10 relative">
+    <div className="min-h-screen bg-black pt-10 px-6 pb-20 z-10 relative">
       <motion.div
         className="max-w-md mx-auto"
         variants={containerVariants}
@@ -537,7 +578,7 @@ const Survey = () => {
             <Button
               onClick={handleNextStep}
               variant="default"
-              className="flex-1"
+              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
             >
               Next
             </Button>
@@ -546,11 +587,11 @@ const Survey = () => {
               onClick={handleSubmit}
               disabled={isLoading}
               variant="default"
-              className="flex-1"
+              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   <span>Processing...</span>
                 </div>
               ) : (

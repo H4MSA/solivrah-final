@@ -20,6 +20,26 @@ interface AuthResponse {
   user: User | null;
 }
 
+// Helper to clean up auth state - prevents issues with token persistence
+const cleanupAuthState = () => {
+  // Remove standard auth tokens
+  localStorage.removeItem('supabase.auth.token');
+  
+  // Remove all Supabase auth keys from localStorage
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  
+  // Remove from sessionStorage if in use
+  Object.keys(sessionStorage || {}).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      sessionStorage.removeItem(key);
+    }
+  });
+};
+
 export const AuthService = {
   signUp: async (data: SignUpData): Promise<AuthResponse> => {
     const { email, password, username } = data;
@@ -27,6 +47,17 @@ export const AuthService = {
     // Validation
     if (!email || !password) {
       throw new Error("Email and password are required");
+    }
+    
+    // Clean up existing auth state first
+    cleanupAuthState();
+    
+    // Try to sign out first to prevent conflicts
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (err) {
+      // Continue even if this fails
+      console.log("Pre-signup signout failed, continuing anyway");
     }
     
     // Sign up with email and password
@@ -37,6 +68,7 @@ export const AuthService = {
         data: {
           username: username || email.split('@')[0], // Default username is first part of email
         },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
     
@@ -57,6 +89,17 @@ export const AuthService = {
     // Validation
     if (!email || !password) {
       throw new Error("Email and password are required");
+    }
+    
+    // Clean up existing auth state first
+    cleanupAuthState();
+    
+    // Try to sign out first to prevent conflicts
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (err) {
+      // Continue even if this fails
+      console.log("Pre-signin signout failed, continuing anyway");
     }
     
     try {
@@ -81,6 +124,15 @@ export const AuthService = {
   },
   
   signInWithOAuth: async (provider: OAuthProvider): Promise<void> => {
+    // Clean up existing auth state first
+    cleanupAuthState();
+    
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (err) {
+      // Continue even if this fails
+    }
+    
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -103,7 +155,11 @@ export const AuthService = {
   
   signOut: async () => {
     try {
-      const { error } = await supabase.auth.signOut();
+      // Clean up auth state
+      cleanupAuthState();
+      
+      // Attempt global sign out (fallback if it fails)
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
       
       if (error) {
         console.error("Sign out error:", error);

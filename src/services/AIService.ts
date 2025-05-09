@@ -91,11 +91,44 @@ export class AIService {
 
   async generateRoadmap(goals: string, struggles: string, dailyTime: number, userProfile: any = {}) {
     try {
-      console.log("Generating roadmap with parameters:", { goals, struggles, dailyTime });
+      // Enhanced logging to debug roadmap generation
+      console.log("Generating roadmap with parameters:", { 
+        goals, 
+        struggles, 
+        dailyTime, 
+        userProfile: { 
+          ...userProfile, 
+          id: userProfile.id ? `${userProfile.id.substring(0, 5)}...` : 'unknown' 
+        } 
+      });
+      
+      // For guest users, check if we already have a stored roadmap
+      if (userProfile.is_guest) {
+        const storedRoadmap = localStorage.getItem('guestRoadmap');
+        if (storedRoadmap) {
+          try {
+            return JSON.parse(storedRoadmap);
+          } catch (e) {
+            console.log("Could not parse stored roadmap, generating new one");
+          }
+        }
+      }
+      
+      // Make the API request with enhanced prompting
       const { data, error } = await supabase.functions.invoke('ai-services', {
         body: {
           endpoint: 'roadmap',
-          data: { goals, struggles, dailyTime, userProfile }
+          data: { 
+            goals, 
+            struggles, 
+            dailyTime, 
+            userProfile,
+            enhanced: true, // Signal the API to use enhanced prompting
+            requestMetadata: {
+              client: 'web-app',
+              timestamp: new Date().toISOString()
+            }
+          }
         }
       });
       
@@ -104,10 +137,38 @@ export class AIService {
         throw error;
       }
       
+      // For guest users without auth, store the roadmap in localStorage
+      if (userProfile.is_guest) {
+        localStorage.setItem('guestRoadmap', JSON.stringify(data.roadmap));
+      }
+      
       return data.roadmap;
     } catch (error) {
       console.error('Error in generateRoadmap:', error);
-      throw new Error("Failed to generate roadmap");
+      
+      // Create fallback roadmap if API fails
+      const fallbackRoadmap = {
+        theme: userProfile.theme || 'General',
+        goal: goals,
+        days: Array.from({ length: 30 }, (_, i) => ({
+          day: i + 1,
+          title: `Day ${i+1}: Progress Step`,
+          description: "Continue working on your goals with small, achievable steps.",
+          tasks: [
+            "Review your progress",
+            "Set a small goal for today",
+            "Take one action toward your main goal"
+          ],
+          completed: false
+        }))
+      };
+      
+      // Store fallback for guest users
+      if (userProfile.is_guest) {
+        localStorage.setItem('guestRoadmap', JSON.stringify(fallbackRoadmap));
+      }
+      
+      return fallbackRoadmap;
     }
   }
 

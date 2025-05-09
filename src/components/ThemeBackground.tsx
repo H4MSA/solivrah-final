@@ -2,16 +2,19 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useApp } from "@/context/AppContext";
+import { useLocation } from "react-router-dom";
 
 export const ThemeBackground: React.FC = () => {
   const { selectedTheme } = useApp();
   const [mounted, setMounted] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null;
+  // Don't render on auth pages
+  if (!mounted || location.pathname.includes("/auth")) return null;
 
   const getThemeGradient = () => {
     switch (selectedTheme) {
