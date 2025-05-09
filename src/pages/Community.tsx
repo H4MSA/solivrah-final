@@ -161,7 +161,8 @@ const Community = () => {
   };
   
   return (
-    <div className="min-h-screen pb-24 bg-black">
+    // Removed the min-h-screen pb-24 bg-black to fix the black background overlay
+    <div className="pb-24">
       <div className="p-4 space-y-4 max-w-[430px] mx-auto">
         <h1 className="text-xl font-bold mb-4">Community</h1>
         

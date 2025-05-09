@@ -16,7 +16,7 @@ export const SearchBar: React.FC = () => (
     <input 
       type="text" 
       placeholder="Search for quests or tasks..." 
-      className="w-full h-10 bg-[#1A1A1A]/90 border border-[#333333] rounded-lg pl-10 pr-4 text-xs text-white/80 placeholder:text-white/50 focus:outline-none focus:ring-1 focus:ring-white/20 focus:border-white/20 transition-all"
+      className="w-full h-10 bg-[#1A1A1A] border border-[#333333] rounded-lg pl-10 pr-4 text-xs text-white/80 placeholder:text-white/50 focus:outline-none focus:ring-1 focus:ring-white/20 focus:border-white/20 transition-all"
     />
   </motion.div>
 );

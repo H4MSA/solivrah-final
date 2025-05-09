@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
-import { Send, User, Smile, Meh, Frown, ChevronDown, ChevronUp, Clock, Menu } from "lucide-react";
+import { Send, User, Smile, Meh, Frown, ChevronDown, ChevronUp, Clock } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AIService } from "@/services/AIService";
@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { ChatHistoryDrawer } from "@/components/coach/ChatHistoryDrawer";
 import { TabNavigation } from "@/components/TabNavigation";
+import { Card } from "@/components/ui/card";
 import type { Database } from "@/integrations/supabase/types";
 
 interface Message {
@@ -271,7 +272,7 @@ const Coach = () => {
   };
 
   return (
-    <div className="min-h-screen pb-24 flex flex-col bg-black">
+    <div className="pb-24 flex flex-col">
       <ChatHistoryDrawer 
         isOpen={showHistory} 
         onClose={() => setShowHistory(false)}
@@ -280,7 +281,7 @@ const Coach = () => {
       />
       
       <motion.div 
-        className="p-4 flex-shrink-0 border-b border-white/10 bg-[#111111] z-10 sticky top-0"
+        className="p-4 flex-shrink-0 border-b border-white/10 bg-[#1A1A1A] z-10 sticky top-0 rounded-b-xl"
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.3 }}
@@ -293,12 +294,12 @@ const Coach = () => {
             >
               <Clock size={20} />
             </button>
-            <h1 className="text-lg font-semibold text-purple-300">AI Coach</h1>
+            <h1 className="text-lg font-semibold text-white">AI Coach</h1>
           </div>
           <div className="flex items-center gap-2">
             <motion.button 
               onClick={() => setShowMoodSelector(!showMoodSelector)}
-              className="flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-[#1A1A1A] hover:bg-[#222222] border border-white/10 transition-all duration-300 text-sm"
+              className="flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-[#222222] hover:bg-[#333333] border border-white/10 transition-all duration-300 text-sm"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
             >
@@ -308,7 +309,7 @@ const Coach = () => {
             </motion.button>
             
             <motion.div 
-              className="w-9 h-9 rounded-full bg-[#1A1A1A] flex items-center justify-center border border-white/10 hover:border-white/20 transition-all hover:bg-[#222222]"
+              className="w-9 h-9 rounded-full bg-[#222222] flex items-center justify-center border border-white/10 hover:border-white/20 transition-all hover:bg-[#333333]"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -414,9 +415,9 @@ const Coach = () => {
             >
               <div className="flex items-center space-x-2">
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-purple-400/60 rounded-full animate-pulse"></div>
-                  <div className="w-2 h-2 bg-purple-400/60 rounded-full animate-pulse delay-150"></div>
-                  <div className="w-2 h-2 bg-purple-400/60 rounded-full animate-pulse delay-300"></div>
+                  <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse delay-150"></div>
+                  <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse delay-300"></div>
                 </div>
                 <span className="text-xs text-white/50">AI is thinking...</span>
               </div>
@@ -446,7 +447,7 @@ const Coach = () => {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.3 }}
       >
-        <div className="flex items-center gap-2 bg-[#1A1A1A] rounded-full p-1 pr-2 border border-white/10 hover:border-white/20 transition-all shadow-lg">
+        <Card className="flex items-center gap-2 rounded-full p-1 pr-2 border border-white/10 hover:border-white/20 transition-all shadow-lg">
           <input 
             type="text" 
             value={input}
@@ -457,8 +458,8 @@ const Coach = () => {
             disabled={isLoading}
           />
           <motion.button 
-            className={`bg-purple-500 text-white rounded-full p-2 transition-all ${
-              input.trim() ? 'hover:bg-purple-600 active:scale-95' : 'opacity-50 cursor-not-allowed'
+            className={`bg-white text-black rounded-full p-2 transition-all ${
+              input.trim() ? 'hover:bg-white/90 active:scale-95' : 'opacity-50 cursor-not-allowed'
             }`}
             onClick={handleSend}
             disabled={isLoading || !input.trim()}
@@ -468,7 +469,7 @@ const Coach = () => {
           >
             <Send size={16} />
           </motion.button>
-        </div>
+        </Card>
       </motion.div>
       
       <TabNavigation />
