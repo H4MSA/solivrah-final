@@ -3,7 +3,6 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Lock, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { StartButton } from "@/components/ui/start-button";
 
 interface QuestCardProps {
   title: string;
@@ -35,7 +34,7 @@ export const QuestCard: React.FC<QuestCardProps> = ({
       )}
     >
       <div className={cn(
-        "p-4 bg-black/80 border border-[#333333] rounded-xl shadow-sm",
+        "p-4 bg-[#1A1A1A] border border-[#333333] rounded-xl shadow-sm",
         active && "border-white/20"
       )}>
         {active && (

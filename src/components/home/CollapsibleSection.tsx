@@ -1,57 +1,54 @@
 
-import React, { useState } from "react";
-import { ChevronUp, ChevronDown } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 interface CollapsibleSectionProps {
   title: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
-  rightLabel?: string;
 }
 
-export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ 
-  title, 
-  children, 
-  defaultOpen = true,
-  rightLabel
+export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
+  title,
+  children,
+  defaultOpen = true
 }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   
   return (
-    <div className="space-y-3 mb-5">
-      <div 
-        className="flex justify-between items-center cursor-pointer"
+    <motion.div 
+      className="mb-4 bg-[#1A1A1A] rounded-xl border border-[#333333] overflow-hidden"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <button
         onClick={() => setIsOpen(!isOpen)}
+        className="flex justify-between items-center w-full px-4 py-3 text-left text-sm font-semibold"
       >
-        <h2 className="text-base font-semibold text-white">{title}</h2>
-        <div className="flex items-center gap-2">
-          {rightLabel && (
-            <span className="text-xs text-white/60 bg-white/5 px-2 py-0.5 rounded-full border border-white/5">
-              {rightLabel}
-            </span>
-          )}
-          <button className="p-1 rounded-full bg-white/5 border border-white/5 active:scale-95 transition-all">
-            {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </button>
-        </div>
-      </div>
+        <span>{title}</span>
+        <motion.div
+          animate={{ rotate: isOpen ? 90 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+        </motion.div>
+      </button>
       
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
+            animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden"
+            className="overflow-hidden px-4 pb-4"
           >
-            <div className="space-y-3">
-              {children}
-            </div>
+            {children}
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 };

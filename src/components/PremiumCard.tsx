@@ -40,7 +40,7 @@ export const PremiumCard: React.FC<PremiumCardProps> = ({
   return (
     <motion.div
       className={cn(
-        "rounded-2xl p-5 mb-5 transition-colors duration-200",
+        "rounded-xl p-5 mb-5 transition-colors duration-200",
         variant === "default" && "bg-[#1A1A1A] text-white",
         variant === "selected" && "bg-[#222222] border-white/20 text-white",
         variant === "dark" && "bg-black/90 text-white",
@@ -82,12 +82,12 @@ export const OptionCard: React.FC<PremiumCardProps & {
   return (
     <PremiumCard
       variant={selected ? "selected" : "default"}
-      className={cn("p-5", className)}
+      className={cn("p-4", className)}
       interactive={true}
       onClick={onClick}
       {...props}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {icon && (
           <div className={cn(
             "flex items-center justify-center w-10 h-10 rounded-full", 

@@ -1,7 +1,9 @@
 
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Camera, User } from "lucide-react";
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Camera } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useApp } from '@/context/AppContext';
 
 interface HeaderSectionProps {
   greeting: string;
@@ -9,32 +11,46 @@ interface HeaderSectionProps {
   onCameraClick: () => void;
 }
 
-export const HeaderSection: React.FC<HeaderSectionProps> = ({ greeting, displayName, onCameraClick }) => {
-  const navigate = useNavigate();
+export const HeaderSection: React.FC<HeaderSectionProps> = ({
+  greeting,
+  displayName,
+  onCameraClick
+}) => {
+  const { user } = useApp();
   
   return (
-    <div className="flex justify-between items-center mb-4">
+    <motion.div 
+      className="flex justify-between items-center mb-6"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       <div>
-        <h1 className="text-sm text-white font-medium">
-          {greeting},
-        </h1>
-        <h2 className="text-base text-white font-semibold">{displayName}</h2>
+        <h1 className="text-xl font-bold text-white leading-tight">{greeting},</h1>
+        <p className="text-sm text-white/70">{displayName}</p>
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <button 
-          className="w-8 h-8 rounded-full bg-black/60 border border-[#333333] flex items-center justify-center transition-all hover:bg-black/70 active:scale-95"
           onClick={onCameraClick}
+          className="bg-[#1A1A1A] border border-[#333333] p-2 rounded-full hover:bg-[#222222] transition-colors"
         >
-          <Camera size={16} className="text-white" />
+          <Camera size={18} className="text-white" />
         </button>
-        <button 
-          className="w-8 h-8 rounded-full bg-black/60 border border-[#333333] flex items-center justify-center transition-all hover:bg-black/70 active:scale-95"
-          onClick={() => navigate("/profile")}
-        >
-          <User size={16} className="text-white" />
-        </button>
+        
+        <Avatar className="h-10 w-10 border border-[#333333]">
+          {user?.user_metadata?.avatar_url ? (
+            <AvatarImage 
+              src={user.user_metadata.avatar_url} 
+              alt={displayName} 
+            />
+          ) : (
+            <AvatarFallback className="bg-[#1A1A1A] text-white">
+              {displayName?.charAt(0)?.toUpperCase() || '?'}
+            </AvatarFallback>
+          )}
+        </Avatar>
       </div>
-    </div>
+    </motion.div>
   );
 };

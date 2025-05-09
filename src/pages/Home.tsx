@@ -60,6 +60,25 @@ const Home = () => {
   
   const displayName = user?.user_metadata?.username || user?.email?.split('@')[0] || "Friend";
   
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 300, damping: 24 }
+    }
+  };
+
   return (
     <div className="min-h-screen pb-20 text-white">
       <ThemeBackground />
@@ -78,50 +97,73 @@ const Home = () => {
         />
       )}
       
-      <div className="px-4 pt-4 pb-20 space-y-2 max-w-[340px] mx-auto">
-        <HeaderSection 
-          greeting={greeting} 
-          displayName={displayName} 
-          onCameraClick={() => setShowCamera(true)} 
-        />
-        
-        <SearchBar />
-        
-        <DailyAffirmation />
-        
-        <CollapsibleSection title="Today's Quest">
-          <QuestCard 
-            title="Track your time for 24 hours" 
-            description="Document how you spend your day to identify time-wasting activities and opportunities for improvement."
-            onClick={() => navigate("/quests")}
-            active={true}
+      <motion.div 
+        className="px-4 pt-4 pb-20 space-y-4 max-w-[340px] mx-auto"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        <motion.div variants={itemVariants}>
+          <HeaderSection 
+            greeting={greeting} 
+            displayName={displayName} 
+            onCameraClick={() => setShowCamera(true)} 
           />
-        </CollapsibleSection>
+        </motion.div>
         
-        <ProgressCard 
-          streak={streak} 
-          xp={xp} 
-          level={level} 
-          progress={progress} 
-        />
+        <motion.div variants={itemVariants}>
+          <SearchBar />
+        </motion.div>
         
-        <MoodSection 
-          moods={moods} 
-          selectedMood={selectedMood} 
-          setSelectedMood={setSelectedMood} 
-        />
+        <motion.div variants={itemVariants}>
+          <DailyAffirmation />
+        </motion.div>
         
-        <QuickActionSection onScannerClick={() => setShowScanner(true)} />
+        <motion.div variants={itemVariants}>
+          <CollapsibleSection title="Today's Quest">
+            <QuestCard 
+              title="Track your time for 24 hours" 
+              description="Document how you spend your day to identify time-wasting activities and opportunities for improvement."
+              onClick={() => navigate("/quests")}
+              active={true}
+            />
+          </CollapsibleSection>
+        </motion.div>
         
-        <CollapsibleSection title="Coming Up">
-          <QuestCard 
-            title="Day 2: Morning Routine" 
-            description="Establish a productive morning routine to set the tone for your day."
-            locked={true}
-            onClick={() => {}}
+        <motion.div variants={itemVariants}>
+          <ProgressCard 
+            streak={streak} 
+            xp={xp} 
+            level={level} 
+            progress={progress} 
           />
-        </CollapsibleSection>
-      </div>
+        </motion.div>
+        
+        <motion.div variants={itemVariants}>
+          <MoodSection 
+            moods={moods} 
+            selectedMood={selectedMood} 
+            setSelectedMood={setSelectedMood} 
+          />
+        </motion.div>
+        
+        <motion.div variants={itemVariants}>
+          <QuickActionSection onScannerClick={() => setShowScanner(true)} />
+        </motion.div>
+        
+        <motion.div variants={itemVariants}>
+          <CollapsibleSection title="Coming Up">
+            <QuestCard 
+              title="Day 2: Morning Routine" 
+              description="Establish a productive morning routine to set the tone for your day."
+              locked={true}
+              onClick={() => {}}
+            />
+          </CollapsibleSection>
+        </motion.div>
+      </motion.div>
+      
+      <TabNavigation />
     </div>
   );
 };

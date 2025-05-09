@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { PremiumCard } from '@/components/PremiumCard';
 import { supabase } from '@/integrations/supabase/client';
@@ -41,6 +41,53 @@ const Profile = () => {
     { id: "Resilience", name: "Resilience", color: "from-green-400/20 to-green-700/10" },
     { id: "Wildcards", name: "Wildcards", color: "from-amber-400/20 to-amber-700/10" }
   ];
+  
+  // Attempt to load profile image and banner image on component mount
+  useEffect(() => {
+    if (user) {
+      // Check if image exists in storage for this user
+      const checkAndLoadImages = async () => {
+        try {
+          // For demonstration, we're using hardcoded paths
+          // In a real app, you would fetch these paths from a user profile table
+          const profilePath = `profile-images/${user.id}-profile`;
+          const bannerPath = `profile-images/${user.id}-banner`;
+          
+          const { data: profileData } = await supabase.storage
+            .from('profile-images')
+            .list('', { 
+              search: profilePath
+            });
+            
+          const { data: bannerData } = await supabase.storage
+            .from('profile-images')
+            .list('', { 
+              search: bannerPath
+            });
+          
+          if (profileData && profileData.length > 0) {
+            const { data: urlData } = supabase.storage
+              .from('profile-images')
+              .getPublicUrl(profileData[0].name);
+            
+            setProfileImageUrl(urlData.publicUrl);
+          }
+          
+          if (bannerData && bannerData.length > 0) {
+            const { data: urlData } = supabase.storage
+              .from('profile-images')
+              .getPublicUrl(bannerData[0].name);
+            
+            setBannerImageUrl(urlData.publicUrl);
+          }
+        } catch (error) {
+          console.error("Error loading profile images:", error);
+        }
+      };
+      
+      checkAndLoadImages();
+    }
+  }, [user]);
   
   const handleSignOut = async () => {
     try {
@@ -84,11 +131,11 @@ const Profile = () => {
     
     try {
       const fileExt = file.name.split('.').pop();
-      const filePath = `profile-images/${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `profile-images/${user.id}-profile.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('profile-images')
-        .upload(filePath, file);
+        .upload(filePath, file, { upsert: true });
         
       if (uploadError) throw uploadError;
       
@@ -119,11 +166,11 @@ const Profile = () => {
     
     try {
       const fileExt = file.name.split('.').pop();
-      const filePath = `banner-images/${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `profile-images/${user.id}-banner.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('profile-images')
-        .upload(filePath, file);
+        .upload(filePath, file, { upsert: true });
         
       if (uploadError) throw uploadError;
       
@@ -179,7 +226,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen pb-24 text-white">
       <motion.div 
-        className="px-4 pt-6 pb-24"
+        className="px-4 pt-6 pb-24 max-w-[340px] mx-auto"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
