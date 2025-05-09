@@ -51,7 +51,12 @@ export const QuestCard: React.FC<QuestCardProps> = ({
           <p className="text-xs text-white/70 leading-relaxed">{description}</p>
           
           {!locked ? (
-            <StartButton onClick={onClick}>Start</StartButton>
+            <button
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg transition-colors duration-200 bg-black/80 text-white hover:bg-black/90 shadow-sm border border-white/10 text-xs font-medium"
+              onClick={onClick}
+            >
+              Start <span className="ml-1">→</span>
+            </button>
           ) : (
             <div className="flex items-center justify-center py-2 text-xs text-white/50">
               <Lock size={12} className="mr-1" />
