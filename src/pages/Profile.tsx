@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '@/context/AppContext';
 import { PremiumCard } from '@/components/PremiumCard';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,37 +47,39 @@ const Profile = () => {
       // Check if image exists in storage for this user
       const checkAndLoadImages = async () => {
         try {
-          // For demonstration, we're using hardcoded paths
-          // In a real app, you would fetch these paths from a user profile table
-          const profilePath = `profile-images/${user.id}-profile`;
-          const bannerPath = `profile-images/${user.id}-banner`;
-          
-          const { data: profileData } = await supabase.storage
-            .from('profile-images')
-            .list('', { 
-              search: profilePath
-            });
+          // Create the bucket if it doesn't exist
+          const { data: buckets } = await supabase.storage
+            .listBuckets();
             
-          const { data: bannerData } = await supabase.storage
-            .from('profile-images')
-            .list('', { 
-              search: bannerPath
-            });
+          const profileBucketExists = buckets?.some(bucket => bucket.name === 'profile-images');
           
-          if (profileData && profileData.length > 0) {
-            const { data: urlData } = supabase.storage
-              .from('profile-images')
-              .getPublicUrl(profileData[0].name);
-            
-            setProfileImageUrl(urlData.publicUrl);
+          if (!profileBucketExists) {
+            await supabase.storage.createBucket('profile-images', {
+              public: true,
+              fileSizeLimit: 1024 * 1024 * 2 // 2MB
+            });
           }
           
-          if (bannerData && bannerData.length > 0) {
-            const { data: urlData } = supabase.storage
-              .from('profile-images')
-              .getPublicUrl(bannerData[0].name);
+          // For profile image
+          const profilePath = `${user.id}/profile`;
+          const { data: profileData, error: profileError } = await supabase.storage
+            .from('profile-images')
+            .download(profilePath);
             
-            setBannerImageUrl(urlData.publicUrl);
+          if (profileData && !profileError) {
+            const url = URL.createObjectURL(profileData);
+            setProfileImageUrl(url);
+          }
+          
+          // For banner image
+          const bannerPath = `${user.id}/banner`;
+          const { data: bannerData, error: bannerError } = await supabase.storage
+            .from('profile-images')
+            .download(bannerPath);
+            
+          if (bannerData && !bannerError) {
+            const url = URL.createObjectURL(bannerData);
+            setBannerImageUrl(url);
           }
         } catch (error) {
           console.error("Error loading profile images:", error);
@@ -130,8 +131,8 @@ const Profile = () => {
     if (!file || !user) return;
     
     try {
-      const fileExt = file.name.split('.').pop();
-      const filePath = `profile-images/${user.id}-profile.${fileExt}`;
+      // Upload to Supabase Storage
+      const filePath = `${user.id}/profile`;
       
       const { error: uploadError } = await supabase.storage
         .from('profile-images')
@@ -139,11 +140,13 @@ const Profile = () => {
         
       if (uploadError) throw uploadError;
       
-      const { data: urlData } = supabase.storage
+      // Generate a URL for the uploaded image
+      const { data } = await supabase.storage
         .from('profile-images')
         .getPublicUrl(filePath);
-        
-      setProfileImageUrl(urlData.publicUrl);
+      
+      // Set the profile image URL with a cache-busting query parameter
+      setProfileImageUrl(`${data.publicUrl}?t=${new Date().getTime()}`);
       
       toast({
         title: "Profile image updated",
@@ -165,8 +168,8 @@ const Profile = () => {
     if (!file || !user) return;
     
     try {
-      const fileExt = file.name.split('.').pop();
-      const filePath = `profile-images/${user.id}-banner.${fileExt}`;
+      // Upload to Supabase Storage
+      const filePath = `${user.id}/banner`;
       
       const { error: uploadError } = await supabase.storage
         .from('profile-images')
@@ -174,11 +177,13 @@ const Profile = () => {
         
       if (uploadError) throw uploadError;
       
-      const { data: urlData } = supabase.storage
+      // Generate a URL for the uploaded image
+      const { data } = await supabase.storage
         .from('profile-images')
         .getPublicUrl(filePath);
-        
-      setBannerImageUrl(urlData.publicUrl);
+      
+      // Set the banner image URL with a cache-busting query parameter
+      setBannerImageUrl(`${data.publicUrl}?t=${new Date().getTime()}`);
       
       toast({
         title: "Banner image updated",
@@ -224,7 +229,7 @@ const Profile = () => {
   ];
   
   return (
-    <div className="min-h-screen pb-24 text-white">
+    <div className="pb-24">
       <motion.div 
         className="px-4 pt-6 pb-24 max-w-[340px] mx-auto"
         initial="hidden"

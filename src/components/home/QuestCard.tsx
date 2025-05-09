@@ -64,11 +64,11 @@ export const QuestCard: React.FC<QuestCardProps> = ({
           )}
         </div>
         
-        {/* Overlay for locked quests */}
+        {/* Overlay for locked quests - improved styling for premium look */}
         {locked && (
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] rounded-xl flex flex-col items-center justify-center">
-            <Lock size={24} className="text-white/60 mb-2" />
-            <p className="text-xs text-white/60 text-center px-6">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] rounded-xl flex flex-col items-center justify-center">
+            <Lock size={24} className="text-white/70 mb-2" />
+            <p className="text-xs text-white/70 text-center px-6">
               Complete previous quests to unlock
             </p>
           </div>

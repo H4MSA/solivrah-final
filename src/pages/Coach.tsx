@@ -26,8 +26,11 @@ interface ChatHistory {
   unread?: boolean;
 }
 
+// The key for storing chat history in local storage
+const CHAT_HISTORY_KEY = 'ai_coach_chat_history';
+
 const Coach = () => {
-  const { selectedTheme, user } = useApp();
+  const { selectedTheme, user, isGuest } = useApp();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     { sender: "ai", text: `Hi, I'm your AI Coach for ${selectedTheme || 'personal development'}. How can I help you today?` },
@@ -42,6 +45,29 @@ const Coach = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const aiService = new AIService();
+
+  // Load messages from local storage on initial load
+  useEffect(() => {
+    const savedMessages = localStorage.getItem(CHAT_HISTORY_KEY);
+    if (savedMessages) {
+      try {
+        const parsedMessages = JSON.parse(savedMessages);
+        if (Array.isArray(parsedMessages) && parsedMessages.length > 0) {
+          setMessages(parsedMessages);
+        }
+      } catch (error) {
+        console.error("Error parsing saved messages:", error);
+      }
+    }
+  }, []);
+
+  // Save messages to local storage whenever they change
+  useEffect(() => {
+    // Don't save if it's just the initial greeting
+    if (messages.length > 1) {
+      localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(messages));
+    }
+  }, [messages]);
 
   useEffect(() => {
     scrollToBottom();
@@ -150,6 +176,19 @@ const Coach = () => {
     toast({
       title: "Chat selected",
       description: `Selected chat from ${chatId}`,
+      duration: 2000,
+    });
+  };
+
+  const clearChatHistory = () => {
+    // Clear local storage and reset messages
+    localStorage.removeItem(CHAT_HISTORY_KEY);
+    setMessages([
+      { sender: "ai", text: `Hi, I'm your AI Coach for ${selectedTheme || 'personal development'}. How can I help you today?` }
+    ]);
+    toast({
+      title: "Chat history cleared",
+      description: "Your conversation history has been cleared.",
       duration: 2000,
     });
   };
@@ -272,7 +311,7 @@ const Coach = () => {
   };
 
   return (
-    <div className="pb-24 flex flex-col">
+    <div className="pb-24 flex flex-col min-h-screen">
       <ChatHistoryDrawer 
         isOpen={showHistory} 
         onClose={() => setShowHistory(false)}
@@ -436,6 +475,17 @@ const Coach = () => {
               </p>
             </motion.div>
           )}
+
+          {messages.length > 1 && (
+            <div className="flex justify-center my-4">
+              <button
+                onClick={clearChatHistory}
+                className="text-xs text-white/50 hover:text-white/70 transition-colors px-3 py-1 bg-black/20 rounded-full border border-white/5"
+              >
+                Clear chat history
+              </button>
+            </div>
+          )}
           
           <div ref={messagesEndRef} />
         </div>
@@ -471,8 +521,6 @@ const Coach = () => {
           </motion.button>
         </Card>
       </motion.div>
-      
-      <TabNavigation />
     </div>
   );
 };

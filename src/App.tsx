@@ -33,8 +33,10 @@ const queryClient = new QueryClient({
 
 // SessionHandler component to manage authentication state
 const SessionHandler = ({ children }: { children: React.ReactNode }) => {
-  const { setUser, setSession } = useApp();
+  const { setUser, setSession, setIsGuest } = useApp();
   const [checking, setChecking] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Set up auth state listener FIRST (critical for avoiding auth deadlocks)
@@ -64,6 +66,9 @@ const SessionHandler = ({ children }: { children: React.ReactNode }) => {
           setUser(parsedSession?.user ?? null);
         }
         
+        // Check if user has completed a survey
+        const hasCompletedSurvey = localStorage.getItem('hasCompletedSurvey') === 'true';
+        
         // Then verify with Supabase
         const { data: { session } } = await supabase.auth.getSession();
         console.log("Initial session check:", session?.user?.email || "No session");
@@ -72,11 +77,30 @@ const SessionHandler = ({ children }: { children: React.ReactNode }) => {
           setSession(session);
           setUser(session?.user ?? null);
           localStorage.setItem('authSession', JSON.stringify(session));
+          
+          // Check if we need to redirect to survey
+          if (location.pathname === '/auth' || location.pathname === '/') {
+            navigate('/home');
+          }
         } else {
           // If Supabase says no session, clear localStorage
           localStorage.removeItem('authSession');
           setSession(null);
           setUser(null);
+          
+          // Check if guest mode is active
+          const isGuestMode = localStorage.getItem('guestMode') === 'true';
+          if (isGuestMode) {
+            setIsGuest(true);
+            
+            // If guest user hasn't completed survey, redirect them
+            if (!hasCompletedSurvey && !location.pathname.includes('/survey')) {
+              // Wait for the next tick to avoid navigation conflicts
+              setTimeout(() => {
+                navigate('/survey');
+              }, 0);
+            }
+          }
         }
       } catch (error) {
         console.error("Session check error:", error);
@@ -91,7 +115,7 @@ const SessionHandler = ({ children }: { children: React.ReactNode }) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [setUser, setSession]);
+  }, [setUser, setSession, setIsGuest, navigate, location.pathname]);
 
   if (checking) {
     return (
@@ -108,6 +132,14 @@ const SessionHandler = ({ children }: { children: React.ReactNode }) => {
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, isGuest } = useApp();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user is in guest mode and needs to complete survey
+    if (isGuest && localStorage.getItem('hasCompletedSurvey') !== 'true' && !location.pathname.includes('/survey')) {
+      navigate('/survey');
+    }
+  }, [isGuest, location.pathname, navigate]);
 
   if (loading) {
     return (
@@ -206,6 +238,25 @@ const App = () => {
     };
     
     requestCameraPermission();
+
+    // Performance improvements
+    // Use passive event listeners for better scroll performance
+    const opts = { passive: true };
+    document.addEventListener('touchstart', () => {}, opts);
+    document.addEventListener('touchmove', () => {}, opts);
+    
+    // Optimize image loading
+    if ('loading' in HTMLImageElement.prototype) {
+      const images = document.querySelectorAll('img[loading="lazy"]');
+      images.forEach(img => {
+        img.setAttribute('loading', 'lazy');
+      });
+    }
+
+    return () => {
+      document.removeEventListener('touchstart', () => {});
+      document.removeEventListener('touchmove', () => {});
+    };
   }, []);
 
   return (

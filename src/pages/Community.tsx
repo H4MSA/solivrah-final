@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Star, Users, MessageCircle, Heart } from "lucide-react";
+import { Star, Users, MessageCircle, Heart, Search } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -8,6 +8,7 @@ import { TabNavigation } from "@/components/TabNavigation";
 
 const Community = () => {
   const [activeTab, setActiveTab] = useState("leaderboards");
+  const [searchTerm, setSearchTerm] = useState("");
   const { selectedTheme } = useApp();
   
   // Sample data
@@ -51,6 +52,13 @@ const Community = () => {
     }
   };
   
+  const filteredData = (data: any[], key: string = 'name') => {
+    if (!searchTerm) return data;
+    return data.filter(item => 
+      item[key].toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }
+  
   const renderTabContent = () => {
     switch (activeTab) {
       case "leaderboards":
@@ -61,7 +69,7 @@ const Community = () => {
             initial="hidden"
             animate="visible"
           >
-            {leaderboards.map((user, index) => (
+            {filteredData(leaderboards).map((user, index) => (
               <motion.div key={index} variants={itemVariants}>
                 <div className="p-4 rounded-xl bg-[#1A1A1A] border border-[#333333] flex items-center gap-4">
                   <div className="bg-white/10 rounded-full w-12 h-12 flex items-center justify-center font-semibold border border-white/5 text-lg">
@@ -90,7 +98,7 @@ const Community = () => {
             initial="hidden"
             animate="visible"
           >
-            {groups.map((group, index) => (
+            {filteredData(groups).map((group, index) => (
               <motion.div key={index} variants={itemVariants}>
                 <div className="p-4 rounded-xl bg-[#1A1A1A] border border-[#333333] space-y-3">
                   <h3 className="text-base font-semibold">{group.name}</h3>
@@ -118,7 +126,7 @@ const Community = () => {
             initial="hidden"
             animate="visible"
           >
-            {posts.map((post, index) => (
+            {filteredData(posts, 'content').map((post, index) => (
               <motion.div key={index} variants={itemVariants}>
                 <div className="p-4 rounded-xl bg-[#1A1A1A] border border-[#333333] space-y-3">
                   <div className="flex justify-between items-center">
@@ -161,10 +169,22 @@ const Community = () => {
   };
   
   return (
-    // Removed the min-h-screen pb-24 bg-black to fix the black background overlay
     <div className="pb-24">
       <div className="p-4 space-y-4 max-w-[430px] mx-auto">
         <h1 className="text-xl font-bold mb-4">Community</h1>
+        
+        <div className="relative mb-4">
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50">
+            <Search size={16} strokeWidth={2.5} />
+          </div>
+          <input 
+            type="text" 
+            placeholder="Search..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full h-10 bg-[#1A1A1A] border border-[#333333] rounded-lg pl-10 pr-4 text-xs text-white/80 placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
+          />
+        </div>
         
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
           <button 
@@ -203,8 +223,6 @@ const Community = () => {
           {renderTabContent()}
         </div>
       </div>
-      
-      <TabNavigation />
     </div>
   );
 };

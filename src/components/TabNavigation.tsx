@@ -20,6 +20,13 @@ export const TabNavigation = () => {
     { to: "/profile", icon: User, label: "Profile" },
   ];
   
+  // Only render navigation if we're on a page that should have it
+  const shouldShowNavigation = ['/home', '/quests', '/coach', '/community', '/profile'].includes(location.pathname);
+  
+  if (!shouldShowNavigation) {
+    return null;
+  }
+  
   return (
     <div className="fixed inset-x-0 bottom-4 z-50 px-4 flex justify-center">
       <motion.div 
