@@ -1,8 +1,55 @@
+
 import React, { useState, useEffect } from "react";
 import { Quote, RefreshCw } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { AIService } from "@/services/AIService";
 import { motion } from "framer-motion";
+
+// More impactful affirmations based on themes
+const themeAffirmations = {
+  Focus: [
+    "I direct my focus with intention and purpose.",
+    "My mind is clear, focused, and ready for any challenge.",
+    "I choose where my attention goes, and it serves my highest goals.",
+    "With each deep breath, my focus strengthens and sharpens.",
+    "I am fully present in this moment, exactly where I need to be.",
+  ],
+  Fitness: [
+    "My body grows stronger with every effort I make.",
+    "I honor my body by challenging its limits and respecting its needs.",
+    "Each choice I make today builds the healthier future I deserve.",
+    "My commitment to myself is unwavering; I show up for my health.",
+    "My strength is not just physical—it flows from mind to body and back.",
+  ],
+  Mindfulness: [
+    "I am grounded in the present, aware of all that surrounds and fills me.",
+    "Peace begins with this breath, this moment, this awareness.",
+    "I observe my thoughts without judgment, letting what doesn't serve me flow away.",
+    "The wisdom I seek has always been within me, waiting for stillness.",
+    "In the space between thoughts, I find my truest self.",
+  ],
+  Learning: [
+    "My mind expands with each new idea I encounter.",
+    "I transform challenges into opportunities for profound growth.",
+    "The curiosity that drives me is my greatest strength.",
+    "Every question leads me closer to the wisdom I seek.",
+    "I am becoming more capable and insightful with each day.",
+  ],
+  Discipline: [
+    "I am the architect of my habits and the master of my actions.",
+    "My willpower grows stronger each time I choose long-term fulfillment over instant gratification.",
+    "Consistency is my superpower—small daily actions create extraordinary results.",
+    "I follow through on commitments to myself with the same respect I show others.",
+    "The discipline I practice today creates freedom for my future self.",
+  ],
+  Default: [
+    "I am capable of remarkable growth and transformation.",
+    "The path forward becomes clear when I take the first step.",
+    "I have everything I need within me to create the life I desire.",
+    "My potential is limitless when I align my actions with my purpose.",
+    "Today I choose progress over perfection.",
+  ]
+};
 
 export const DailyAffirmation = () => {
   const { selectedTheme, user } = useApp();
@@ -30,10 +77,8 @@ export const DailyAffirmation = () => {
     setError(false);
     
     try {
-      // Get user's information for personalization
+      // Try to get AI-generated affirmation first
       const username = user?.user_metadata?.username || user?.email?.split('@')[0] || "";
-      
-      // Get user's mood from local storage if available
       const userMood = localStorage.getItem("currentMood") || "";
       
       // Use AI service to generate personalized affirmation
@@ -53,16 +98,19 @@ export const DailyAffirmation = () => {
       console.error("Failed to generate affirmation:", err);
       setError(true);
       
-      // Fallback to default affirmation if API call fails
-      const fallbacks = [
-        "I am capable of growth.",
-        "Progress over perfection.",
-        "I embrace challenges.",
-        "Today's efforts shape tomorrow.",
-        "My potential is limitless.",
-      ];
-      const randomIndex = Math.floor(Math.random() * fallbacks.length);
-      setAffirmation(fallbacks[randomIndex]);
+      // Fall back to our theme-based curated affirmations
+      const theme = selectedTheme || "Default";
+      const affirmations = themeAffirmations[theme as keyof typeof themeAffirmations] || 
+                         themeAffirmations.Default;
+      
+      const randomIndex = Math.floor(Math.random() * affirmations.length);
+      const fallbackAffirmation = affirmations[randomIndex];
+      
+      setAffirmation(fallbackAffirmation);
+      
+      // Still save to localStorage to prevent repeated attempts
+      localStorage.setItem("dailyAffirmation", fallbackAffirmation);
+      localStorage.setItem("affirmationDate", new Date().toDateString());
     } finally {
       setRefreshing(false);
     }
@@ -70,7 +118,7 @@ export const DailyAffirmation = () => {
   
   return (
     <div 
-      className="relative overflow-hidden bg-black/80 border border-[#333333] rounded-xl p-3 shadow-sm mb-4"
+      className="relative overflow-hidden bg-[#1A1A1A] border border-[#333333] rounded-xl p-3 shadow-sm mb-4"
     >
       <div className="absolute top-3 left-3">
         <Quote size={14} className="text-white/30" />
