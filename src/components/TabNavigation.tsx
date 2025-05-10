@@ -5,12 +5,24 @@ import { motion } from "framer-motion";
 import { Home, Award, MessageCircle, Users, User } from "lucide-react";
 
 export const TabNavigation = () => {
-  const location = useLocation();
-  const [activeTab, setActiveTab] = useState("/home");
+  // Safely handle the location to prevent errors outside Router context
+  let pathname = '/';
+  let locationHook;
+  
+  try {
+    locationHook = useLocation();
+    pathname = locationHook.pathname;
+  } catch (error) {
+    console.warn("Router context not available in TabNavigation");
+  }
+  
+  const [activeTab, setActiveTab] = useState(pathname);
   
   useEffect(() => {
-    setActiveTab(location.pathname);
-  }, [location]);
+    if (locationHook) {
+      setActiveTab(pathname);
+    }
+  }, [pathname, locationHook]);
   
   const navTabs = [
     { to: "/home", icon: Home, label: "Home" },
@@ -21,7 +33,7 @@ export const TabNavigation = () => {
   ];
   
   // Only render navigation if we're on a page that should have it
-  const shouldShowNavigation = ['/home', '/quests', '/coach', '/community', '/profile'].includes(location.pathname);
+  const shouldShowNavigation = ['/home', '/quests', '/coach', '/community', '/profile'].includes(pathname);
   
   if (!shouldShowNavigation) {
     return null;

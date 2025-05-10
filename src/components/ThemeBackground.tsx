@@ -2,19 +2,34 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useApp } from "@/context/AppContext";
-import { useLocation } from "react-router-dom";
 
-export const ThemeBackground: React.FC = () => {
+export const ThemeBackground: React.FC<{
+  forcedPathname?: string; // Optional prop to pass pathname explicitly
+}> = ({ forcedPathname }) => {
   const { selectedTheme } = useApp();
   const [mounted, setMounted] = useState(false);
-  const location = useLocation();
+  
+  // Try to use location, but if not available, use the forcedPathname prop
+  let pathname = forcedPathname || '/';
+  
+  // Try to get location from React Router when available
+  try {
+    // Only import and use if we're in a browser environment
+    if (typeof window !== 'undefined') {
+      // Dynamic import to make this component usable outside of Router context
+      const location = window.location;
+      pathname = location.pathname;
+    }
+  } catch (error) {
+    console.warn("Router context not available, using forcedPathname");
+  }
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   // Don't render on auth pages
-  if (!mounted || location.pathname.includes("/auth")) return null;
+  if (!mounted || (pathname && pathname.includes("/auth"))) return null;
 
   const getThemeGradient = () => {
     switch (selectedTheme) {
