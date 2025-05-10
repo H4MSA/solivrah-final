@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -5,8 +6,7 @@ import { useApp } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { AIService } from "@/services/AIService";
-import { Button } from "@/components/ui/button";
-import { CheckCircle2 } from "lucide-react";
+import { Check, ArrowRight, Star, Clock } from "lucide-react";
 
 const themes = [
   { id: "Focus", label: "Focus & Productivity" },
@@ -101,21 +101,6 @@ const Survey = () => {
   
   const aiService = new AIService();
 
-  // Apply fixed background to prevent display issues
-  useEffect(() => {
-    document.body.classList.add('bg-black');
-    return () => {
-      document.body.classList.remove('bg-black');
-    };
-  }, []);
-
-  // Set up theme-specific suggestions when theme changes
-  useEffect(() => {
-    // Reset suggestions visibility when changing steps
-    setShowGoalSuggestions(false);
-    setShowStruggleSuggestions(false);
-  }, [currentStep]);
-  
   const handleNextStep = () => {
     if (currentStep === 1 && !selectedThemeId) {
       toast({
@@ -309,7 +294,7 @@ const Survey = () => {
   };
   
   return (
-    <div className="min-h-screen bg-black pt-10 px-6 pb-20 z-10 relative">
+    <div className="min-h-screen bg-gray-100 pt-12 px-6 pb-20 z-10 relative">
       <motion.div
         className="max-w-md mx-auto"
         variants={containerVariants}
@@ -318,8 +303,8 @@ const Survey = () => {
         exit="exit"
       >
         <motion.div variants={itemVariants}>
-          <h1 className="text-2xl font-bold text-white mb-2">Personalize Your Journey</h1>
-          <p className="text-white/70 mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Personalize Your Journey</h1>
+          <p className="text-gray-600 mb-8">
             Answer these questions to create your custom roadmap.
           </p>
         </motion.div>
@@ -332,262 +317,268 @@ const Survey = () => {
                 key={step}
                 className={`h-1 flex-1 rounded-full ${
                   step <= currentStep
-                    ? "bg-white"
-                    : "bg-white/20"
+                    ? "bg-gray-900"
+                    : "bg-gray-300"
                 }`}
               ></div>
             ))}
           </div>
-          <div className="text-white/50 text-xs mt-2">
+          <div className="text-gray-500 text-xs mt-2">
             Step {currentStep} of 4
           </div>
         </motion.div>
         
-        {/* Step 1: Select Theme */}
-        {currentStep === 1 && (
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="space-y-6"
-          >
-            <motion.div variants={itemVariants}>
-              <h2 className="text-xl font-semibold text-white mb-4">
-                Choose Your Focus Area
-              </h2>
-              
-              <div className="space-y-3">
-                {themes.map((theme) => (
-                  <motion.div
-                    key={theme.id}
-                    variants={itemVariants}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setSelectedThemeId(theme.id)}
-                    className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                      selectedThemeId === theme.id
-                        ? "border-white bg-white/10"
-                        : "border-white/10 bg-white/5 hover:bg-white/10"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                          selectedThemeId === theme.id
-                            ? "border-white"
-                            : "border-white/30"
-                        }`}
-                      >
-                        {selectedThemeId === theme.id && (
-                          <div className="w-2.5 h-2.5 bg-white rounded-full" />
-                        )}
-                      </div>
-                      <span className="text-white font-medium">
-                        {theme.label}
-                      </span>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-        
-        {/* Step 2: Goal setting */}
-        {currentStep === 2 && (
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="space-y-6"
-          >
-            <motion.div variants={itemVariants}>
-              <h2 className="text-xl font-semibold text-white mb-4">
-                What's your main goal?
-              </h2>
-              <p className="text-white/70 mb-4">
-                Be specific about what you want to achieve in the next 30 days.
-              </p>
-              
-              <div className="space-y-4">
-                <textarea
-                  value={goal}
-                  onChange={(e) => setGoal(e.target.value)}
-                  placeholder="e.g., Establish a consistent morning routine that includes exercise and reflection"
-                  className="w-full h-32 p-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/30"
-                />
+        <div className="backdrop-blur-lg bg-white/70 rounded-xl p-6 border border-gray-200 shadow-lg mb-8">
+          {/* Step 1: Select Theme */}
+          {currentStep === 1 && (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-6"
+            >
+              <motion.div variants={itemVariants}>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                  Choose Your Focus Area
+                </h2>
                 
-                {/* Need inspiration button */}
-                <button 
-                  onClick={() => setShowGoalSuggestions(!showGoalSuggestions)}
-                  className="w-full py-2 px-3 text-sm border border-white/10 rounded-lg bg-white/5 text-white/70 hover:bg-white/10 transition-colors"
-                >
-                  {showGoalSuggestions ? "Hide suggestions" : "Need inspiration? See suggestions"}
-                </button>
-                
-                {/* Goal suggestions */}
-                {showGoalSuggestions && (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    className="space-y-2 mt-3"
-                  >
-                    <p className="text-white/60 text-sm mb-2">Select a suggestion or use as inspiration:</p>
-                    {goalSuggestions[selectedThemeId as keyof typeof goalSuggestions].map((suggestion, index) => (
-                      <div 
-                        key={index}
-                        onClick={() => handleSelectSuggestion('goal', suggestion)}
-                        className="p-3 rounded-lg bg-white/5 border border-white/10 text-white/80 cursor-pointer hover:bg-white/10 transition-all text-sm flex items-start gap-2"
-                      >
-                        <div className="mt-0.5">
-                          <CheckCircle2 size={14} className="text-white/40" />
+                <div className="space-y-3">
+                  {themes.map((theme) => (
+                    <motion.div
+                      key={theme.id}
+                      variants={itemVariants}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setSelectedThemeId(theme.id)}
+                      className={`p-4 rounded-xl cursor-pointer transition-all shadow-sm ${
+                        selectedThemeId === theme.id
+                          ? "border-2 border-gray-900 bg-white"
+                          : "border border-gray-300 bg-white/60 hover:bg-white"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                            selectedThemeId === theme.id
+                              ? "border-gray-900"
+                              : "border-gray-400"
+                          }`}
+                        >
+                          {selectedThemeId === theme.id && (
+                            <div className="w-2.5 h-2.5 bg-gray-900 rounded-full" />
+                          )}
                         </div>
-                        <span>{suggestion}</span>
+                        <span className="text-gray-900 font-medium">
+                          {theme.label}
+                        </span>
                       </div>
-                    ))}
-                  </motion.div>
-                )}
-              </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-        
-        {/* Step 3: Struggles */}
-        {currentStep === 3 && (
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="space-y-6"
-          >
-            <motion.div variants={itemVariants}>
-              <h2 className="text-xl font-semibold text-white mb-4">
-                What's your biggest struggle?
-              </h2>
-              <p className="text-white/70 mb-4">
-                Understanding your challenges helps us create a more effective plan.
-              </p>
-              
-              <div className="space-y-4">
-                <textarea
-                  value={struggle}
-                  onChange={(e) => setStruggle(e.target.value)}
-                  placeholder="e.g., I have trouble staying consistent with new habits and often give up after a few days"
-                  className="w-full h-32 p-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/30"
-                />
+          )}
+          
+          {/* Step 2: Goal setting */}
+          {currentStep === 2 && (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-6"
+            >
+              <motion.div variants={itemVariants}>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                  What's your main goal?
+                </h2>
+                <p className="text-gray-600 mb-4">
+                  Be specific about what you want to achieve in the next 30 days.
+                </p>
                 
-                {/* Need inspiration button */}
-                <button 
-                  onClick={() => setShowStruggleSuggestions(!showStruggleSuggestions)}
-                  className="w-full py-2 px-3 text-sm border border-white/10 rounded-lg bg-white/5 text-white/70 hover:bg-white/10 transition-colors"
-                >
-                  {showStruggleSuggestions ? "Hide suggestions" : "Need inspiration? See suggestions"}
-                </button>
-                
-                {/* Struggle suggestions */}
-                {showStruggleSuggestions && (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    className="space-y-2 mt-3"
-                  >
-                    <p className="text-white/60 text-sm mb-2">Select a struggle that resonates with you:</p>
-                    {struggleSuggestions[selectedThemeId as keyof typeof struggleSuggestions].map((suggestion, index) => (
-                      <div 
-                        key={index}
-                        onClick={() => handleSelectSuggestion('struggle', suggestion)}
-                        className="p-3 rounded-lg bg-white/5 border border-white/10 text-white/80 cursor-pointer hover:bg-white/10 transition-all text-sm flex items-start gap-2"
-                      >
-                        <div className="mt-0.5">
-                          <CheckCircle2 size={14} className="text-white/40" />
-                        </div>
-                        <span>{suggestion}</span>
-                      </div>
-                    ))}
-                  </motion.div>
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-        
-        {/* Step 4: Time commitment */}
-        {currentStep === 4 && (
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="space-y-6"
-          >
-            <motion.div variants={itemVariants}>
-              <h2 className="text-xl font-semibold text-white mb-4">
-                How much time can you commit daily?
-              </h2>
-              <p className="text-white/70 mb-4">
-                This helps us create tasks that fit into your schedule.
-              </p>
-              
-              <div className="space-y-6">
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-white/70 text-sm">Minutes per day</span>
-                    <span className="text-white font-bold">{dailyTime} min</span>
-                  </div>
-                  
-                  <input
-                    type="range"
-                    min={5}
-                    max={120}
-                    step={5}
-                    value={dailyTime}
-                    onChange={(e) => setDailyTime(Number(e.target.value))}
-                    className="w-full accent-white"
+                <div className="space-y-4">
+                  <textarea
+                    value={goal}
+                    onChange={(e) => setGoal(e.target.value)}
+                    placeholder="e.g., Establish a consistent morning routine that includes exercise and reflection"
+                    className="w-full h-32 p-4 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500/20"
                   />
                   
-                  <div className="flex justify-between text-xs text-white/50 mt-1">
-                    <span>5 min</span>
-                    <span>60 min</span>
-                    <span>120 min</span>
+                  {/* Need inspiration button */}
+                  <button 
+                    onClick={() => setShowGoalSuggestions(!showGoalSuggestions)}
+                    className="w-full py-2 px-3 text-sm border border-gray-300 rounded-lg bg-white/80 text-gray-700 hover:bg-white hover:text-gray-900 transition-colors"
+                  >
+                    {showGoalSuggestions ? "Hide suggestions" : "Need inspiration? See suggestions"}
+                  </button>
+                  
+                  {/* Goal suggestions */}
+                  {showGoalSuggestions && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="space-y-2 mt-3"
+                    >
+                      <p className="text-gray-500 text-sm mb-2">Select a suggestion or use as inspiration:</p>
+                      {goalSuggestions[selectedThemeId as keyof typeof goalSuggestions].map((suggestion, index) => (
+                        <div 
+                          key={index}
+                          onClick={() => handleSelectSuggestion('goal', suggestion)}
+                          className="p-3 rounded-lg bg-white border border-gray-200 text-gray-800 cursor-pointer hover:bg-gray-50 transition-all text-sm flex items-start gap-2"
+                        >
+                          <div className="mt-0.5">
+                            <Check size={14} className="text-gray-400" />
+                          </div>
+                          <span>{suggestion}</span>
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+          
+          {/* Step 3: Struggles */}
+          {currentStep === 3 && (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-6"
+            >
+              <motion.div variants={itemVariants}>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                  What's your biggest struggle?
+                </h2>
+                <p className="text-gray-600 mb-4">
+                  Understanding your challenges helps us create a more effective plan.
+                </p>
+                
+                <div className="space-y-4">
+                  <textarea
+                    value={struggle}
+                    onChange={(e) => setStruggle(e.target.value)}
+                    placeholder="e.g., I have trouble staying consistent with new habits and often give up after a few days"
+                    className="w-full h-32 p-4 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500/20"
+                  />
+                  
+                  {/* Need inspiration button */}
+                  <button 
+                    onClick={() => setShowStruggleSuggestions(!showStruggleSuggestions)}
+                    className="w-full py-2 px-3 text-sm border border-gray-300 rounded-lg bg-white/80 text-gray-700 hover:bg-white hover:text-gray-900 transition-colors"
+                  >
+                    {showStruggleSuggestions ? "Hide suggestions" : "Need inspiration? See suggestions"}
+                  </button>
+                  
+                  {/* Struggle suggestions */}
+                  {showStruggleSuggestions && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="space-y-2 mt-3"
+                    >
+                      <p className="text-gray-500 text-sm mb-2">Select a struggle that resonates with you:</p>
+                      {struggleSuggestions[selectedThemeId as keyof typeof struggleSuggestions].map((suggestion, index) => (
+                        <div 
+                          key={index}
+                          onClick={() => handleSelectSuggestion('struggle', suggestion)}
+                          className="p-3 rounded-lg bg-white border border-gray-200 text-gray-800 cursor-pointer hover:bg-gray-50 transition-all text-sm flex items-start gap-2"
+                        >
+                          <div className="mt-0.5">
+                            <Check size={14} className="text-gray-400" />
+                          </div>
+                          <span>{suggestion}</span>
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+          
+          {/* Step 4: Time commitment */}
+          {currentStep === 4 && (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-6"
+            >
+              <motion.div variants={itemVariants}>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                  How much time can you commit daily?
+                </h2>
+                <p className="text-gray-600 mb-4">
+                  This helps us create tasks that fit into your schedule.
+                </p>
+                
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center text-gray-700 text-sm">
+                        <Clock className="h-4 w-4 mr-1" />
+                        <span>Minutes per day</span>
+                      </div>
+                      <span className="text-gray-900 font-bold">{dailyTime} min</span>
+                    </div>
+                    
+                    <input
+                      type="range"
+                      min={5}
+                      max={120}
+                      step={5}
+                      value={dailyTime}
+                      onChange={(e) => setDailyTime(Number(e.target.value))}
+                      className="w-full accent-gray-900"
+                    />
+                    
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <span>5 min</span>
+                      <span>60 min</span>
+                      <span>120 min</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 p-4 border border-gray-200 rounded-xl bg-white/80">
+                    <div className="flex items-center mb-2">
+                      <Star className="h-4 w-4 text-gray-700 mr-1.5" />
+                      <h3 className="text-gray-900 font-medium text-sm">What to expect next:</h3>
+                    </div>
+                    <p className="text-gray-600 text-sm">
+                      We'll use your responses to create a personalized 30-day journey with 
+                      achievable daily quests designed specifically for your goals and schedule.
+                    </p>
                   </div>
                 </div>
-
-                <div className="mt-6 p-4 border border-white/10 rounded-xl bg-white/5">
-                  <h3 className="text-white font-medium text-sm mb-2">What to expect next:</h3>
-                  <p className="text-white/70 text-sm">
-                    We'll use your responses to create a personalized 30-day journey with 
-                    achievable daily quests designed specifically for your goals and schedule.
-                  </p>
-                </div>
-              </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
+          )}
+        </div>
         
         {/* Navigation buttons */}
-        <motion.div variants={itemVariants} className="flex gap-3 mt-10">
+        <motion.div variants={itemVariants} className="flex gap-3 mt-6">
           {currentStep > 1 && (
-            <Button
+            <button
               onClick={handlePreviousStep}
-              variant="outline"
-              className="flex-1"
+              className="flex-1 py-3 px-4 bg-white border border-gray-300 text-gray-700 rounded-xl font-medium transition-all hover:bg-gray-50 hover:text-gray-900 active:scale-[0.98]"
             >
               Back
-            </Button>
+            </button>
           )}
           
           {currentStep < 4 ? (
-            <Button
+            <button
               onClick={handleNextStep}
-              variant="default"
-              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+              className="flex-1 py-3 px-4 flex items-center justify-center bg-gray-900 text-white rounded-xl font-medium transition-all hover:bg-gray-800 active:scale-[0.98]"
             >
-              Next
-            </Button>
+              <span>Next</span>
+              <ArrowRight className="ml-1.5 h-4 w-4" />
+            </button>
           ) : (
-            <Button
+            <button
               onClick={handleSubmit}
               disabled={isLoading}
-              variant="default"
-              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+              className="flex-1 py-3 px-4 bg-gray-900 text-white rounded-xl font-medium transition-all hover:bg-gray-800 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center gap-2">
@@ -597,7 +588,7 @@ const Survey = () => {
               ) : (
                 "Create My Plan"
               )}
-            </Button>
+            </button>
           )}
         </motion.div>
       </motion.div>
