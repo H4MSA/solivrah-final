@@ -2,14 +2,13 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { cn } from "@/lib/utils";
-import { motion, HTMLMotionProps } from "framer-motion";
+import { motion } from "framer-motion";
 
-// Define a type that combines button props and motion props
 type StartButtonProps = {
   children: React.ReactNode;
   variant?: 'default' | 'outline';
   className?: string;
-} & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, keyof HTMLMotionProps<"button">>;
+} & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const StartButton = React.forwardRef<HTMLButtonElement, StartButtonProps>(
   ({ className, children, variant = 'default', ...props }, ref) => {

@@ -3,7 +3,7 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
-import { motion, type HTMLMotionProps } from "framer-motion"
+import { motion } from "framer-motion"
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-base font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -39,25 +39,14 @@ export interface ButtonProps
   asChild?: boolean
 }
 
-// Define a separate type for the motion button props to avoid conflicts
-type MotionButtonProps = Omit<HTMLMotionProps<"button">, keyof ButtonProps | "ref">;
-
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps & MotionButtonProps>(
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : motion.button
+    const Comp = asChild ? Slot : "button"
     
-    // Animation props that we'll pass to the motion component
-    const motionProps = {
-      whileHover: { scale: 1.02 },
-      whileTap: { scale: 0.98 },
-      transition: { type: "spring", stiffness: 500, damping: 30 }
-    };
-
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
-        {...motionProps}
         {...props}
       />
     )
@@ -65,4 +54,41 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps & MotionButtonPro
 )
 Button.displayName = "Button"
 
-export { Button, buttonVariants }
+// Create a separate MotionButton component that wraps the Button component
+interface MotionButtonProps extends ButtonProps {
+  whileHover?: any;
+  whileTap?: any;
+  transition?: any;
+  animate?: any;
+  initial?: any;
+  exit?: any;
+}
+
+const MotionButton = React.forwardRef<HTMLButtonElement, MotionButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    // Default animation values
+    const motionProps = {
+      whileHover: props.whileHover || { scale: 1.02 },
+      whileTap: props.whileTap || { scale: 0.98 },
+      transition: props.transition || { type: "spring", stiffness: 500, damping: 30 },
+    };
+    
+    // Remove framer-motion specific props from the props passed to the button
+    const { whileHover, whileTap, transition, animate, initial, exit, ...buttonProps } = props;
+    
+    return (
+      <motion.button
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...motionProps}
+        animate={animate}
+        initial={initial}
+        exit={exit}
+        {...buttonProps}
+      />
+    )
+  }
+)
+MotionButton.displayName = "MotionButton"
+
+export { Button, MotionButton, buttonVariants }
