@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -165,9 +164,16 @@
 
   .shimmer {
     @apply relative overflow-hidden;
-    background: linear-gradient(90deg, #141414, #1A1A1A, #141414);
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
+    &::after {
+      content: '';
+      @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent;
+      transform: translateX(-100%);
+      animation: shimmer 2.5s infinite;
+    }
+  }
+
+  .transform-style-3d {
+    transform-style: preserve-3d;
   }
 
   .card-3d-effect {

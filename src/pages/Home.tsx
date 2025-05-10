@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -8,6 +7,7 @@ import { QRScanner } from "@/components/QRScanner";
 import { CameraUpload } from "@/components/CameraUpload";
 import { ThemeBackground } from "@/components/ThemeBackground";
 import { DailyAffirmation } from "@/components/DailyAffirmation";
+import { GlassCardShowcase } from "@/components/home/GlassCardShowcase";
 
 // Import the components
 import { HeaderSection } from "@/components/home/HeaderSection";
@@ -149,6 +149,12 @@ const Home = () => {
         
         <motion.div variants={itemVariants}>
           <QuickActionSection onScannerClick={() => setShowScanner(true)} />
+        </motion.div>
+        
+        <motion.div variants={itemVariants}>
+          <CollapsibleSection title="Glass Card Examples">
+            <GlassCardShowcase />
+          </CollapsibleSection>
         </motion.div>
         
         <motion.div variants={itemVariants}>

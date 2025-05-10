@@ -242,6 +242,7 @@ export default {
 				'dark-gradient': 'linear-gradient(180deg, #0A0A0A 0%, #121212 100%)',
 				'glass-gradient': 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
 				'card-gradient': 'linear-gradient(135deg, #181818 0%, #101010 100%)',
+				'premium-gradient': 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)',
 			},
 			boxShadow: {
 				'glass': '0 4px 20px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.05)',

@@ -12,6 +12,7 @@ interface GlassCardProps extends Omit<HTMLMotionProps<"div">, "animate"> {
   interactive?: boolean;
   depth?: "low" | "medium" | "high";
   hoverEffect?: boolean;
+  with3D?: boolean;
 }
 
 export const GlassCard: React.FC<GlassCardProps> = ({ 
@@ -22,6 +23,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   interactive = false,
   depth = "medium",
   hoverEffect = false,
+  with3D = false,
   ...props 
 }) => {
   const { selectedTheme } = useApp();
@@ -37,32 +39,50 @@ export const GlassCard: React.FC<GlassCardProps> = ({
 
   const getBgClass = () => {
     switch (variant) {
-      case "default": return "bg-[#1A1A1A]";
-      case "elevated": return "bg-[#222222] border-white/10";
-      case "subtle": return "bg-[#141414] border-white/5";
+      case "default": return "bg-[#1A1A1A]/80";
+      case "elevated": return "bg-[#222222]/90 border-white/10";
+      case "subtle": return "bg-[#141414]/60 border-white/5";
       case "primary": return "bg-white text-black border-transparent";
-      case "interactive": return "bg-[#1A1A1A] hover:bg-[#222222]";
+      case "interactive": return "bg-[#1A1A1A]/80 hover:bg-[#222222]/90";
       case "dark": return "bg-black/90";
-      case "theme": return "bg-[#1A1A1A]";
-      case "premium": return "bg-[#1A1A1A]";
-      case "ultra-glass": return "bg-[#1A1A1A] border-white/20";
-      default: return "bg-[#1A1A1A]";
+      case "theme": return "bg-[#1A1A1A]/80";
+      case "premium": return "bg-gradient-to-br from-[#1A1A1A]/90 to-[#222222]/95";
+      case "ultra-glass": return "bg-black/40 border-white/20";
+      default: return "bg-[#1A1A1A]/80";
     }
   };
 
   const getDepthStyle = () => {
     switch (depth) {
       case "low": return "shadow-sm";
-      case "high": return "shadow-md";
-      default: return "shadow-sm";
+      case "high": return "shadow-glass-hover";
+      default: return "shadow-glass";
     }
+  };
+
+  // 3D effect properties
+  const get3DProps = () => {
+    if (!with3D) return {};
+    
+    return {
+      whileHover: { 
+        rotateX: 5, 
+        rotateY: 5, 
+        scale: 1.02,
+        transition: { duration: 0.2 }
+      },
+      style: {
+        transformStyle: "preserve-3d" as "preserve-3d"
+      }
+    };
   };
 
   // Simplified motion props for better performance
   const motionProps = {
-    whileHover: hoverEffect ? { scale: 1.01 } : {},
+    whileHover: hoverEffect && !with3D ? { scale: 1.01, y: -2 } : {},
     whileTap: interactive ? { scale: 0.98 } : {},
-    transition: { type: 'spring', stiffness: 500, damping: 30 }
+    transition: { type: 'spring', stiffness: 500, damping: 30 },
+    ...get3DProps()
   };
 
   return (
@@ -70,18 +90,46 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       className={cn(
         "border rounded-xl p-4 mb-4 transition-colors duration-200",
         getBgClass(),
-        "border-[#333333]",
+        "backdrop-blur-xl",
         interactive && "cursor-pointer",
         getAnimationClass(),
         getDepthStyle(),
+        with3D && "transform-gpu perspective-1000",
         className
       )}
       {...motionProps}
       {...props}
     >
-      <div className="relative">
+      <div className={cn("relative", with3D && "transform-style-3d")}>
         {children}
       </div>
     </motion.div>
+  );
+};
+
+// Gradient border card variant
+export const GradientBorderCard: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+  gradientFrom?: string;
+  gradientTo?: string;
+}> = ({ 
+  children, 
+  className,
+  gradientFrom = "from-white/10",
+  gradientTo = "to-white/5"
+}) => {
+  return (
+    <div className={cn(
+      "relative rounded-xl p-[1px] mb-4",
+      `bg-gradient-to-r ${gradientFrom} ${gradientTo}`,
+      "shadow-glass",
+      className
+    )}>
+      <div className="absolute inset-0 rounded-xl bg-[#1A1A1A]/80 backdrop-blur-xl" />
+      <div className="relative z-10 p-4">
+        {children}
+      </div>
+    </div>
   );
 };
