@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -80,7 +81,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen pb-20 text-white">
+    <div className="min-h-screen pb-20 text-white bg-black">
       <ThemeBackground />
       {showScanner && (
         <QRScanner 

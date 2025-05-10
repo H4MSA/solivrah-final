@@ -39,16 +39,16 @@ export const GlassCard: React.FC<GlassCardProps> = ({
 
   const getBgClass = () => {
     switch (variant) {
-      case "default": return "bg-[#1A1A1A]/80";
-      case "elevated": return "bg-[#222222]/90 border-white/10";
-      case "subtle": return "bg-[#141414]/60 border-white/5";
-      case "primary": return "bg-white text-black border-transparent";
-      case "interactive": return "bg-[#1A1A1A]/80 hover:bg-[#222222]/90";
+      case "default": return "bg-black/80";
+      case "elevated": return "bg-[#1A1A1A]/90 border-white/5";
+      case "subtle": return "bg-black/60 border-white/5";
+      case "primary": return "bg-[#1A1A1A] text-white border-transparent";
+      case "interactive": return "bg-black/80 hover:bg-[#1A1A1A]/90";
       case "dark": return "bg-black/90";
-      case "theme": return "bg-[#1A1A1A]/80";
-      case "premium": return "bg-gradient-to-br from-[#1A1A1A]/90 to-[#222222]/95";
-      case "ultra-glass": return "bg-black/40 border-white/20";
-      default: return "bg-[#1A1A1A]/80";
+      case "theme": return "bg-black/80";
+      case "premium": return "bg-gradient-to-br from-black/90 to-[#1A1A1A]/95";
+      case "ultra-glass": return "bg-black/40 border-white/10";
+      default: return "bg-black/80";
     }
   };
 
@@ -126,7 +126,7 @@ export const GradientBorderCard: React.FC<{
       "shadow-glass",
       className
     )}>
-      <div className="absolute inset-0 rounded-xl bg-[#1A1A1A]/80 backdrop-blur-xl" />
+      <div className="absolute inset-0 rounded-xl bg-black/80 backdrop-blur-xl" />
       <div className="relative z-10 p-4">
         {children}
       </div>

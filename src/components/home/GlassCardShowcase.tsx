@@ -34,9 +34,9 @@ export const GlassCardShowcase: React.FC = () => {
         <p className="text-white/70 mt-1">Subtle shimmer animation</p>
       </GlassCard>
       
-      <GlassCard variant="primary" with3D>
-        <h3 className="text-lg font-medium">3D Effect Card</h3>
-        <p className="text-gray-700 mt-1">Hover for 3D rotation</p>
+      <GlassCard variant="dark" with3D>
+        <h3 className="text-lg font-medium text-white">3D Effect Card</h3>
+        <p className="text-white/70 mt-1">Hover for 3D rotation</p>
       </GlassCard>
       
       <GradientBorderCard 

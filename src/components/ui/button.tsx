@@ -11,12 +11,12 @@ const buttonVariants = cva(
       variant: {
         default: "bg-white text-black hover:bg-white/90 shadow-lg",
         destructive: "bg-red-500/90 text-white hover:bg-red-500/80 shadow-md",
-        outline: "border border-white/20 bg-black/20 hover:bg-black/30 hover:border-white/30 text-white backdrop-blur-md",
-        secondary: "bg-solivrah-button text-white hover:bg-solivrah-button-hover shadow-md border border-white/5",
+        outline: "border border-white/10 bg-black/50 hover:bg-black/70 hover:border-white/20 text-white backdrop-blur-md",
+        secondary: "bg-[#1A1A1A] text-white hover:bg-[#222222] shadow-md border border-white/5",
         ghost: "hover:bg-white/5 text-white",
         link: "text-white underline-offset-4 hover:underline",
-        neumorphic: "bg-gradient-to-b from-solivrah-button-start to-solivrah-button-end text-white border border-white/5 shadow-lg hover:shadow-xl",
-        premium: "bg-gradient-to-b from-[#1A1A1A] to-[#0A0A0A] text-white border border-white/10 shadow-button hover:shadow-button-hover",
+        neumorphic: "bg-gradient-to-b from-[#1A1A1A] to-black text-white border border-white/5 shadow-lg hover:shadow-xl",
+        premium: "bg-gradient-to-b from-[#1A1A1A] to-black text-white border border-white/10 shadow-button hover:shadow-button-hover",
       },
       size: {
         default: "h-14 px-6 py-3",
