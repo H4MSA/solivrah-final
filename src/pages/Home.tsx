@@ -8,7 +8,6 @@ import { QRScanner } from "@/components/QRScanner";
 import { CameraUpload } from "@/components/CameraUpload";
 import { ThemeBackground } from "@/components/ThemeBackground";
 import { DailyAffirmation } from "@/components/DailyAffirmation";
-import { GlassCardShowcase } from "@/components/home/GlassCardShowcase";
 
 // Import the components
 import { HeaderSection } from "@/components/home/HeaderSection";
@@ -81,7 +80,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen pb-20 text-white bg-black">
+    <div className="min-h-screen pb-20 text-white">
       <ThemeBackground />
       {showScanner && (
         <QRScanner 
@@ -150,12 +149,6 @@ const Home = () => {
         
         <motion.div variants={itemVariants}>
           <QuickActionSection onScannerClick={() => setShowScanner(true)} />
-        </motion.div>
-        
-        <motion.div variants={itemVariants}>
-          <CollapsibleSection title="Glass Card Examples">
-            <GlassCardShowcase />
-          </CollapsibleSection>
         </motion.div>
         
         <motion.div variants={itemVariants}>
