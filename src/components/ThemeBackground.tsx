@@ -34,8 +34,14 @@ export const ThemeBackground: React.FC<{
       {/* Main background - light gray */}
       <div className="absolute inset-0 bg-gradient-to-b from-gray-100 to-gray-200" />
       
-      {/* Subtle grid pattern overlay */}
-      <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cpath d=\"M0 0h20v20H0z\" fill=\"%23000\" fill-opacity=\"0.05\"/%3E%3C/svg%3E')]" />
+      {/* Subtle grid pattern overlay - Using a simpler pattern to avoid escaping issues */}
+      <div 
+        className="absolute inset-0 opacity-20" 
+        style={{
+          backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h20v20H0z' fill='%23000' fill-opacity='0.05'/%3E%3C/svg%3E\")",
+          backgroundSize: "20px 20px"
+        }}
+      />
       
       {/* Subtle animated bubbles */}
       <motion.div
