@@ -38,7 +38,7 @@ const Auth = () => {
 
     try {
       if (isSignup) {
-        const { data } = await AuthService.signUp({
+        const response = await AuthService.signUp({
           email,
           password,
         });
@@ -49,7 +49,7 @@ const Auth = () => {
         });
 
         // Auto-login if email confirmation is disabled
-        if (data?.user && !data.user.email_confirmed_at) {
+        if (response.user && !response.user.email_confirmed_at) {
           navigate("/home");
         }
 
