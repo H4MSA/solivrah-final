@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Home, Award, MessageCircle, Users, User } from "lucide-react";
 
 export const TabNavigation = () => {
@@ -38,50 +38,81 @@ export const TabNavigation = () => {
   if (!shouldShowNavigation) {
     return null;
   }
+
+  // Enhanced animation variants
+  const containerVariants = {
+    hidden: { y: 100, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { 
+        type: "spring", 
+        stiffness: 300, 
+        damping: 30,
+        staggerChildren: 0.05,
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
   
   return (
     <div className="fixed inset-x-0 bottom-4 z-50 px-4 flex justify-center">
       <motion.div 
-        className="flex items-center justify-between px-4 py-2 rounded-xl backdrop-blur-xl bg-white/60 border border-gray-200/50 shadow-lg max-w-[340px] w-full"
-        initial={{ y: 100 }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="flex items-center justify-between px-4 py-2 rounded-xl backdrop-blur-xl bg-[#1A1A1A]/80 border border-[#333333] shadow-lg max-w-[340px] w-full"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
       >
-        {navTabs.map((tab) => {
+        {navTabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.to;
           
           return (
-            <Link
+            <motion.div
               key={tab.to}
-              to={tab.to}
-              className="flex flex-col items-center justify-center"
+              variants={itemVariants}
+              custom={index}
             >
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                className="relative p-1"
+              <Link
+                to={tab.to}
+                className="flex flex-col items-center justify-center"
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-0 rounded-full bg-gray-900/10 backdrop-blur-sm"
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  />
-                )}
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  className="relative p-1"
+                >
+                  <AnimatePresence mode="wait">
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeTab"
+                        className="absolute inset-0 rounded-full bg-white/10 backdrop-blur-sm"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      />
+                    )}
+                  </AnimatePresence>
+                  
+                  <div className={`p-1.5 ${isActive ? 'text-white' : 'text-gray-400'} transition-colors duration-200`}>
+                    <Icon className="w-4 h-4" strokeWidth={2.5} />
+                  </div>
+                </motion.div>
                 
-                <div className={`p-1.5 ${isActive ? 'text-gray-900' : 'text-gray-500'} transition-colors duration-200`}>
-                  <Icon className="w-4 h-4" strokeWidth={2.5} />
-                </div>
-              </motion.div>
-              
-              <span 
-                className={`text-[10px] font-medium mt-0.5 ${isActive ? 'text-gray-900' : 'text-gray-500'}`}
-              >
-                {tab.label}
-              </span>
-            </Link>
+                <motion.span 
+                  className={`text-[10px] font-medium mt-0.5 ${isActive ? 'text-white' : 'text-gray-400'}`}
+                  animate={{ opacity: isActive ? 1 : 0.7 }}
+                >
+                  {tab.label}
+                </motion.span>
+              </Link>
+            </motion.div>
           );
         })}
       </motion.div>

@@ -31,24 +31,39 @@ export const ThemeBackground: React.FC<{
   
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">
-      {/* Main background - light gray */}
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-100 to-gray-200" />
+      {/* Main background - dark gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black to-gray-900" />
       
-      {/* Subtle grid pattern overlay - Using a simpler pattern to avoid escaping issues */}
+      {/* Subtle grid pattern overlay */}
       <div 
-        className="absolute inset-0 opacity-20" 
+        className="absolute inset-0 opacity-10" 
         style={{
-          backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h20v20H0z' fill='%23000' fill-opacity='0.05'/%3E%3C/svg%3E\")",
+          backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h20v20H0z' fill='%23FFF' fill-opacity='0.05'/%3E%3C/svg%3E\")",
           backgroundSize: "20px 20px"
         }}
       />
       
-      {/* Subtle animated bubbles */}
+      {/* Animated particles */}
       <motion.div
-        className="absolute w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(0,0,0,0.01),transparent_70%)] -top-[250px] -left-[250px]"
+        className="absolute w-[600px] h-[600px] rounded-full bg-gradient-radial from-purple-900/10 to-transparent -top-[300px] -left-[300px]"
         animate={{
           x: [0, 30, 0],
-          y: [0, 50, 0],
+          y: [0, 20, 0],
+          scale: [1, 1.05, 1],
+        }}
+        transition={{
+          duration: 15,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      
+      <motion.div
+        className="absolute w-[800px] h-[800px] rounded-full bg-gradient-radial from-indigo-900/10 to-transparent -bottom-[400px] -right-[400px]"
+        animate={{
+          x: [0, -40, 0],
+          y: [0, -20, 0],
+          scale: [1, 1.03, 1],
         }}
         transition={{
           duration: 20,
@@ -57,16 +72,19 @@ export const ThemeBackground: React.FC<{
         }}
       />
       
+      {/* Subtle glow effect */}
       <motion.div
-        className="absolute w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(0,0,0,0.01),transparent_70%)] -bottom-[300px] -right-[300px]"
+        className="absolute inset-0 opacity-30"
         animate={{
-          x: [0, -40, 0],
-          y: [0, -30, 0],
+          opacity: [0.2, 0.3, 0.2],
         }}
         transition={{
-          duration: 25,
+          duration: 8,
           repeat: Infinity,
           ease: "easeInOut"
+        }}
+        style={{
+          background: "radial-gradient(circle at 50% 50%, rgba(79, 70, 229, 0.15) 0%, transparent 70%)"
         }}
       />
     </div>

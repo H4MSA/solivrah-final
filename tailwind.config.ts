@@ -242,6 +242,7 @@ export default {
 				'dark-gradient': 'linear-gradient(180deg, #0A0A0A 0%, #121212 100%)',
 				'glass-gradient': 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
 				'card-gradient': 'linear-gradient(135deg, #181818 0%, #101010 100%)',
+				'subtle-glow': 'radial-gradient(circle at 50% 50%, rgba(79, 70, 229, 0.15) 0%, transparent 70%)',
 			},
 			boxShadow: {
 				'glass': '0 4px 20px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.05)',
@@ -250,6 +251,9 @@ export default {
 				'card-3d': '0 20px 40px -15px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.07)',
 				'button': '0 2px 5px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.05)',
 				'button-hover': '0 4px 10px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1)',
+				'glow-sm': '0 0 10px rgba(79, 70, 229, 0.2)',
+				'glow-md': '0 0 15px rgba(79, 70, 229, 0.3)',
+				'glow-lg': '0 0 20px rgba(79, 70, 229, 0.4)',
 			}
 		}
 	},
