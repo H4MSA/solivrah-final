@@ -54,15 +54,29 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = "Button"
 
-// Create a separate MotionButton component that wraps the Button component
-interface MotionButtonProps extends ButtonProps {
-  whileHover?: any;
-  whileTap?: any;
-  transition?: any;
-  animate?: any;
-  initial?: any;
-  exit?: any;
-}
+// Fix: Properly define motion button props to avoid conflicts between React and Framer Motion types
+type MotionButtonPropsWithoutMotion = Omit<ButtonProps, 
+  'onAnimationStart' | 
+  'onDrag' | 
+  'onDragEnd' | 
+  'onDragStart' |
+  'onAnimationComplete' |
+  'style'
+>;
+
+// Define the Framer Motion specific props
+type FramerMotionSpecificProps = {
+  whileHover?: object;
+  whileTap?: object;
+  transition?: object;
+  animate?: object;
+  initial?: object;
+  exit?: object;
+  style?: React.CSSProperties | any; // Allow both React style and Framer motion variant style
+};
+
+// Combined type for Motion Button
+interface MotionButtonProps extends MotionButtonPropsWithoutMotion, FramerMotionSpecificProps {}
 
 const MotionButton = React.forwardRef<HTMLButtonElement, MotionButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
@@ -73,8 +87,16 @@ const MotionButton = React.forwardRef<HTMLButtonElement, MotionButtonProps>(
       transition: props.transition || { type: "spring", stiffness: 500, damping: 30 },
     };
     
-    // Remove framer-motion specific props from the props passed to the button
-    const { whileHover, whileTap, transition, animate, initial, exit, ...buttonProps } = props;
+    // Extract Framer Motion specific props to avoid passing them to the HTML element
+    const { 
+      whileHover, 
+      whileTap, 
+      transition, 
+      animate, 
+      initial, 
+      exit,
+      ...buttonProps 
+    } = props;
     
     return (
       <motion.button

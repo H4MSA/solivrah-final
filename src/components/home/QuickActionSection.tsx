@@ -1,8 +1,7 @@
 
 import React from "react";
-import { motion } from "framer-motion";
 import { FiCamera, FiEdit, FiZap } from "react-icons/fi";
-import { MotionButton } from "@/components/ui/button"; // Updated import
+import { MotionButton } from "@/components/ui/button"; // Using MotionButton for animation support
 
 interface QuickActionSectionProps {
   onScannerClick: () => void;
@@ -26,6 +25,8 @@ export const QuickActionSection: React.FC<QuickActionSectionProps> = ({ onScanne
             size="sm"
             className="flex flex-col items-center justify-center gap-1 bg-black/50 h-20 rounded-xl border border-white/10"
             onClick={action.onClick}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
           >
             <span className="text-lg">{action.icon}</span>
             <span className="text-xs font-medium">{action.label}</span>
