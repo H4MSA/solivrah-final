@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Logo } from "@/components/Logo";
@@ -41,7 +40,7 @@ const Index = () => {
       
       {/* Main content */}
       <div className={`flex-1 flex flex-col justify-center items-center text-center space-y-6 transition-all duration-1000 z-10 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-        <Logo className="mb-10" />
+        <Logo size="lg" className="mb-10" />
         
         <motion.div 
           className="w-full max-w-[340px] mx-auto space-y-4"
