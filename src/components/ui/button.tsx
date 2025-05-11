@@ -3,7 +3,7 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
-import { motion, type HTMLMotionProps } from "framer-motion"
+import { motion, type MotionProps } from "framer-motion"
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-base font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -54,43 +54,25 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = "Button"
 
-// Fix: Define motion button props properly to avoid type conflicts
+// Fix: Define proper types for Framer Motion buttons to avoid TypeScript errors
 type MotionButtonPropsWithoutMotion = Omit<ButtonProps, 
-  'onAnimationStart' | 
-  'onDrag' | 
-  'onDragEnd' | 
-  'onDragStart' |
-  'onAnimationComplete' |
-  'style'
+  keyof MotionProps
 >;
 
-// Only specify the motion-specific props that we'll actually use
-interface FramerMotionProps {
-  whileHover?: Record<string, unknown>;
-  whileTap?: Record<string, unknown>;
-  transition?: Record<string, unknown>;
-  animate?: Record<string, unknown>;
-  initial?: Record<string, unknown>;
-  exit?: Record<string, unknown>;
-  style?: React.CSSProperties;
-}
-
 // Combined type for Motion Button
-interface MotionButtonProps extends MotionButtonPropsWithoutMotion, FramerMotionProps {}
+interface MotionButtonProps extends MotionButtonPropsWithoutMotion, MotionProps {}
 
 const MotionButton = React.forwardRef<HTMLButtonElement, MotionButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    // Default animation values
-    const motionProps = {
-      whileHover: props.whileHover || { scale: 1.02 },
-      whileTap: props.whileTap || { scale: 0.98 },
+  ({ className, variant, size, asChild = false, whileHover, whileTap, ...props }, ref) => {
+    // Default animation values with proper typing
+    const motionProps: MotionProps = {
+      whileHover: whileHover || { scale: 1.02 },
+      whileTap: whileTap || { scale: 0.98 },
       transition: props.transition || { type: "spring", stiffness: 500, damping: 30 },
     };
     
     // Extract Framer Motion specific props to avoid passing them to the HTML element
     const { 
-      whileHover, 
-      whileTap, 
       transition, 
       animate, 
       initial, 
@@ -103,9 +85,6 @@ const MotionButton = React.forwardRef<HTMLButtonElement, MotionButtonProps>(
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...motionProps}
-        animate={animate}
-        initial={initial}
-        exit={exit}
         {...buttonProps}
       />
     )

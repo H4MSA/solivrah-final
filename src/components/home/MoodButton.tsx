@@ -1,7 +1,6 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { PremiumCard } from "@/components/PremiumCard";
 import { cn } from "@/lib/utils";
 
 interface MoodButtonProps {
@@ -18,10 +17,10 @@ export const MoodButton: React.FC<MoodButtonProps> = ({ emoji, label, selected, 
   >
     <div
       className={cn(
-        "p-3 flex flex-col items-center justify-center gap-2 transition-all rounded-xl",
+        "p-3 flex flex-col items-center justify-center gap-2 transition-all rounded-xl cursor-pointer",
         selected 
           ? "bg-[#1A1A1A] border border-white/20 shadow-md" 
-          : "bg-[#151515] border border-[#333333]"
+          : "bg-[#151515] border border-[#333333] hover:border-white/10"
       )}
       onClick={onClick}
     >

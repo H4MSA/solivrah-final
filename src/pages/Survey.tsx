@@ -1,597 +1,303 @@
 
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { useApp } from "@/context/AppContext";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { AIService } from "@/services/AIService";
-import { Check, ArrowRight, Star, Clock } from "lucide-react";
-
-const themes = [
-  { id: "Focus", label: "Focus & Productivity" },
-  { id: "Fitness", label: "Fitness & Health" },
-  { id: "Mindfulness", label: "Mindfulness & Meditation" },
-  { id: "Learning", label: "Learning & Growth" },
-  { id: "Discipline", label: "Discipline & Habits" }
-];
-
-// Goal suggestions based on theme
-const goalSuggestions = {
-  Focus: [
-    "Establish a morning routine to improve daily productivity",
-    "Complete focused work sessions without distractions",
-    "Organize my workspace and digital environment",
-    "Develop a system to track and prioritize tasks effectively"
-  ],
-  Fitness: [
-    "Exercise for 30 minutes at least 5 days a week",
-    "Improve my endurance by adding 5 minutes to my cardio routine each week",
-    "Learn and practice proper form for three new strength exercises",
-    "Establish a consistent post-workout recovery routine"
-  ],
-  Mindfulness: [
-    "Practice daily meditation for at least 10 minutes",
-    "Create a mindful morning ritual to start each day with intention",
-    "Practice mindful eating at one meal per day",
-    "Develop a gratitude practice before bed each night"
-  ],
-  Learning: [
-    "Master the fundamentals of a new skill I've been wanting to learn",
-    "Read 20 pages of educational content daily",
-    "Complete one online course related to my interests or career",
-    "Practice applied learning by creating something with my new knowledge"
-  ],
-  Discipline: [
-    "Establish and maintain three key daily habits consistently",
-    "Build a consistent sleep schedule with fixed wake-up times",
-    "Follow through on commitments I make to myself",
-    "Replace one unhelpful habit with a beneficial one"
-  ]
-};
-
-// Struggle suggestions based on theme
-const struggleSuggestions = {
-  Focus: [
-    "I'm easily distracted by notifications and social media",
-    "I procrastinate on important tasks until the last minute",
-    "I have trouble prioritizing what to work on first",
-    "My energy fluctuates throughout the day making focus inconsistent"
-  ],
-  Fitness: [
-    "I struggle with staying motivated after the initial excitement wears off",
-    "I don't know how to structure an effective workout routine",
-    "I have difficulty making time for exercise in my busy schedule",
-    "I get discouraged when I don't see immediate results"
-  ],
-  Mindfulness: [
-    "My mind races constantly and I struggle to quiet my thoughts",
-    "I find it difficult to be present instead of worrying about the future",
-    "I react emotionally to situations instead of responding mindfully",
-    "I get frustrated when trying to meditate and 'do it right'"
-  ],
-  Learning: [
-    "I start learning many things but rarely finish mastering any of them",
-    "I struggle with applying what I learn to real-world situations",
-    "I get overwhelmed by how much there is to learn and don't know where to focus",
-    "I have trouble retaining information after studying it"
-  ],
-  Discipline: [
-    "I start strong but lose motivation after a few days",
-    "I give in to immediate gratification at the expense of long-term goals",
-    "I struggle with consistency and maintaining routines",
-    "I often make excuses when facing challenges or discomfort"
-  ]
-};
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ThemeBackground } from '@/components/ThemeBackground';
+import { useApp } from '@/context/AppContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 const Survey = () => {
   const navigate = useNavigate();
-  const { setSelectedTheme, user, isGuest } = useApp();
   const { toast } = useToast();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const { user, selectedTheme, setSelectedTheme } = useApp();
   
-  // Form fields
-  const [selectedThemeId, setSelectedThemeId] = useState<string>("Discipline");
-  const [goal, setGoal] = useState<string>("");
-  const [struggle, setStruggle] = useState<string>("");
-  const [dailyTime, setDailyTime] = useState<number>(30);
-  const [showGoalSuggestions, setShowGoalSuggestions] = useState<boolean>(false);
-  const [showStruggleSuggestions, setShowStruggleSuggestions] = useState<boolean>(false);
-  
-  const aiService = new AIService();
+  // Survey state
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    goal: '',
+    biggestStruggle: '',
+    dailyCommitment: 15, // Default to 15 minutes
+  });
 
-  const handleNextStep = () => {
-    if (currentStep === 1 && !selectedThemeId) {
-      toast({
-        title: "Please select a theme",
-        description: "Choose a theme to continue",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (currentStep === 2 && !goal) {
-      toast({
-        title: "Goal required",
-        description: "Please enter your goal to continue",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (currentStep === 3 && !struggle) {
-      toast({
-        title: "Struggle required",
-        description: "Please share your struggle to continue",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (currentStep < 4) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
+  // Theme options
+  const themeOptions = [
+    { id: 'Discipline', label: 'Discipline', description: 'Building consistent habits and routines' },
+    { id: 'Focus', label: 'Focus', description: 'Improving concentration and mental clarity' },
+    { id: 'Resilience', label: 'Resilience', description: 'Developing mental strength and adaptability' },
+    { id: 'Wildcards', label: 'Wildcards', description: 'Surprise challenges to break your routine' }
+  ];
   
-  const handlePreviousStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
+  // Time commitment options in minutes
+  const timeOptions = [
+    { value: 5, label: '5 minutes' },
+    { value: 15, label: '15 minutes' },
+    { value: 30, label: '30 minutes' },
+    { value: 45, label: '45 minutes' },
+    { value: 60, label: '1 hour' }
+  ];
 
-  const handleSelectSuggestion = (type: 'goal' | 'struggle', suggestion: string) => {
-    if (type === 'goal') {
-      setGoal(suggestion);
-      setShowGoalSuggestions(false);
-    } else {
-      setStruggle(suggestion);
-      setShowStruggleSuggestions(false);
-    }
-    
-    // Provide positive feedback for selection
-    toast({
-      title: "Great choice!",
-      description: "You can also customize it to fit your unique needs.",
-      duration: 3000,
-    });
-  };
-  
+  // Handle form submission
   const handleSubmit = async () => {
-    setIsLoading(true);
-    
+    setLoading(true);
+
     try {
-      // Generate a unique ID for guest users
-      const guestId = isGuest ? `guest_${Date.now()}_${Math.random().toString(36).substring(2, 9)}` : null;
-      
-      if (!isGuest && !user?.id) {
-        toast({
-          title: "Authentication required",
-          description: "Please log in to create your personalized plan",
-          variant: "destructive"
-        });
-        setIsLoading(false);
-        return;
-      }
-      
-      // Set theme in context regardless of auth status
-      setSelectedTheme(selectedThemeId);
-      
-      // For authenticated users, save survey responses
-      if (!isGuest && user?.id) {
-        // Save survey responses
-        const { error: surveyError } = await supabase
-          .from("survey_responses")
-          .insert({
-            user_id: user.id,
-            theme: selectedThemeId,
-            goal: goal,
-            biggest_struggle: struggle,
-            daily_commitment: dailyTime
-          });
-        
-        if (surveyError) throw surveyError;
-        
-        // Update user profile with selected theme
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .update({ theme: selectedThemeId })
-          .eq("id", user.id);
-        
-        if (profileError) throw profileError;
-      }
-      
-      // For guest mode, set completed survey flag in localStorage
-      if (isGuest) {
-        localStorage.setItem('hasCompletedSurvey', 'true');
-        localStorage.setItem('guestTheme', selectedThemeId);
-        localStorage.setItem('guestGoal', goal);
-        localStorage.setItem('guestStruggle', struggle);
-        localStorage.setItem('guestDailyTime', dailyTime.toString());
-        localStorage.setItem('guestId', guestId || '');
-      }
-      
-      // Show creating roadmap toast
-      toast({
-        title: "Creating your personalized journey",
-        description: "We're crafting a plan just for you...",
-      });
-      
-      // Get user profile for context (or use guest data)
-      let profileData = {};
-      
-      if (!isGuest && user?.id) {
-        const { data: userData } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single();
-        
-        if (userData) {
-          profileData = userData;
+      // Save survey response to database
+      const { error } = await supabase.from('survey_responses').insert([
+        {
+          user_id: user?.id || 'guest',
+          theme: selectedTheme,
+          goal: formData.goal,
+          biggest_struggle: formData.biggestStruggle,
+          daily_commitment: formData.dailyCommitment
         }
-      } else {
-        // For guests, create a simplified profile object
-        profileData = {
-          id: guestId,
-          theme: selectedThemeId,
-          is_guest: true
-        };
-      }
-      
-      console.log("Generating roadmap with profile:", { ...profileData, theme: selectedThemeId });
-      
-      // Generate roadmap using AI
-      const roadmap = await aiService.generateRoadmap(
-        goal,
-        struggle,
-        dailyTime,
-        { ...profileData, theme: selectedThemeId }
-      );
-      
-      // Store the generated roadmap for guest users
-      if (isGuest) {
-        localStorage.setItem('guestRoadmap', JSON.stringify(roadmap));
-      }
-      
-      // Navigate to home when done
+      ]);
+
+      if (error) throw error;
+
+      // Show success notification
       toast({
-        title: "Your journey awaits!",
-        description: "We've created a personalized roadmap for you",
+        title: 'Your plan is ready!',
+        description: 'Your personalized 30-day roadmap has been created.'
       });
-      
-      navigate("/home");
+
+      // Navigate to Home
+      navigate('/home');
     } catch (error) {
-      console.error("Error submitting survey:", error);
+      console.error('Error submitting survey:', error);
       toast({
-        title: "Something went wrong",
-        description: "Please try again later",
-        variant: "destructive"
+        variant: 'destructive',
+        title: 'Something went wrong',
+        description: 'Unable to create your plan. Please try again.'
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
-  
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    },
-    exit: { opacity: 0 }
-  };
-  
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { duration: 0.5 }
-    }
-  };
-  
-  return (
-    <div className="min-h-screen bg-gray-100 pt-12 px-6 pb-20 z-10 relative">
-      <motion.div
-        className="max-w-md mx-auto"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-      >
-        <motion.div variants={itemVariants}>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Personalize Your Journey</h1>
-          <p className="text-gray-600 mb-8">
-            Answer these questions to create your custom roadmap.
-          </p>
-        </motion.div>
-        
-        {/* Progress indicator */}
-        <motion.div variants={itemVariants} className="mb-8">
-          <div className="flex gap-1">
-            {[1, 2, 3, 4].map((step) => (
-              <div
-                key={step}
-                className={`h-1 flex-1 rounded-full ${
-                  step <= currentStep
-                    ? "bg-gray-900"
-                    : "bg-gray-300"
-                }`}
-              ></div>
-            ))}
-          </div>
-          <div className="text-gray-500 text-xs mt-2">
-            Step {currentStep} of 4
-          </div>
-        </motion.div>
-        
-        <div className="backdrop-blur-lg bg-white/70 rounded-xl p-6 border border-gray-200 shadow-lg mb-8">
-          {/* Step 1: Select Theme */}
-          {currentStep === 1 && (
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="space-y-6"
-            >
-              <motion.div variants={itemVariants}>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Choose Your Focus Area
-                </h2>
-                
-                <div className="space-y-3">
-                  {themes.map((theme) => (
-                    <motion.div
-                      key={theme.id}
-                      variants={itemVariants}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setSelectedThemeId(theme.id)}
-                      className={`p-4 rounded-xl cursor-pointer transition-all shadow-sm ${
-                        selectedThemeId === theme.id
-                          ? "border-2 border-gray-900 bg-white"
-                          : "border border-gray-300 bg-white/60 hover:bg-white"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                            selectedThemeId === theme.id
-                              ? "border-gray-900"
-                              : "border-gray-400"
-                          }`}
-                        >
-                          {selectedThemeId === theme.id && (
-                            <div className="w-2.5 h-2.5 bg-gray-900 rounded-full" />
-                          )}
-                        </div>
-                        <span className="text-gray-900 font-medium">
-                          {theme.label}
-                        </span>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-          
-          {/* Step 2: Goal setting */}
-          {currentStep === 2 && (
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="space-y-6"
-            >
-              <motion.div variants={itemVariants}>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  What's your main goal?
-                </h2>
-                <p className="text-gray-600 mb-4">
-                  Be specific about what you want to achieve in the next 30 days.
-                </p>
-                
-                <div className="space-y-4">
-                  <textarea
-                    value={goal}
-                    onChange={(e) => setGoal(e.target.value)}
-                    placeholder="e.g., Establish a consistent morning routine that includes exercise and reflection"
-                    className="w-full h-32 p-4 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500/20"
-                  />
-                  
-                  {/* Need inspiration button */}
-                  <button 
-                    onClick={() => setShowGoalSuggestions(!showGoalSuggestions)}
-                    className="w-full py-2 px-3 text-sm border border-gray-300 rounded-lg bg-white/80 text-gray-700 hover:bg-white hover:text-gray-900 transition-colors"
-                  >
-                    {showGoalSuggestions ? "Hide suggestions" : "Need inspiration? See suggestions"}
-                  </button>
-                  
-                  {/* Goal suggestions */}
-                  {showGoalSuggestions && (
-                    <motion.div 
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      className="space-y-2 mt-3"
-                    >
-                      <p className="text-gray-500 text-sm mb-2">Select a suggestion or use as inspiration:</p>
-                      {goalSuggestions[selectedThemeId as keyof typeof goalSuggestions].map((suggestion, index) => (
-                        <div 
-                          key={index}
-                          onClick={() => handleSelectSuggestion('goal', suggestion)}
-                          className="p-3 rounded-lg bg-white border border-gray-200 text-gray-800 cursor-pointer hover:bg-gray-50 transition-all text-sm flex items-start gap-2"
-                        >
-                          <div className="mt-0.5">
-                            <Check size={14} className="text-gray-400" />
-                          </div>
-                          <span>{suggestion}</span>
-                        </div>
-                      ))}
-                    </motion.div>
-                  )}
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-          
-          {/* Step 3: Struggles */}
-          {currentStep === 3 && (
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="space-y-6"
-            >
-              <motion.div variants={itemVariants}>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  What's your biggest struggle?
-                </h2>
-                <p className="text-gray-600 mb-4">
-                  Understanding your challenges helps us create a more effective plan.
-                </p>
-                
-                <div className="space-y-4">
-                  <textarea
-                    value={struggle}
-                    onChange={(e) => setStruggle(e.target.value)}
-                    placeholder="e.g., I have trouble staying consistent with new habits and often give up after a few days"
-                    className="w-full h-32 p-4 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500/20"
-                  />
-                  
-                  {/* Need inspiration button */}
-                  <button 
-                    onClick={() => setShowStruggleSuggestions(!showStruggleSuggestions)}
-                    className="w-full py-2 px-3 text-sm border border-gray-300 rounded-lg bg-white/80 text-gray-700 hover:bg-white hover:text-gray-900 transition-colors"
-                  >
-                    {showStruggleSuggestions ? "Hide suggestions" : "Need inspiration? See suggestions"}
-                  </button>
-                  
-                  {/* Struggle suggestions */}
-                  {showStruggleSuggestions && (
-                    <motion.div 
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      className="space-y-2 mt-3"
-                    >
-                      <p className="text-gray-500 text-sm mb-2">Select a struggle that resonates with you:</p>
-                      {struggleSuggestions[selectedThemeId as keyof typeof struggleSuggestions].map((suggestion, index) => (
-                        <div 
-                          key={index}
-                          onClick={() => handleSelectSuggestion('struggle', suggestion)}
-                          className="p-3 rounded-lg bg-white border border-gray-200 text-gray-800 cursor-pointer hover:bg-gray-50 transition-all text-sm flex items-start gap-2"
-                        >
-                          <div className="mt-0.5">
-                            <Check size={14} className="text-gray-400" />
-                          </div>
-                          <span>{suggestion}</span>
-                        </div>
-                      ))}
-                    </motion.div>
-                  )}
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-          
-          {/* Step 4: Time commitment */}
-          {currentStep === 4 && (
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="space-y-6"
-            >
-              <motion.div variants={itemVariants}>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  How much time can you commit daily?
-                </h2>
-                <p className="text-gray-600 mb-4">
-                  This helps us create tasks that fit into your schedule.
-                </p>
-                
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center text-gray-700 text-sm">
-                        <Clock className="h-4 w-4 mr-1" />
-                        <span>Minutes per day</span>
-                      </div>
-                      <span className="text-gray-900 font-bold">{dailyTime} min</span>
-                    </div>
-                    
-                    <input
-                      type="range"
-                      min={5}
-                      max={120}
-                      step={5}
-                      value={dailyTime}
-                      onChange={(e) => setDailyTime(Number(e.target.value))}
-                      className="w-full accent-gray-900"
-                    />
-                    
-                    <div className="flex justify-between text-xs text-gray-500 mt-1">
-                      <span>5 min</span>
-                      <span>60 min</span>
-                      <span>120 min</span>
-                    </div>
-                  </div>
 
-                  <div className="mt-6 p-4 border border-gray-200 rounded-xl bg-white/80">
-                    <div className="flex items-center mb-2">
-                      <Star className="h-4 w-4 text-gray-700 mr-1.5" />
-                      <h3 className="text-gray-900 font-medium text-sm">What to expect next:</h3>
-                    </div>
-                    <p className="text-gray-600 text-sm">
-                      We'll use your responses to create a personalized 30-day journey with 
-                      achievable daily quests designed specifically for your goals and schedule.
-                    </p>
+  // Animation variants for transitions
+  const pageVariants = {
+    initial: { opacity: 0, x: 50 },
+    in: { opacity: 1, x: 0 },
+    out: { opacity: 0, x: -50 }
+  };
+
+  // Handle back navigation
+  const goBack = () => {
+    if (step > 1) {
+      setStep(step - 1);
+    }
+  };
+
+  // Handle forward navigation
+  const goNext = () => {
+    if (step < 4) {
+      setStep(step + 1);
+    } else {
+      // Submit on the last step
+      handleSubmit();
+    }
+  };
+
+  // Check if the current step is valid and can proceed
+  const canProceed = () => {
+    switch (step) {
+      case 1: // Theme selection
+        return selectedTheme !== '';
+      case 2: // Goal setting
+        return formData.goal.trim().length > 0;
+      case 3: // Biggest struggle
+        return formData.biggestStruggle.trim().length > 0;
+      case 4: // Daily commitment
+        return formData.dailyCommitment > 0;
+      default:
+        return false;
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-[#0A0A0A] text-white">
+      <ThemeBackground />
+      
+      {/* Container */}
+      <div className="flex-1 flex flex-col p-6 max-w-md mx-auto w-full relative z-10">
+        {/* Header */}
+        <div className="text-center mb-8 mt-8">
+          <h1 className="text-2xl font-bold mb-2">Let's Create Your Plan</h1>
+          <p className="text-white/70 text-sm">
+            Answer a few questions to get a personalized 30-day journey
+          </p>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="w-full h-1 bg-white/10 rounded-full mb-8 overflow-hidden">
+          <motion.div
+            className="h-full bg-white/50 rounded-full"
+            initial={{ width: '0%' }}
+            animate={{ width: `${(step / 4) * 100}%` }}
+            transition={{ duration: 0.3 }}
+          />
+        </div>
+
+        {/* Step Content */}
+        <div className="flex-1 flex flex-col">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              initial="initial"
+              animate="in"
+              exit="out"
+              variants={pageVariants}
+              transition={{ duration: 0.3 }}
+              className="flex-1"
+            >
+              {step === 1 && (
+                <div className="space-y-6">
+                  <h2 className="text-xl font-semibold mb-4">Choose a theme</h2>
+                  <p className="text-white/70 mb-6">
+                    Select what you'd like to focus on during your 30-day journey
+                  </p>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    {themeOptions.map((theme) => (
+                      <div
+                        key={theme.id}
+                        className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                          selectedTheme === theme.id
+                            ? 'bg-white/10 border-white/30'
+                            : 'bg-black/40 border-white/10 hover:bg-black/60'
+                        }`}
+                        onClick={() => setSelectedTheme(theme.id)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="font-medium">{theme.label}</h3>
+                            <p className="text-white/70 text-sm">{theme.description}</p>
+                          </div>
+                          <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                            selectedTheme === theme.id
+                              ? 'border-white bg-white'
+                              : 'border-white/30'
+                          }`}>
+                            {selectedTheme === theme.id && (
+                              <div className="w-3 h-3 rounded-full bg-black" />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </div>
-        
-        {/* Navigation buttons */}
-        <motion.div variants={itemVariants} className="flex gap-3 mt-6">
-          {currentStep > 1 && (
-            <button
-              onClick={handlePreviousStep}
-              className="flex-1 py-3 px-4 bg-white border border-gray-300 text-gray-700 rounded-xl font-medium transition-all hover:bg-gray-50 hover:text-gray-900 active:scale-[0.98]"
-            >
-              Back
-            </button>
-          )}
-          
-          {currentStep < 4 ? (
-            <button
-              onClick={handleNextStep}
-              className="flex-1 py-3 px-4 flex items-center justify-center bg-gray-900 text-white rounded-xl font-medium transition-all hover:bg-gray-800 active:scale-[0.98]"
-            >
-              <span>Next</span>
-              <ArrowRight className="ml-1.5 h-4 w-4" />
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={isLoading}
-              className="flex-1 py-3 px-4 bg-gray-900 text-white rounded-xl font-medium transition-all hover:bg-gray-800 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Processing...</span>
-                </div>
-              ) : (
-                "Create My Plan"
               )}
-            </button>
-          )}
-        </motion.div>
-      </motion.div>
+
+              {step === 2 && (
+                <div className="space-y-6">
+                  <h2 className="text-xl font-semibold mb-4">What's your goal?</h2>
+                  <p className="text-white/70 mb-6">
+                    Describe what you hope to achieve in the next 30 days
+                  </p>
+
+                  <div className="space-y-2">
+                    <Input
+                      placeholder="e.g., Establish a morning meditation routine"
+                      className="bg-black/40 border-white/10 text-white placeholder:text-white/40 focus:border-white/20"
+                      value={formData.goal}
+                      onChange={(e) =>
+                        setFormData({ ...formData, goal: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+              )}
+
+              {step === 3 && (
+                <div className="space-y-6">
+                  <h2 className="text-xl font-semibold mb-4">
+                    What's your biggest struggle?
+                  </h2>
+                  <p className="text-white/70 mb-6">
+                    This helps us understand what challenges to address
+                  </p>
+
+                  <div className="space-y-2">
+                    <Input
+                      placeholder="e.g., Getting distracted by social media"
+                      className="bg-black/40 border-white/10 text-white placeholder:text-white/40 focus:border-white/20"
+                      value={formData.biggestStruggle}
+                      onChange={(e) =>
+                        setFormData({ ...formData, biggestStruggle: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+              )}
+
+              {step === 4 && (
+                <div className="space-y-6">
+                  <h2 className="text-xl font-semibold mb-4">
+                    Daily time commitment
+                  </h2>
+                  <p className="text-white/70 mb-6">
+                    How much time can you dedicate each day?
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {timeOptions.map((option) => (
+                      <div
+                        key={option.value}
+                        className={`p-3 rounded-xl flex items-center justify-center cursor-pointer transition-all ${
+                          formData.dailyCommitment === option.value
+                            ? 'bg-white text-black font-medium'
+                            : 'bg-black/40 border border-white/10 hover:bg-black/60'
+                        }`}
+                        onClick={() =>
+                          setFormData({ ...formData, dailyCommitment: option.value })
+                        }
+                      >
+                        {option.label}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="flex items-center justify-between mt-10">
+          <Button
+            variant="ghost"
+            onClick={goBack}
+            disabled={step === 1}
+            className="px-4 py-2 flex items-center gap-1"
+          >
+            <ArrowLeft size={16} />
+            Back
+          </Button>
+          
+          <Button
+            onClick={goNext}
+            disabled={!canProceed() || loading}
+            className="px-6 py-3 bg-white text-black hover:bg-white/90 flex items-center gap-2"
+          >
+            {loading ? (
+              <span>Loading...</span>
+            ) : step < 4 ? (
+              <>
+                Next
+                <ArrowRight size={16} />
+              </>
+            ) : (
+              'Create My Plan'
+            )}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

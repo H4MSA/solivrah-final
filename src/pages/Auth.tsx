@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Mail, Lock, AlertCircle, ArrowRight } from "lucide-react";
+import { ThemeBackground } from "@/components/ThemeBackground";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -72,19 +73,20 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-6 py-12">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0A0A] px-6 py-12 relative">
+      <ThemeBackground />
       <motion.div 
-        className="w-full max-w-sm space-y-6"
+        className="w-full max-w-sm space-y-6 relative z-10"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
         <div className="flex flex-col items-center justify-center">
           <Logo className="h-28 w-auto mb-6" />
-          <h2 className="mb-2 text-center text-2xl font-bold text-gray-900">
+          <h2 className="mb-2 text-center text-2xl font-bold text-white">
             {isSignup ? "Create your account" : "Sign in to your account"}
           </h2>
-          <p className="text-center text-sm text-gray-600 max-w-[250px]">
+          <p className="text-center text-sm text-white/70 max-w-[250px]">
             {isSignup 
               ? "Join our community and start your journey towards your goals" 
               : "Welcome back! Sign in to continue your journey"}
@@ -93,23 +95,23 @@ const Auth = () => {
 
         {error && (
           <motion.div 
-            className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-600 relative pl-10"
+            className="rounded-lg bg-red-900/20 border border-red-500/20 p-3 text-sm text-red-400 relative pl-10"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <AlertCircle className="absolute left-3 top-3 h-4 w-4 text-red-500" />
+            <AlertCircle className="absolute left-3 top-3 h-4 w-4 text-red-400" />
             {error}
           </motion.div>
         )}
 
-        <div className="backdrop-blur-lg bg-white/70 rounded-xl p-6 border border-gray-200 shadow-lg">
+        <div className="backdrop-blur-lg bg-white/5 rounded-xl p-6 border border-white/10 shadow-lg">
           <form className="space-y-5" onSubmit={handleAuth}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-white/80 mb-2">
                 Email address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                <Mail className="absolute left-3 top-2.5 h-5 w-5 text-white/50" />
                 <Input
                   id="email"
                   name="email"
@@ -118,18 +120,18 @@ const Auth = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 bg-white border border-gray-300 text-gray-900 focus:border-gray-500 focus:ring-gray-500/20"
+                  className="pl-10 bg-black/40 border border-white/10 text-white focus:border-white/20 focus:ring-white/10"
                   placeholder="you@example.com"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-white/80 mb-2">
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                <Lock className="absolute left-3 top-2.5 h-5 w-5 text-white/50" />
                 <Input
                   id="password"
                   name="password"
@@ -138,7 +140,7 @@ const Auth = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 bg-white border border-gray-300 text-gray-900 focus:border-gray-500 focus:ring-gray-500/20"
+                  className="pl-10 bg-black/40 border border-white/10 text-white focus:border-white/20 focus:ring-white/10"
                   placeholder="••••••••••••"
                 />
               </div>
@@ -148,7 +150,7 @@ const Auth = () => {
               <motion.button
                 type="submit"
                 whileTap={{ scale: 0.97 }}
-                className="group relative flex w-full justify-center rounded-xl bg-gray-900 px-4 py-3.5 text-white font-medium transition-all hover:bg-gray-800 active:scale-[0.98] shadow-lg"
+                className="group relative flex w-full justify-center rounded-xl bg-[#222222] px-4 py-3.5 text-white font-medium transition-all hover:bg-[#333333] active:scale-[0.98] shadow-lg border border-white/10"
                 disabled={loading}
               >
                 {loading ? (
@@ -171,16 +173,16 @@ const Auth = () => {
         </div>
 
         <div className="flex items-center">
-          <div className="h-px flex-1 bg-gray-300"></div>
-          <p className="mx-4 text-sm text-gray-500">or</p>
-          <div className="h-px flex-1 bg-gray-300"></div>
+          <div className="h-px flex-1 bg-white/10"></div>
+          <p className="mx-4 text-sm text-white/50">or</p>
+          <div className="h-px flex-1 bg-white/10"></div>
         </div>
 
         <div className="flex items-center justify-center">
           <motion.button
             type="button"
             whileTap={{ scale: 0.97 }}
-            className="text-sm text-gray-600 px-4 py-2 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            className="text-sm text-white/60 px-4 py-2 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
             onClick={handleGuestLogin}
           >
             Continue as Guest
@@ -190,14 +192,14 @@ const Auth = () => {
         <div className="text-center mt-6">
           <motion.button
             whileTap={{ scale: 0.97 }}
-            className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            className="text-sm text-white/60 hover:text-white transition-colors"
             onClick={() => setIsSignup(!isSignup)}
           >
             {isSignup ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
           </motion.button>
         </div>
         
-        <div className="text-gray-500 text-[10px] text-center mt-8">
+        <div className="text-white/50 text-[10px] text-center mt-8">
           © 2025 Solivrah. All rights reserved.
         </div>
       </motion.div>

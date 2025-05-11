@@ -2,34 +2,23 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, type MotionProps } from "framer-motion";
 
 type StartButtonPropsWithoutMotion = Omit<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
-  'onAnimationStart' | 'onDrag' | 'onDragEnd' | 'onDragStart' | 'onAnimationComplete' | 'style'
+  keyof MotionProps
 >;
-
-// Only specify the motion-specific props that we'll actually use
-interface FramerProps {
-  whileHover?: Record<string, unknown>;
-  whileTap?: Record<string, unknown>;
-  transition?: Record<string, unknown>;
-  animate?: Record<string, unknown>;
-  initial?: Record<string, unknown>;
-  exit?: Record<string, unknown>;
-  style?: React.CSSProperties;
-}
 
 type StartButtonProps = {
   children: React.ReactNode;
   variant?: 'default' | 'outline';
   className?: string;
-} & StartButtonPropsWithoutMotion & FramerProps;
+} & StartButtonPropsWithoutMotion & MotionProps;
 
 export const StartButton = React.forwardRef<HTMLButtonElement, StartButtonProps>(
   ({ className, children, variant = 'default', whileHover, whileTap, ...props }, ref) => {
-    // Set default motion props
-    const motionProps = {
+    // Set default motion props with proper typing
+    const motionProps: MotionProps = {
       whileHover: whileHover || { scale: 1.02 },
       whileTap: whileTap || { scale: 0.98 },
     };
@@ -55,10 +44,10 @@ export const StartButton = React.forwardRef<HTMLButtonElement, StartButtonProps>
           className
         )}
         {...motionProps}
+        transition={transition}
         animate={animate}
         initial={initial}
         exit={exit}
-        transition={transition}
         {...buttonProps}
       >
         {children}
