@@ -23,7 +23,7 @@ export const Logo: React.FC<LogoProps> = ({ size = "md", className, withText = f
       transition={{ duration: 0.5 }}
     >
       <motion.img 
-        src="/solivrah-logo.png" 
+        src="/lovable-uploads/68c40b83-f35c-4ca2-a67e-23d5ff575a28.png" 
         alt="Solivrah Logo" 
         className={cn(sizeClass[size], "object-contain")}
         initial={{ rotate: -10, scale: 0.8 }}
