@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PremiumCard } from '@/components/PremiumCard';
@@ -6,11 +5,11 @@ import { Button } from '@/components/ui/button';
 import { useApp } from '@/context/AppContext';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileReset } from '@/components/ProfileReset';
-import { Settings, LogOut, Send, Bell, Globe, Shield, Moon } from 'lucide-react';
+import { Settings, LogOut, Send, Bell, Shield, Moon } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 
 export const ProfileSettings: React.FC = () => {
-  const { user, signOut, selectedTheme } = useApp();
+  const { user, signOut, selectedTheme, resetProgress } = useApp();
   const { toast } = useToast();
   const [isResetting, setIsResetting] = useState(false);
   const [notifications, setNotifications] = useState(true);
