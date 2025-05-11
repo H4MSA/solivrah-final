@@ -2,7 +2,7 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, type TargetAndTransition, type VariantLabels, type AnimationControls } from "framer-motion";
 
 type StartButtonPropsWithoutMotion = Omit<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -10,12 +10,12 @@ type StartButtonPropsWithoutMotion = Omit<
 >;
 
 type FramerProps = {
-  whileHover?: object;
-  whileTap?: object;
-  transition?: object;
-  animate?: object;
-  initial?: object;
-  exit?: object;
+  whileHover?: boolean | TargetAndTransition | VariantLabels;
+  whileTap?: boolean | TargetAndTransition | VariantLabels;
+  transition?: any; // Using 'any' for transition as it has a complex type structure
+  animate?: boolean | AnimationControls | TargetAndTransition | VariantLabels;
+  initial?: boolean | TargetAndTransition | VariantLabels;
+  exit?: TargetAndTransition | VariantLabels;
   style?: React.CSSProperties | any;
 };
 
