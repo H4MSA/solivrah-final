@@ -2,22 +2,23 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { cn } from "@/lib/utils";
-import { motion, type TargetAndTransition, type VariantLabels, type AnimationControls } from "framer-motion";
+import { motion } from "framer-motion";
 
 type StartButtonPropsWithoutMotion = Omit<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
   'onAnimationStart' | 'onDrag' | 'onDragEnd' | 'onDragStart' | 'onAnimationComplete' | 'style'
 >;
 
-type FramerProps = {
-  whileHover?: boolean | TargetAndTransition | VariantLabels;
-  whileTap?: boolean | TargetAndTransition | VariantLabels;
-  transition?: any; // Using 'any' for transition as it has a complex type structure
-  animate?: boolean | AnimationControls | TargetAndTransition | VariantLabels;
-  initial?: boolean | TargetAndTransition | VariantLabels;
-  exit?: TargetAndTransition | VariantLabels;
-  style?: React.CSSProperties | any;
-};
+// Only specify the motion-specific props that we'll actually use
+interface FramerProps {
+  whileHover?: Record<string, unknown>;
+  whileTap?: Record<string, unknown>;
+  transition?: Record<string, unknown>;
+  animate?: Record<string, unknown>;
+  initial?: Record<string, unknown>;
+  exit?: Record<string, unknown>;
+  style?: React.CSSProperties;
+}
 
 type StartButtonProps = {
   children: React.ReactNode;

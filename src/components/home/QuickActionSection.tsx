@@ -1,7 +1,7 @@
 
 import React from "react";
 import { FiCamera, FiEdit, FiZap } from "react-icons/fi";
-import { MotionButton } from "@/components/ui/button"; // Using MotionButton for animation support
+import { MotionButton } from "@/components/ui/button";
 
 interface QuickActionSectionProps {
   onScannerClick: () => void;

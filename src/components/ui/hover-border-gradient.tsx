@@ -77,7 +77,7 @@ export function HoverBorderGradient({
     >
       <div
         className={cn(
-          "w-auto text-white z-10 bg-[#1E1E1E] px-4 py-2 rounded-[inherit] transform-gpu transition-all duration-300 active:scale-[0.98]",
+          "w-auto text-white z-10 bg-[#151515] px-4 py-2 rounded-[inherit] transform-gpu transition-all duration-300 active:scale-[0.98]",
           className
         )}
       >
@@ -96,7 +96,7 @@ export function HoverBorderGradient({
           transition: "background 0.5s ease"
         }}
       />
-      <div className="bg-[#1A1A1A] absolute z-1 flex-none inset-[2px] rounded-[100px]" />
+      <div className="bg-[#111111] absolute z-1 flex-none inset-[2px] rounded-[100px]" />
     </Tag>
   );
 }

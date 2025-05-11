@@ -41,12 +41,12 @@ export const PremiumCard: React.FC<PremiumCardProps> = ({
     <motion.div
       className={cn(
         "rounded-xl p-5 mb-5 transition-colors duration-200",
-        variant === "default" && "bg-[#1A1A1A] text-white",
-        variant === "selected" && "bg-[#222222] border-white/20 text-white",
+        variant === "default" && "bg-[#151515] text-white",
+        variant === "selected" && "bg-[#1A1A1A] border-white/20 text-white",
         variant === "dark" && "bg-black/90 text-white",
         variant === "subtle" && "bg-black/20 border-white/5 text-white",
         variant === "black" && "bg-black text-white",
-        variant === "premium" && "bg-[#1A1A1A] text-white",
+        variant === "premium" && "bg-[#151515] text-white",
         variant === "glass" && "bg-black/40 text-white",
         withBorder && "border border-[#333333]",
         interactive && "cursor-pointer",

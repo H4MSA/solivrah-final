@@ -64,16 +64,16 @@ export const GlassCard: React.FC<GlassCardProps> = ({
 
   const getBgClass = () => {
     switch (variant) {
-      case "default": return "bg-[#1A1A1A]";
-      case "elevated": return "bg-[#222222] border-white/10";
-      case "subtle": return "bg-[#141414] border-white/5";
-      case "primary": return "bg-[#252525] text-white border-white/10";
-      case "interactive": return "bg-[#1A1A1A] hover:bg-[#222222]";
+      case "default": return "bg-[#151515]";
+      case "elevated": return "bg-[#1A1A1A] border-white/10";
+      case "subtle": return "bg-[#111111] border-white/5";
+      case "primary": return "bg-[#1A1A1A] text-white border-white/10";
+      case "interactive": return "bg-[#151515] hover:bg-[#1A1A1A]";
       case "dark": return "bg-black/90";
-      case "theme": return "bg-[#1A1A1A]";
-      case "premium": return "bg-gradient-to-br from-[#222222] to-[#1A1A1A]";
-      case "ultra-glass": return "bg-[#1A1A1A]/80 backdrop-blur-md border-white/20";
-      default: return "bg-[#1A1A1A]";
+      case "theme": return "bg-[#151515]";
+      case "premium": return "bg-gradient-to-br from-[#1A1A1A] to-[#0A0A0A]";
+      case "ultra-glass": return "bg-[#151515]/80 backdrop-blur-md border-white/20";
+      default: return "bg-[#151515]";
     }
   };
 

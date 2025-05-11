@@ -3,7 +3,7 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
-import { motion, type HTMLMotionProps, type TargetAndTransition, type VariantLabels, type AnimationControls } from "framer-motion"
+import { motion, type HTMLMotionProps } from "framer-motion"
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-base font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -54,7 +54,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = "Button"
 
-// Fix: Properly define motion button props to avoid conflicts between React and Framer Motion types
+// Fix: Define motion button props properly to avoid type conflicts
 type MotionButtonPropsWithoutMotion = Omit<ButtonProps, 
   'onAnimationStart' | 
   'onDrag' | 
@@ -64,19 +64,19 @@ type MotionButtonPropsWithoutMotion = Omit<ButtonProps,
   'style'
 >;
 
-// Define the Framer Motion specific props with correct types
-type FramerMotionSpecificProps = {
-  whileHover?: boolean | TargetAndTransition | VariantLabels;
-  whileTap?: boolean | TargetAndTransition | VariantLabels;
-  transition?: any; // Using 'any' for transition as it has a complex type structure
-  animate?: boolean | AnimationControls | TargetAndTransition | VariantLabels;
-  initial?: boolean | TargetAndTransition | VariantLabels;
-  exit?: TargetAndTransition | VariantLabels;
-  style?: React.CSSProperties | any;
-};
+// Only specify the motion-specific props that we'll actually use
+interface FramerMotionProps {
+  whileHover?: Record<string, unknown>;
+  whileTap?: Record<string, unknown>;
+  transition?: Record<string, unknown>;
+  animate?: Record<string, unknown>;
+  initial?: Record<string, unknown>;
+  exit?: Record<string, unknown>;
+  style?: React.CSSProperties;
+}
 
 // Combined type for Motion Button
-interface MotionButtonProps extends MotionButtonPropsWithoutMotion, FramerMotionSpecificProps {}
+interface MotionButtonProps extends MotionButtonPropsWithoutMotion, FramerMotionProps {}
 
 const MotionButton = React.forwardRef<HTMLButtonElement, MotionButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {

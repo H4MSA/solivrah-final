@@ -20,15 +20,15 @@ export const MoodButton: React.FC<MoodButtonProps> = ({ emoji, label, selected, 
       className={cn(
         "p-3 flex flex-col items-center justify-center gap-2 transition-all rounded-xl",
         selected 
-          ? "bg-black border border-white/20 shadow-md" 
-          : "bg-black/90 border border-[#333333]"
+          ? "bg-[#1A1A1A] border border-white/20 shadow-md" 
+          : "bg-[#151515] border border-[#333333]"
       )}
       onClick={onClick}
     >
       <div className={cn(
         "flex items-center justify-center w-12 h-12 rounded-full mb-1 text-2xl",
         selected 
-          ? "bg-black/80 shadow-sm" 
+          ? "bg-[#222222]" 
           : "bg-black/60"
       )}>
         {emoji}

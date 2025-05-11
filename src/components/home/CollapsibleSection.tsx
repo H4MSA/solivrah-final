@@ -18,7 +18,7 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   
   return (
     <motion.div 
-      className="mb-4 bg-[#1A1A1A] rounded-xl border border-[#333333] overflow-hidden"
+      className="mb-4 bg-[#151515] rounded-xl border border-[#333333] overflow-hidden"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
