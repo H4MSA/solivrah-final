@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Wifi, WifiOff, CloudSync } from 'lucide-react';
+import { Wifi, WifiOff, CloudUpload } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOfflineSupport } from '@/hooks/useOfflineSupport';
 import { GlassCard } from './GlassCard';
@@ -55,7 +56,7 @@ export const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
             depth="high"
           >
             {pendingOperationsCount > 0 && isOnline ? (
-              <CloudSync className="text-blue-400 animate-pulse" size={14} />
+              <CloudUpload className="text-blue-400 animate-pulse" size={14} />
             ) : (
               statusIcon
             )}
@@ -71,7 +72,7 @@ export const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
           >
             <div className="flex items-center gap-2 w-full">
               {pendingOperationsCount > 0 && isOnline ? (
-                <CloudSync className="text-blue-400 animate-pulse" size={18} />
+                <CloudUpload className="text-blue-400 animate-pulse" size={18} />
               ) : (
                 statusIcon
               )}
@@ -98,4 +99,4 @@ export const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
       </motion.div>
     </AnimatePresence>
   );
-}; 
+};

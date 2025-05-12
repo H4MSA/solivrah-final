@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 
 // Types for offline operations
@@ -128,10 +129,11 @@ export function useOfflineSupport() {
 
   // Helper function to request background sync
   const requestSync = useCallback(async () => {
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
       try {
         const registration = await navigator.serviceWorker.ready;
-        if ('sync' in registration) {
+        // Check if the sync API is supported and available on the registration
+        if (registration.sync && typeof registration.sync.register === 'function') {
           await registration.sync.register('offline-quest-completion');
           return true;
         }
@@ -182,4 +184,4 @@ export function useOfflineSupport() {
     syncOfflineOperations,
     pendingOperationsCount: syncStatus.pendingOperations
   };
-} 
+}
