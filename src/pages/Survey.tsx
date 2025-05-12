@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,7 +8,8 @@ import { ThemeBackground } from '@/components/ThemeBackground';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, ArrowRight, LightbulbIcon } from 'lucide-react';
+import { ArrowLeft, ArrowRight, LightbulbIcon, CheckIcon } from 'lucide-react';
+import { GlassCard } from '@/components/GlassCard';
 
 const Survey = () => {
   const navigate = useNavigate();
@@ -118,22 +120,28 @@ const Survey = () => {
         userId: user?.id || 'guest'
       };
 
-      // Save survey response to database
-      const { error: surveyError } = await supabase.from('survey_responses').insert([
-        {
-          user_id: user?.id || 'guest',
-          theme: selectedTheme,
-          goal: formData.goal,
-          biggest_struggle: formData.biggestStruggle,
-          daily_commitment: formData.dailyCommitment
-        }
-      ]);
+      // For guest users, just store in local storage
+      if (!user?.id) {
+        localStorage.setItem('personalizedPlan', JSON.stringify(planData));
+        localStorage.setItem('hasCompletedSurvey', 'true');
+      } else {
+        // Save survey response to database for authenticated users
+        const { error: surveyError } = await supabase.from('survey_responses').insert([
+          {
+            user_id: user.id,
+            theme: selectedTheme,
+            goal: formData.goal,
+            biggest_struggle: formData.biggestStruggle,
+            daily_commitment: formData.dailyCommitment
+          }
+        ]);
 
-      if (surveyError) throw surveyError;
-
-      // Save plan to local storage for now (as a fallback)
-      localStorage.setItem('personalizedPlan', JSON.stringify(planData));
-      localStorage.setItem('hasCompletedSurvey', 'true');
+        if (surveyError) throw surveyError;
+        
+        // Still save to localStorage for immediate access
+        localStorage.setItem('personalizedPlan', JSON.stringify(planData));
+        localStorage.setItem('hasCompletedSurvey', 'true');
+      }
 
       // Show success notification
       toast({
@@ -159,8 +167,24 @@ const Survey = () => {
   // Animation variants for transitions
   const pageVariants = {
     initial: { opacity: 0, x: 50 },
-    in: { opacity: 1, x: 0 },
-    out: { opacity: 0, x: -50 }
+    in: { opacity: 1, x: 0, transition: { duration: 0.4, ease: "easeOut" } },
+    out: { opacity: 0, x: -50, transition: { duration: 0.2 } }
+  };
+  
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
   };
 
   // Handle back navigation
@@ -202,38 +226,90 @@ const Survey = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0A0A0A] text-white">
+    <div className="min-h-screen flex flex-col bg-[#0A0A0A] text-white overflow-x-hidden">
       <ThemeBackground />
       
+      {/* Animated background elements */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <motion.div 
+          className="bubble w-64 h-64 top-[5%] left-[80%]"
+          animate={{ 
+            x: [0, -40, 0], 
+            y: [0, 30, 0],
+            opacity: [0.03, 0.06, 0.03]
+          }}
+          transition={{ 
+            repeat: Infinity, 
+            duration: 20,
+            ease: "easeInOut" 
+          }}
+        />
+        <motion.div 
+          className="bubble w-48 h-48 bottom-[20%] left-[5%]"
+          animate={{ 
+            x: [0, 30, 0], 
+            y: [0, -30, 0],
+            opacity: [0.04, 0.07, 0.04]
+          }}
+          transition={{ 
+            repeat: Infinity, 
+            duration: 15,
+            ease: "easeInOut",
+            delay: 3
+          }}
+        />
+      </div>
+      
       {/* Container */}
-      <div className="flex-1 flex flex-col max-w-md mx-auto w-full relative z-10">
+      <div className="flex-1 flex flex-col max-w-md mx-auto w-full relative z-10 px-6 pt-8 pb-32">
         {/* Header */}
-        <div className="text-center mb-8 mt-8">
-          <h1 className="text-2xl font-bold mb-2">Let's Create Your Plan</h1>
-          <p className="text-white/70 text-sm">
+        <motion.div 
+          className="text-center mb-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.h1 
+            variants={itemVariants}
+            className="text-2xl font-bold mb-2"
+          >
+            Let's Create Your Plan
+          </motion.h1>
+          <motion.p 
+            variants={itemVariants}
+            className="text-white/70 text-sm"
+          >
             Answer a few questions to get a personalized 30-day journey
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Error message */}
-        {error && (
-          <div className="bg-red-500/20 text-red-300 p-4 rounded-lg mb-6">
-            <p>{error}</p>
-          </div>
-        )}
+        <AnimatePresence>
+          {error && (
+            <motion.div 
+              className="bg-red-500/20 text-red-300 p-4 rounded-lg mb-6"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <p>{error}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Progress Bar */}
-        <div className="w-full h-1 bg-white/10 rounded-full mb-8 overflow-hidden">
+        <div className="w-full h-1.5 bg-white/5 rounded-full mb-8 overflow-hidden">
           <motion.div
-            className="h-full bg-white/50 rounded-full"
+            className="h-full bg-gradient-to-r from-white/40 to-white/60 rounded-full"
             initial={{ width: '0%' }}
             animate={{ width: `${(step / 4) * 100}%` }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
           />
         </div>
 
         {/* Step Content */}
-        <div className="flex-1 flex flex-col content-with-fixed-nav">
+        <div className="flex-1 flex flex-col">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
@@ -241,26 +317,34 @@ const Survey = () => {
               animate="in"
               exit="out"
               variants={pageVariants}
-              transition={{ duration: 0.3 }}
-              className="flex-1 px-6"
+              className="flex-1"
             >
               {step === 1 && (
-                <div className="space-y-6">
-                  <h2 className="text-xl font-semibold mb-4">Choose a theme</h2>
-                  <p className="text-white/70 mb-6">
+                <motion.div 
+                  className="space-y-6"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  <motion.h2 variants={itemVariants} className="text-xl font-semibold mb-4">Choose a theme</motion.h2>
+                  <motion.p variants={itemVariants} className="text-white/70 mb-6">
                     Select what you'd like to focus on during your 30-day journey
-                  </p>
+                  </motion.p>
 
                   <div className="grid grid-cols-1 gap-4">
-                    {themeOptions.map((theme) => (
-                      <div
+                    {themeOptions.map((theme, index) => (
+                      <motion.div
                         key={theme.id}
+                        variants={itemVariants}
+                        custom={index}
                         className={`p-4 rounded-xl border cursor-pointer transition-all ${
                           selectedTheme === theme.id
                             ? 'bg-white/10 border-white/30'
-                            : 'bg-black/40 border-white/10 hover:bg-black/60'
+                            : 'bg-black/40 border-white/10 hover:bg-white/5'
                         }`}
                         onClick={() => setSelectedTheme(theme.id)}
+                        whileHover={{ y: -3, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3)" }}
+                        whileTap={{ scale: 0.98 }}
                       >
                         <div className="flex items-center justify-between">
                           <div>
@@ -277,20 +361,25 @@ const Survey = () => {
                             )}
                           </div>
                         </div>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               )}
 
               {step === 2 && (
-                <div className="space-y-6">
-                  <h2 className="text-xl font-semibold mb-4">What's your goal?</h2>
-                  <p className="text-white/70 mb-6">
+                <motion.div 
+                  className="space-y-6"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  <motion.h2 variants={itemVariants} className="text-xl font-semibold mb-4">What's your goal?</motion.h2>
+                  <motion.p variants={itemVariants} className="text-white/70 mb-6">
                     Describe what you hope to achieve in the next 30 days
-                  </p>
+                  </motion.p>
 
-                  <div className="space-y-2">
+                  <motion.div variants={itemVariants} className="space-y-2">
                     <Input
                       placeholder="e.g., Establish a morning meditation routine"
                       className="bg-black/40 border-white/10 text-white placeholder:text-white/40 focus:border-white/20"
@@ -299,11 +388,14 @@ const Survey = () => {
                         setFormData({ ...formData, goal: e.target.value })
                       }
                     />
-                  </div>
+                  </motion.div>
 
                   {/* Suggestions based on selected theme */}
                   {selectedTheme && (
-                    <div className="mt-6">
+                    <motion.div 
+                      variants={itemVariants}
+                      className="mt-6"
+                    >
                       <div className="flex items-center gap-2 mb-2">
                         <LightbulbIcon className="w-4 h-4 text-yellow-400" />
                         <p className="text-sm text-white/70">Suggestions</p>
@@ -311,30 +403,41 @@ const Survey = () => {
                       
                       <div className="space-y-2">
                         {themeGoalSuggestions[selectedTheme as keyof typeof themeGoalSuggestions]?.map((suggestion, index) => (
-                          <div
+                          <motion.div
                             key={index}
+                            whileHover={{ 
+                              backgroundColor: "rgba(255,255,255,0.1)", 
+                              x: 3,
+                              transition: { duration: 0.2 } 
+                            }}
+                            whileTap={{ scale: 0.98 }}
                             onClick={() => handleSuggestionClick(suggestion, 'goal')}
-                            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 cursor-pointer text-sm text-white/70"
+                            className="p-3 rounded-lg bg-white/5 hover:bg-white/10 cursor-pointer text-sm text-white/70 transition-colors"
                           >
                             {suggestion}
-                          </div>
+                          </motion.div>
                         ))}
                       </div>
-                    </div>
+                    </motion.div>
                   )}
-                </div>
+                </motion.div>
               )}
 
               {step === 3 && (
-                <div className="space-y-6">
-                  <h2 className="text-xl font-semibold mb-4">
+                <motion.div 
+                  className="space-y-6"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  <motion.h2 variants={itemVariants} className="text-xl font-semibold mb-4">
                     What's your biggest struggle?
-                  </h2>
-                  <p className="text-white/70 mb-6">
+                  </motion.h2>
+                  <motion.p variants={itemVariants} className="text-white/70 mb-6">
                     This helps us understand what challenges to address
-                  </p>
+                  </motion.p>
 
-                  <div className="space-y-2">
+                  <motion.div variants={itemVariants} className="space-y-2">
                     <Input
                       placeholder="e.g., Getting distracted by social media"
                       className="bg-black/40 border-white/10 text-white placeholder:text-white/40 focus:border-white/20"
@@ -343,11 +446,14 @@ const Survey = () => {
                         setFormData({ ...formData, biggestStruggle: e.target.value })
                       }
                     />
-                  </div>
+                  </motion.div>
 
                   {/* Struggle suggestions based on selected theme */}
                   {selectedTheme && (
-                    <div className="mt-6">
+                    <motion.div 
+                      variants={itemVariants}
+                      className="mt-6"
+                    >
                       <div className="flex items-center gap-2 mb-2">
                         <LightbulbIcon className="w-4 h-4 text-yellow-400" />
                         <p className="text-sm text-white/70">Common struggles with {selectedTheme}</p>
@@ -355,99 +461,161 @@ const Survey = () => {
                       
                       <div className="space-y-2">
                         {themeSuggestions[selectedTheme as keyof typeof themeSuggestions]?.map((suggestion, index) => (
-                          <div
+                          <motion.div
                             key={index}
+                            whileHover={{ 
+                              backgroundColor: "rgba(255,255,255,0.1)", 
+                              x: 3,
+                              transition: { duration: 0.2 } 
+                            }}
+                            whileTap={{ scale: 0.98 }}
                             onClick={() => handleSuggestionClick(suggestion, 'biggestStruggle')}
-                            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 cursor-pointer text-sm text-white/70"
+                            className="p-3 rounded-lg bg-white/5 hover:bg-white/10 cursor-pointer text-sm text-white/70 transition-colors"
                           >
                             {suggestion}
-                          </div>
+                          </motion.div>
                         ))}
                       </div>
-                    </div>
+                    </motion.div>
                   )}
-                </div>
+                </motion.div>
               )}
 
               {step === 4 && (
-                <div className="space-y-6">
-                  <h2 className="text-xl font-semibold mb-4">
+                <motion.div 
+                  className="space-y-6"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  <motion.h2 
+                    variants={itemVariants}
+                    className="text-xl font-semibold mb-4"
+                  >
                     Daily time commitment
-                  </h2>
-                  <p className="text-white/70 mb-6">
+                  </motion.h2>
+                  <motion.p 
+                    variants={itemVariants}
+                    className="text-white/70 mb-6"
+                  >
                     How much time can you dedicate each day?
-                  </p>
+                  </motion.p>
 
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    {timeOptions.map((option) => (
-                      <div
+                  <motion.div 
+                    variants={itemVariants}
+                    className="grid grid-cols-2 gap-3 sm:grid-cols-3"
+                  >
+                    {timeOptions.map((option, index) => (
+                      <motion.div
                         key={option.value}
+                        whileHover={{ y: -3, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3)" }}
+                        whileTap={{ scale: 0.98 }}
+                        variants={itemVariants}
+                        custom={index}
                         className={`p-3 rounded-xl border text-center cursor-pointer transition-all ${
                           formData.dailyCommitment === option.value
                             ? 'bg-white/10 border-white/30'
-                            : 'bg-black/40 border-white/10 hover:bg-black/60'
+                            : 'bg-black/40 border-white/10 hover:bg-white/5'
                         }`}
                         onClick={() =>
                           setFormData({ ...formData, dailyCommitment: option.value })
                         }
                       >
                         {option.label}
-                      </div>
+                      </motion.div>
                     ))}
-                  </div>
-                </div>
+                  </motion.div>
+                  
+                  <motion.div variants={itemVariants} className="mt-8">
+                    <GlassCard variant="subtle" className="p-4">
+                      <div className="flex flex-row items-start">
+                        <div className="mr-3 mt-1">
+                          <CheckIcon size={16} className="text-green-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-white/90 mb-1">Your 30-day plan is about to be created</h3>
+                          <p className="text-sm text-white/70">
+                            Based on your selections, we'll generate a personalized roadmap to help you
+                            achieve your {selectedTheme?.toLowerCase() || "personal development"} goals.
+                          </p>
+                        </div>
+                      </div>
+                    </GlassCard>
+                  </motion.div>
+                </motion.div>
               )}
             </motion.div>
           </AnimatePresence>
         </div>
 
         {/* Navigation Buttons */}
-        <div className="fixed-bottom-nav">
-          <div className="flex justify-between max-w-md mx-auto px-6 pb-4">
-            {step > 1 ? (
-              <Button
-                variant="outline"
-                size="lg"
-                className="flex-1 mr-3 bg-black/40 border-white/10 hover:bg-black/60 hover:border-white/20"
-                onClick={goBack}
-                disabled={loading}
-              >
-                <ArrowLeft className="mr-2 w-4 h-4" />
-                Back
-              </Button>
-            ) : (
-              <div className="flex-1 mr-3" />
-            )}
+        <div className="fixed inset-x-0 bottom-0 z-10">
+          <div className="bg-gradient-to-t from-black via-black/95 to-transparent pt-20 pb-8 px-6">
+            <div className="flex justify-between max-w-md mx-auto">
+              {step > 1 ? (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  className="flex-1 mr-3"
+                >
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="flex-1 w-full bg-black/40 border-white/10 hover:bg-black/60 hover:border-white/20"
+                    onClick={goBack}
+                    disabled={loading}
+                  >
+                    <ArrowLeft className="mr-2 w-4 h-4" />
+                    Back
+                  </Button>
+                </motion.div>
+              ) : (
+                <div className="flex-1 mr-3" />
+              )}
 
-            {step < 4 ? (
-              <Button
-                variant="default"
-                size="lg"
-                className="flex-1 bg-white text-black hover:bg-white/90"
-                onClick={goNext}
-                disabled={!canProceed()}
-              >
-                Next
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            ) : (
-              <Button
-                variant="default"
-                size="lg"
-                className="flex-1 bg-white text-black hover:bg-white/90"
-                onClick={handleSubmit}
-                disabled={loading || !canProceed()}
-              >
-                {loading ? (
-                  <div className="flex items-center">
-                    <div className="animate-spin w-4 h-4 border-2 border-black border-t-transparent rounded-full mr-2"></div>
-                    Creating...
-                  </div>
-                ) : (
-                  "Create My Plan"
-                )}
-              </Button>
-            )}
+              {step < 4 ? (
+                <motion.div 
+                  className="flex-1"
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button
+                    variant="default"
+                    size="lg"
+                    className="flex-1 w-full bg-white text-black hover:bg-white/90"
+                    onClick={goNext}
+                    disabled={!canProceed()}
+                  >
+                    Next
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </motion.div>
+              ) : (
+                <motion.div 
+                  className="flex-1"
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button
+                    variant="default"
+                    size="lg"
+                    className="flex-1 w-full bg-white text-black hover:bg-white/90"
+                    onClick={handleSubmit}
+                    disabled={loading || !canProceed()}
+                  >
+                    {loading ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin w-4 h-4 border-2 border-black border-t-transparent rounded-full mr-2"></div>
+                        Creating...
+                      </div>
+                    ) : (
+                      "Create My Plan"
+                    )}
+                  </Button>
+                </motion.div>
+              )}
+            </div>
           </div>
         </div>
       </div>

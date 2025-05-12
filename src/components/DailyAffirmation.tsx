@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, memo } from "react";
 import { Quote, RefreshCw } from "lucide-react";
 import { useApp } from "@/context/AppContext";
@@ -14,33 +15,26 @@ const themeAffirmations = {
     "With each deep breath, my focus strengthens and sharpens.",
     "I am fully present in this moment, exactly where I need to be.",
   ],
-  Fitness: [
-    "My body grows stronger with every effort I make.",
-    "I honor my body by challenging its limits and respecting its needs.",
-    "Each choice I make today builds the healthier future I deserve.",
-    "My commitment to myself is unwavering; I show up for my health.",
-    "My strength is not just physical—it flows from mind to body and back.",
-  ],
-  Mindfulness: [
-    "I am grounded in the present, aware of all that surrounds and fills me.",
-    "Peace begins with this breath, this moment, this awareness.",
-    "I observe my thoughts without judgment, letting what doesn't serve me flow away.",
-    "The wisdom I seek has always been within me, waiting for stillness.",
-    "In the space between thoughts, I find my truest self.",
-  ],
-  Learning: [
-    "My mind expands with each new idea I encounter.",
-    "I transform challenges into opportunities for profound growth.",
-    "The curiosity that drives me is my greatest strength.",
-    "Every question leads me closer to the wisdom I seek.",
-    "I am becoming more capable and insightful with each day.",
-  ],
   Discipline: [
-    "I am the architect of my habits and the master of my actions.",
-    "My willpower grows stronger each time I choose long-term fulfillment over instant gratification.",
-    "Consistency is my superpower—small daily actions create extraordinary results.",
-    "I follow through on commitments to myself with the same respect I show others.",
-    "The discipline I practice today creates freedom for my future self.",
+    "Small daily disciplines lead to major achievements.",
+    "I am building the habit of consistency.",
+    "Each mindful choice strengthens my self-discipline.",
+    "I follow through on commitments to myself.",
+    "My discipline creates future freedom.",
+  ],
+  Resilience: [
+    "I grow stronger with each challenge I face.",
+    "Setbacks are opportunities for greater comebacks.",
+    "My resilience expands with every obstacle overcome.",
+    "I bend but do not break; I adapt and evolve.",
+    "My capacity to recover and thrive is limitless.",
+  ],
+  Wildcards: [
+    "I embrace the unexpected with curiosity and courage.",
+    "New experiences expand my understanding and capabilities.",
+    "I step outside my comfort zone and discover my potential.",
+    "Today I welcome spontaneity and creative insights.",
+    "I find joy in breaking my routine to discover new paths.",
   ],
   Default: [
     "I am capable of remarkable growth and transformation.",
@@ -56,15 +50,28 @@ const aiServiceInstance = new AIService();
 
 // Create a component for the affirmation text to isolate renders
 const AffirmationText = memo(({ text, isLoading }: { text: string; isLoading: boolean }) => (
-  <motion.p 
-    key={text}
-    initial={{ opacity: 0, y: 5 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.3 }}
-    className={`text-white text-sm font-medium ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
-  >
-    {text}
-  </motion.p>
+  <AnimatePresence mode="wait">
+    {!isLoading && (
+      <motion.p 
+        key={text}
+        initial={{ opacity: 0, y: 5 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -5 }}
+        transition={{ duration: 0.3 }}
+        className="text-white text-sm font-medium"
+      >
+        {text}
+      </motion.p>
+    )}
+    {isLoading && (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="h-5 bg-white/10 animate-pulse rounded-md"
+      />
+    )}
+  </AnimatePresence>
 ));
 
 AffirmationText.displayName = 'AffirmationText';
@@ -131,12 +138,17 @@ export const DailyAffirmation = memo(() => {
           userInfo.mood
         );
         
+        // Validate affirmation length to ensure it's not too long
+        const cleanedAffirmation = newAffirmation.length > 120 
+          ? newAffirmation.split('.')[0] + '.'  // Take just the first sentence if too long
+          : newAffirmation;
+        
         // Save to localStorage
-        localStorage.setItem("dailyAffirmation", newAffirmation);
+        localStorage.setItem("dailyAffirmation", cleanedAffirmation);
         localStorage.setItem("affirmationDate", new Date().toDateString());
         
         // Update state
-        setAffirmation(newAffirmation);
+        setAffirmation(cleanedAffirmation);
       } else {
         // If offline, use fallback immediately without trying API
         throw new Error("Offline - using fallback affirmation");
@@ -182,38 +194,56 @@ export const DailyAffirmation = memo(() => {
   }, [selectedTheme]); 
   
   return (
-    <div 
+    <motion.div 
       className="relative overflow-hidden bg-[#1A1A1A] border border-[#333333] rounded-xl p-3 shadow-sm mb-4"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      whileHover={{ 
+        y: -2, 
+        boxShadow: "0 10px 20px rgba(0,0,0,0.2)",
+        transition: { duration: 0.2 } 
+      }}
     >
-      <div className="absolute top-3 left-3">
+      <motion.div 
+        className="absolute top-3 left-3"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+      >
         <Quote size={14} className="text-white/30" />
-      </div>
+      </motion.div>
       
       <div className="ml-6 mr-6">
-        <h3 className="text-xs uppercase tracking-wider text-white/60 font-medium mb-1.5 flex items-center gap-1">
+        <motion.h3 
+          className="text-xs uppercase tracking-wider text-white/60 font-medium mb-1.5 flex items-center gap-1"
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.3 }}
+        >
           <span className="w-1 h-1 rounded-full bg-purple-400/70 inline-block"></span>
           <span>Daily Affirmation</span>
-        </h3>
+        </motion.h3>
         
-        <AnimatePresence mode="wait">
-          {/* Use the memoized component to avoid unnecessary renders */}
-          <AffirmationText text={affirmation} isLoading={refreshing} />
-        </AnimatePresence>
+        {/* Use the memoized component to avoid unnecessary renders */}
+        <AffirmationText text={affirmation} isLoading={refreshing} />
         
         {error && !refreshing && (
           <p className="text-xs text-white/50 mt-1">Offline mode</p>
         )}
       </div>
       
-      <button 
+      <motion.button 
         onClick={() => getNewAffirmation(true)}
         className="absolute top-2 right-2 text-white/50 hover:text-white hover:bg-white/10 transition-all active:scale-90 p-1 rounded-full"
         disabled={refreshing}
         aria-label="Refresh affirmation"
+        whileTap={{ scale: 0.8, rotate: 180 }}
+        transition={{ type: "spring", stiffness: 400, damping: 10 }}
       >
         <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
-      </button>
-    </div>
+      </motion.button>
+    </motion.div>
   );
 });
 

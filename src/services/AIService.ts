@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -57,17 +58,98 @@ export class AIService {
 
   async generateDailyAffirmation(theme: string, username: string = '', mood: string = ''): Promise<string> {
     try {
+      // First check if we have a cached affirmation that's suitable
+      const cachedAffirmation = this.getCachedAffirmation(theme, mood);
+      if (cachedAffirmation) {
+        return cachedAffirmation;
+      }
+      
+      // If not cached or cache invalid, generate new affirmation
       const response = await this.callSupabaseFunction<{ affirmation: string }>(
         'affirmation',
-        { theme, username, mood }
+        { 
+          theme, 
+          username, 
+          mood,
+          style: 'concise' // Request concise style for better affirmations
+        }
       );
       
+      // Cache the newly generated affirmation
+      this.cacheAffirmation(theme, response.affirmation, mood);
       return response.affirmation;
     } catch (error) {
       console.error('Error in generateDailyAffirmation:', error);
-      // Provide a fallback affirmation if API call fails
-      return `Today I embrace growth and progress on my ${theme} journey.`;
+      // Provide a quality fallback affirmation based on theme
+      return this.getFallbackAffirmation(theme);
     }
+  }
+
+  private getCachedAffirmation(theme: string, mood: string): string | null {
+    try {
+      const cacheKey = `affirmation_${theme}_${mood || 'any'}`;
+      const cache = localStorage.getItem(cacheKey);
+      if (cache) {
+        const { affirmation, timestamp } = JSON.parse(cache);
+        // Check if cache is still valid (24 hours)
+        if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
+          return affirmation;
+        }
+      }
+    } catch (err) {
+      // Silently fail and generate new affirmation
+    }
+    return null;
+  }
+
+  private cacheAffirmation(theme: string, affirmation: string, mood: string = ''): void {
+    try {
+      const cacheKey = `affirmation_${theme}_${mood || 'any'}`;
+      localStorage.setItem(cacheKey, JSON.stringify({
+        affirmation,
+        timestamp: Date.now()
+      }));
+    } catch (err) {
+      // Silently fail if storage fails
+    }
+  }
+
+  private getFallbackAffirmation(theme: string): string {
+    const fallbacks: Record<string, string[]> = {
+      'Discipline': [
+        "Today I choose consistent effort over sporadic intensity.",
+        "Small daily disciplines compound into massive achievements.",
+        "I build my discipline muscle with every mindful choice.",
+        "My consistent habits are creating my future self."
+      ],
+      'Focus': [
+        "I direct my attention with intention and purpose.",
+        "My focus becomes sharper with each mindful moment.",
+        "I choose where my attention goes and it serves my growth.",
+        "In this moment, I am fully present and capable."
+      ],
+      'Resilience': [
+        "Every challenge I face strengthens my resilience.",
+        "I transform setbacks into stepping stones.",
+        "My strength grows with each obstacle I overcome.",
+        "I bend but do not break; I adapt and evolve."
+      ],
+      'Wildcards': [
+        "Today I embrace the unexpected as an opportunity.",
+        "I welcome spontaneity and new experiences into my life.",
+        "Comfort zone boundaries are meant to be expanded.",
+        "Growth happens outside my familiar routines."
+      ],
+      'default': [
+        "Today I take one step forward on my journey.",
+        "Progress over perfection guides my actions today.",
+        "I am becoming more capable and aware with each day.",
+        "My potential unfolds with each intentional action."
+      ]
+    };
+    
+    const options = fallbacks[theme] || fallbacks['default'];
+    return options[Math.floor(Math.random() * options.length)];
   }
 
   async generateCoachingReply(message: string, mood: string, context: string, userProfile: any = {}) {
@@ -77,7 +159,14 @@ export class AIService {
       
       const response = await this.callSupabaseFunction<{ reply: string }>(
         'coaching',
-        { message, mood, context, userProfile, isSimpleQuestion }
+        { 
+          message, 
+          mood, 
+          context, 
+          userProfile, 
+          isSimpleQuestion,
+          style: 'clear_concise' // Request specific style
+        }
       );
       
       return response.reply;
@@ -101,7 +190,8 @@ export class AIService {
           message, 
           context: `Tone: ${tone}. History: ${history}`, 
           userProfile,
-          isSimpleQuestion
+          isSimpleQuestion,
+          style: 'clear_concise' // Request specific style
         }
       );
       

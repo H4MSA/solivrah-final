@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import { Help } from "./pages/Help";
 import { ContextHelp } from "./components/ContextHelp";
 import { OnboardingFlow } from "./components/OnboardingFlow";
+import Admin from "./pages/Admin";
 
 // Create a new QueryClient instance with custom options
 const queryClient = new QueryClient({
@@ -343,6 +344,7 @@ const App = () => {
                     </ProtectedRoute>
                   } />
                   <Route path="/help" element={<Help />} />
+                  <Route path="/admin" element={<Admin />} />
 
                   {/* Catch-all for 404s */}
                   <Route path="*" element={<NotFound />} />

@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
@@ -48,6 +49,8 @@ serve(async (req) => {
         return await handleAffirmationGeneration(apiKey, data, corsHeaders);
       case 'verification':
         return await handlePhotoVerification(apiKey, data, corsHeaders);
+      case 'admin':
+        return await handleAdminRequest(apiKey, data, corsHeaders);
       default:
         return new Response(
           JSON.stringify({ error: 'Invalid endpoint' }),
@@ -100,35 +103,42 @@ async function callOpenRouter(apiKey: string, messages: OpenRouterMessage[], mod
 
 // Handler for coaching conversations
 async function handleCoaching(apiKey: string, data: any, corsHeaders: HeadersInit): Promise<Response> {
-  const { message, mood, context, userProfile } = data;
+  const { message, mood, context, userProfile, style = 'standard', isSimpleQuestion = false } = data;
   
-  // Analyze message length to determine response type
-  const isSimpleQuestion = message.trim().length < 15 || 
-                          /^(what|who|when|where|why|how|is|are|do|can|could|will|would)\s.{1,30}\??$/i.test(message);
+  // Get coaching instructions from KV store or use defaults
+  const coachingInstructions = await getCoachingInstructions() || 
+    "You are an empathetic personal development coach. Provide concise, actionable guidance.";
   
   const userTheme = userProfile?.theme || 'general personal development';
   const userProgress = userProfile?.xp ? `Current progress: ${userProfile.xp} XP earned, ${userProfile.streak || 0} day streak.` : '';
   
+  const styleGuide = style === 'clear_concise' 
+    ? "Keep responses brief and actionable. Avoid excessive explanations. Use simple language." 
+    : "";
+  
   const messages: OpenRouterMessage[] = [
     { 
       role: 'system', 
-      content: `You are an empathetic personal development coach specializing in ${userTheme}. 
+      content: `${coachingInstructions}
       The user's current mood is: ${mood || 'unknown'}. 
+      Their focus theme is: ${userTheme}.
       ${userProgress}
       Previous conversation context: ${context || 'This is a new conversation'}
       
+      ${styleGuide}
+      
       RESPONSE LENGTH INSTRUCTIONS:
-      - For simple questions (who, what, when, where, why, how) or short queries, provide brief 1-2 sentence answers.
-      - For deeper questions about personal development, provide more detailed guidance but still be concise.
+      - For simple questions, provide very brief 1-2 sentence answers.
+      - For deeper questions about personal development, provide focused guidance.
       - Always prioritize quality advice over length.
       
-      Your tone should be friendly, motivational, and supportive. Use simple language and focus on actionable advice.`
+      Your tone should be friendly, motivational, and supportive.`
     },
     { role: 'user', content: message }
   ];
 
   // Adjust token limit based on question complexity
-  const maxTokens = isSimpleQuestion ? 200 : 800;
+  const maxTokens = isSimpleQuestion ? 150 : 600;
   const reply = await callOpenRouter(apiKey, messages, 'deepseek/deepseek-coder', 0.7, maxTokens);
   
   return new Response(
@@ -142,7 +152,13 @@ async function handleRoadmapGeneration(apiKey: string, data: any, corsHeaders: H
   const { goals, struggles, dailyTime, userProfile } = data;
   const theme = userProfile?.theme || 'personal development';
   
-  const prompt = `Create a 30-day personalized SMART goal roadmap based on:
+  // Get roadmap instructions from KV store or use defaults
+  const roadmapInstructions = await getRoadmapInstructions() || 
+    "Create practical, achievable daily tasks that build toward the user's goals.";
+  
+  const prompt = `${roadmapInstructions}
+  
+    Create a 30-day personalized SMART goal roadmap based on:
     Theme: ${theme}
     Goals: ${goals}
     Struggles: ${struggles}
@@ -217,14 +233,27 @@ async function handleMoodAnalysis(apiKey: string, data: any, corsHeaders: Header
 
 // Handler for daily affirmation generation
 async function handleAffirmationGeneration(apiKey: string, data: any, corsHeaders: HeadersInit): Promise<Response> {
-  const { theme, username, mood } = data;
+  const { theme, username, mood, style = 'standard' } = data;
   const userContext = username ? `for ${username}` : '';
   const moodContext = mood ? `considering their current mood is ${mood}` : '';
+  
+  // Get affirmation instructions from KV store or use defaults
+  const affirmationInstructions = await getAffirmationInstructions() || 
+    "Create short, powerful daily affirmations that are motivating and positive.";
+  
+  const styleGuide = style === 'concise' 
+    ? "The affirmation MUST BE EXTREMELY CONCISE - UNDER 80 CHARACTERS TOTAL. Focus on brevity and impact." 
+    : "Keep the affirmation brief and impactful.";
   
   const messages: OpenRouterMessage[] = [
     { 
       role: 'system', 
-      content: 'You are an inspiring personal development coach. Generate a short, powerful daily affirmation that is motivating and positive. KEEP IT VERY CONCISE - ONE SHORT SENTENCE ONLY. Make it impactful and memorable.' 
+      content: `${affirmationInstructions}
+      ${styleGuide}
+      Generate a short, powerful daily affirmation that is motivating and positive.
+      IMPORTANT: The affirmation should be ONE SHORT SENTENCE ONLY.
+      Make it impactful and memorable.
+      Do not include any introductions, explanations, or additional text.` 
     },
     { 
       role: 'user', 
@@ -233,10 +262,15 @@ async function handleAffirmationGeneration(apiKey: string, data: any, corsHeader
   ];
 
   // Limit to a very short response for punchier affirmations
-  const affirmation = await callOpenRouter(apiKey, messages, 'deepseek/deepseek-coder', 0.7, 100);
+  const affirmation = await callOpenRouter(apiKey, messages, 'deepseek/deepseek-coder', 0.7, 80);
+  
+  // Clean up affirmation - remove any quotes or extra formatting
+  const cleanedAffirmation = affirmation
+    .replace(/^['"]|['"]$/g, '') // Remove surrounding quotes
+    .trim();
   
   return new Response(
-    JSON.stringify({ affirmation }),
+    JSON.stringify({ affirmation: cleanedAffirmation }),
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   );
 }
@@ -271,4 +305,60 @@ async function handlePhotoVerification(apiKey: string, data: any, corsHeaders: H
     JSON.stringify({ verified: isVerified }),
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   );
+}
+
+// New handler for admin-related requests
+async function handleAdminRequest(apiKey: string, data: any, corsHeaders: HeadersInit): Promise<Response> {
+  const { action, content, type } = data;
+  
+  switch (action) {
+    case 'setInstructions':
+      await setInstructions(type, content);
+      return new Response(
+        JSON.stringify({ success: true, message: `${type} instructions updated successfully` }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    
+    case 'getInstructions':
+      const instructions = await getInstructions(type);
+      return new Response(
+        JSON.stringify({ instructions }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    
+    default:
+      return new Response(
+        JSON.stringify({ error: 'Invalid admin action' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+  }
+}
+
+// Helper functions for storing and retrieving AI instructions
+// In a real implementation, these would use Deno KV or another storage mechanism
+// For this example, we'll use simple localStorage simulation with global variables
+
+let aiInstructions: Record<string, string> = {};
+
+async function setInstructions(type: string, instructions: string): Promise<void> {
+  aiInstructions[type] = instructions;
+  // In a real implementation, we would persist this data
+  console.log(`Updated ${type} instructions`);
+}
+
+async function getInstructions(type: string): Promise<string | null> {
+  return aiInstructions[type] || null;
+}
+
+// Specific helpers for different instruction types
+async function getCoachingInstructions(): Promise<string | null> {
+  return getInstructions('coaching');
+}
+
+async function getRoadmapInstructions(): Promise<string | null> {
+  return getInstructions('roadmap');
+}
+
+async function getAffirmationInstructions(): Promise<string | null> {
+  return getInstructions('affirmation');
 }
