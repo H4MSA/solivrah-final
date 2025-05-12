@@ -71,3 +71,23 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Recent UI Improvements
+
+### Mobile Layout Optimizations
+- Added proper safe area handling for modern mobile devices, including notch and dynamic island awareness
+- Fixed bottom navigation positioning to avoid being cut off by system navigation bars
+- Improved survey flow with fixed navigation buttons that remain visible
+- Applied consistent padding and margin throughout the app
+- Added theme-based suggestions in the survey for improved user experience
+
+### CSS Enhancements
+- Added utility classes for safe area insets
+- Created special container classes optimized for mobile
+- Improved fixed positioning elements to work better on mobile devices
+- Better handling of bottom navigation and input areas
+
+### Feature Improvements
+- Fixed personalized roadmap generator
+- Added theme-based suggestions for goals and struggles in the survey
+- Improved error handling and added fallback mechanisms

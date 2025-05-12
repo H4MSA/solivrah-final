@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { ThemeBackground } from '@/components/ThemeBackground';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, LightbulbIcon } from 'lucide-react';
 
 const Survey = () => {
   const navigate = useNavigate();
@@ -18,6 +17,7 @@ const Survey = () => {
   // Survey state
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     goal: '',
     biggestStruggle: '',
@@ -32,6 +32,62 @@ const Survey = () => {
     { id: 'Wildcards', label: 'Wildcards', description: 'Surprise challenges to break your routine' }
   ];
   
+  // Theme-based suggestions for struggles
+  const themeSuggestions = {
+    Discipline: [
+      'Procrastinating on important tasks',
+      'Sticking to a consistent sleep schedule',
+      'Following through on commitments',
+      'Avoiding distractions during work time'
+    ],
+    Focus: [
+      'Getting distracted by social media',
+      'Trouble staying focused for long periods',
+      'Mind wandering during important tasks',
+      'Difficulty concentrating in noisy environments'
+    ],
+    Resilience: [
+      'Dwelling on failures or setbacks',
+      'Getting overwhelmed by stress',
+      'Giving up when things get difficult',
+      'Taking criticism too personally'
+    ],
+    Wildcards: [
+      'Feeling stuck in a routine',
+      'Fear of trying new things',
+      'Getting bored with regular habits',
+      'Resistance to stepping outside comfort zone'
+    ]
+  };
+
+  // Theme-based suggestions for goals
+  const themeGoalSuggestions = {
+    Discipline: [
+      'Establish a morning routine that I follow daily',
+      'Complete my most important task before noon each day',
+      'Build a consistent exercise habit',
+      'Track my daily habits using a habit tracker'
+    ],
+    Focus: [
+      'Complete 30-minute focused work sessions without distractions',
+      'Reduce screen time by 50%',
+      'Practice mindfulness meditation daily',
+      'Eliminate multitasking during important work'
+    ],
+    Resilience: [
+      'Practice daily reflection on challenges and victories',
+      'Learn one new coping skill each week',
+      'Journal about stressful events and my response',
+      'Create a resilience toolkit for difficult moments'
+    ],
+    Wildcards: [
+      'Try something completely new each week',
+      'Break one routine habit each day',
+      'Challenge myself with spontaneous activities',
+      'Document my experience with unexpected challenges'
+    ]
+  };
+  
   // Time commitment options in minutes
   const timeOptions = [
     { value: 5, label: '5 minutes' },
@@ -41,13 +97,29 @@ const Survey = () => {
     { value: 60, label: '1 hour' }
   ];
 
+  // Reset error when changing steps
+  useEffect(() => {
+    setError(null);
+  }, [step]);
+
   // Handle form submission
   const handleSubmit = async () => {
     setLoading(true);
+    setError(null);
 
     try {
+      // Create personalized plan based on survey responses
+      const planData = {
+        theme: selectedTheme,
+        goal: formData.goal,
+        biggestStruggle: formData.biggestStruggle,
+        dailyCommitment: formData.dailyCommitment,
+        createdAt: new Date().toISOString(),
+        userId: user?.id || 'guest'
+      };
+
       // Save survey response to database
-      const { error } = await supabase.from('survey_responses').insert([
+      const { error: surveyError } = await supabase.from('survey_responses').insert([
         {
           user_id: user?.id || 'guest',
           theme: selectedTheme,
@@ -57,7 +129,18 @@ const Survey = () => {
         }
       ]);
 
-      if (error) throw error;
+      if (surveyError) throw surveyError;
+
+      // Save plan to local storage for now (as a fallback)
+      localStorage.setItem('personalizedPlan', JSON.stringify(planData));
+      localStorage.setItem('hasCompletedSurvey', 'true');
+
+      // Create the personalized plan in the database
+      const { error: planError } = await supabase.from('user_plans').insert([planData]);
+      
+      if (planError) {
+        console.warn('Failed to save plan to database, using local storage fallback', planError);
+      }
 
       // Show success notification
       toast({
@@ -67,8 +150,9 @@ const Survey = () => {
 
       // Navigate to Home
       navigate('/home');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting survey:', error);
+      setError('Unable to create your plan. Please try again.');
       toast({
         variant: 'destructive',
         title: 'Something went wrong',
@@ -119,12 +203,17 @@ const Survey = () => {
     }
   };
 
+  // Handle suggestion click
+  const handleSuggestionClick = (suggestion: string, field: 'goal' | 'biggestStruggle') => {
+    setFormData({ ...formData, [field]: suggestion });
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#0A0A0A] text-white">
       <ThemeBackground />
       
       {/* Container */}
-      <div className="flex-1 flex flex-col p-6 max-w-md mx-auto w-full relative z-10">
+      <div className="flex-1 flex flex-col max-w-md mx-auto w-full relative z-10">
         {/* Header */}
         <div className="text-center mb-8 mt-8">
           <h1 className="text-2xl font-bold mb-2">Let's Create Your Plan</h1>
@@ -132,6 +221,13 @@ const Survey = () => {
             Answer a few questions to get a personalized 30-day journey
           </p>
         </div>
+
+        {/* Error message */}
+        {error && (
+          <div className="bg-red-500/20 text-red-300 p-4 rounded-lg mb-6">
+            <p>{error}</p>
+          </div>
+        )}
 
         {/* Progress Bar */}
         <div className="w-full h-1 bg-white/10 rounded-full mb-8 overflow-hidden">
@@ -144,7 +240,7 @@ const Survey = () => {
         </div>
 
         {/* Step Content */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col content-with-fixed-nav">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
@@ -153,7 +249,7 @@ const Survey = () => {
               exit="out"
               variants={pageVariants}
               transition={{ duration: 0.3 }}
-              className="flex-1"
+              className="flex-1 px-6"
             >
               {step === 1 && (
                 <div className="space-y-6">
@@ -211,6 +307,28 @@ const Survey = () => {
                       }
                     />
                   </div>
+
+                  {/* Suggestions based on selected theme */}
+                  {selectedTheme && (
+                    <div className="mt-6">
+                      <div className="flex items-center gap-2 mb-2">
+                        <LightbulbIcon className="w-4 h-4 text-yellow-400" />
+                        <p className="text-sm text-white/70">Suggestions</p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        {themeGoalSuggestions[selectedTheme as keyof typeof themeGoalSuggestions]?.map((suggestion, index) => (
+                          <div
+                            key={index}
+                            onClick={() => handleSuggestionClick(suggestion, 'goal')}
+                            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 cursor-pointer text-sm text-white/70"
+                          >
+                            {suggestion}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -233,6 +351,28 @@ const Survey = () => {
                       }
                     />
                   </div>
+
+                  {/* Struggle suggestions based on selected theme */}
+                  {selectedTheme && (
+                    <div className="mt-6">
+                      <div className="flex items-center gap-2 mb-2">
+                        <LightbulbIcon className="w-4 h-4 text-yellow-400" />
+                        <p className="text-sm text-white/70">Common struggles with {selectedTheme}</p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        {themeSuggestions[selectedTheme as keyof typeof themeSuggestions]?.map((suggestion, index) => (
+                          <div
+                            key={index}
+                            onClick={() => handleSuggestionClick(suggestion, 'biggestStruggle')}
+                            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 cursor-pointer text-sm text-white/70"
+                          >
+                            {suggestion}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -249,10 +389,10 @@ const Survey = () => {
                     {timeOptions.map((option) => (
                       <div
                         key={option.value}
-                        className={`p-3 rounded-xl flex items-center justify-center cursor-pointer transition-all ${
+                        className={`p-3 rounded-xl border text-center cursor-pointer transition-all ${
                           formData.dailyCommitment === option.value
-                            ? 'bg-white text-black font-medium'
-                            : 'bg-black/40 border border-white/10 hover:bg-black/60'
+                            ? 'bg-white/10 border-white/30'
+                            : 'bg-black/40 border-white/10 hover:bg-black/60'
                         }`}
                         onClick={() =>
                           setFormData({ ...formData, dailyCommitment: option.value })
@@ -269,33 +409,53 @@ const Survey = () => {
         </div>
 
         {/* Navigation Buttons */}
-        <div className="flex items-center justify-between mt-10">
-          <Button
-            variant="ghost"
-            onClick={goBack}
-            disabled={step === 1}
-            className="px-4 py-2 flex items-center gap-1"
-          >
-            <ArrowLeft size={16} />
-            Back
-          </Button>
-          
-          <Button
-            onClick={goNext}
-            disabled={!canProceed() || loading}
-            className="px-6 py-3 bg-white text-black hover:bg-white/90 flex items-center gap-2"
-          >
-            {loading ? (
-              <span>Loading...</span>
-            ) : step < 4 ? (
-              <>
-                Next
-                <ArrowRight size={16} />
-              </>
+        <div className="fixed-bottom-nav">
+          <div className="flex justify-between max-w-md mx-auto px-6 pb-4">
+            {step > 1 ? (
+              <Button
+                variant="outline"
+                size="lg"
+                className="flex-1 mr-3 bg-black/40 border-white/10 hover:bg-black/60 hover:border-white/20"
+                onClick={goBack}
+                disabled={loading}
+              >
+                <ArrowLeft className="mr-2 w-4 h-4" />
+                Back
+              </Button>
             ) : (
-              'Create My Plan'
+              <div className="flex-1 mr-3" />
             )}
-          </Button>
+
+            {step < 4 ? (
+              <Button
+                variant="default"
+                size="lg"
+                className="flex-1 bg-white text-black hover:bg-white/90"
+                onClick={goNext}
+                disabled={!canProceed()}
+              >
+                Next
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            ) : (
+              <Button
+                variant="default"
+                size="lg"
+                className="flex-1 bg-white text-black hover:bg-white/90"
+                onClick={handleSubmit}
+                disabled={loading || !canProceed()}
+              >
+                {loading ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin w-4 h-4 border-2 border-black border-t-transparent rounded-full mr-2"></div>
+                    Creating...
+                  </div>
+                ) : (
+                  "Create My Plan"
+                )}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>

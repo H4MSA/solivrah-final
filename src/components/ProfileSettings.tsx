@@ -1,20 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { PremiumCard } from '@/components/PremiumCard';
 import { Button } from '@/components/ui/button';
 import { useApp } from '@/context/AppContext';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileReset } from '@/components/ProfileReset';
-import { Settings, LogOut, Send, Bell, Shield, Moon } from 'lucide-react';
+import { Settings, LogOut, Send, Bell, Shield, Moon, Layout } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { useNavigate } from 'react-router-dom';
 
 export const ProfileSettings: React.FC = () => {
   const { user, signOut, selectedTheme, resetProgress } = useApp();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isResetting, setIsResetting] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
   const [dataPrivacy, setDataPrivacy] = useState(true);
+  const [uiComplexity, setUiComplexity] = useState<'beginner' | 'intermediate' | 'advanced'>(
+    () => localStorage.getItem('uiComplexity') as any || 'intermediate'
+  );
+  
+  useEffect(() => {
+    localStorage.setItem('uiComplexity', uiComplexity);
+  }, [uiComplexity]);
   
   const handleSignOut = async () => {
     try {
@@ -144,6 +153,93 @@ export const ProfileSettings: React.FC = () => {
               onCheckedChange={toggleDataPrivacy}
             />
           </div>
+        </PremiumCard>
+      </motion.div>
+
+      {/* Interface Settings */}
+      <motion.div variants={itemVariants}>
+        <PremiumCard className="p-4">
+          <h3 className="text-lg font-semibold mb-4">Interface Complexity</h3>
+          <p className="text-white/70 text-sm mb-4">Adjust how much information is displayed at once</p>
+          
+          <div className="space-y-3">
+            <div 
+              className={`p-3 rounded-lg border flex items-start cursor-pointer ${
+                uiComplexity === 'beginner' 
+                  ? 'bg-white/10 border-white/30' 
+                  : 'bg-white/5 border-white/10'
+              }`}
+              onClick={() => setUiComplexity('beginner')}
+            >
+              <div className="mt-0.5 mr-3">
+                <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                  uiComplexity === 'beginner' ? 'border-white bg-white' : 'border-white/30'
+                }`}>
+                  {uiComplexity === 'beginner' && <div className="w-2 h-2 rounded-full bg-black" />}
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium">Simplified</h4>
+                <p className="text-sm text-white/70">Focus on essential features with extra guidance</p>
+              </div>
+            </div>
+            
+            <div 
+              className={`p-3 rounded-lg border flex items-start cursor-pointer ${
+                uiComplexity === 'intermediate' 
+                  ? 'bg-white/10 border-white/30' 
+                  : 'bg-white/5 border-white/10'
+              }`}
+              onClick={() => setUiComplexity('intermediate')}
+            >
+              <div className="mt-0.5 mr-3">
+                <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                  uiComplexity === 'intermediate' ? 'border-white bg-white' : 'border-white/30'
+                }`}>
+                  {uiComplexity === 'intermediate' && <div className="w-2 h-2 rounded-full bg-black" />}
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium">Standard</h4>
+                <p className="text-sm text-white/70">Balanced interface with moderate guidance</p>
+              </div>
+            </div>
+            
+            <div 
+              className={`p-3 rounded-lg border flex items-start cursor-pointer ${
+                uiComplexity === 'advanced' 
+                  ? 'bg-white/10 border-white/30' 
+                  : 'bg-white/5 border-white/10'
+              }`}
+              onClick={() => setUiComplexity('advanced')}
+            >
+              <div className="mt-0.5 mr-3">
+                <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                  uiComplexity === 'advanced' ? 'border-white bg-white' : 'border-white/30'
+                }`}>
+                  {uiComplexity === 'advanced' && <div className="w-2 h-2 rounded-full bg-black" />}
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium">Advanced</h4>
+                <p className="text-sm text-white/70">Full feature access with minimal guidance</p>
+              </div>
+            </div>
+          </div>
+        </PremiumCard>
+      </motion.div>
+
+      {/* Help & Support */}
+      <motion.div variants={itemVariants}>
+        <PremiumCard className="p-4">
+          <h3 className="text-lg font-semibold mb-4">Help & Support</h3>
+          <Button 
+            onClick={() => navigate('/help')}
+            className="w-full bg-white/5 text-white hover:bg-white/10 focus:ring-white/10 border border-white/10 rounded-lg"
+          >
+            <Layout size={16} className="mr-2" />
+            View Help Center
+          </Button>
         </PremiumCard>
       </motion.div>
 

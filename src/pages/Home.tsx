@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -8,6 +7,8 @@ import { QRScanner } from "@/components/QRScanner";
 import { CameraUpload } from "@/components/CameraUpload";
 import { ThemeBackground } from "@/components/ThemeBackground";
 import { DailyAffirmation } from "@/components/DailyAffirmation";
+import { QuickGuide } from "@/components/QuickGuide";
+import { FeatureHighlight } from "@/components/FeatureHighlight";
 
 // Import the components
 import { HeaderSection } from "@/components/home/HeaderSection";
@@ -26,14 +27,23 @@ const Home = () => {
   const [greeting, setGreeting] = useState("Good morning");
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   
+  // Check if it's the user's first time
+  const [isFirstVisit, setIsFirstVisit] = useState(() => {
+    return localStorage.getItem("hasVisitedHome") !== "true";
+  });
+  
   useEffect(() => {
+    if (isFirstVisit) {
+      localStorage.setItem("hasVisitedHome", "true");
+    }
+    
     const hour = new Date().getHours();
     if (hour >= 12 && hour < 17) {
       setGreeting("Good afternoon");
     } else if (hour >= 17) {
       setGreeting("Good evening");
     }
-  }, []);
+  }, [isFirstVisit]);
   
   const handleScan = (code: string) => {
     console.log("QR code scanned:", code);
@@ -79,6 +89,9 @@ const Home = () => {
     }
   };
 
+  // Get the current UI complexity preference
+  const uiComplexity = localStorage.getItem('uiComplexity') || 'intermediate';
+
   return (
     <div className="min-h-screen pb-20 text-white">
       <ThemeBackground />
@@ -97,6 +110,13 @@ const Home = () => {
         />
       )}
       
+      {/* Feature highlight for the help system */}
+      <FeatureHighlight 
+        id="context-help-system"
+        title="New Help System Available"
+        description="We've added a context-aware help button! Look for the ? icon at the bottom of the screen for guidance specific to each page."
+      />
+      
       <motion.div 
         className="px-4 pt-4 pb-20 space-y-4 max-w-[340px] mx-auto"
         initial="hidden"
@@ -110,6 +130,21 @@ const Home = () => {
             onCameraClick={() => setShowCamera(true)} 
           />
         </motion.div>
+        
+        {/* Show beginner guide for first-time or 'beginner' UI complexity users */}
+        {(isFirstVisit || uiComplexity === 'beginner') && (
+          <motion.div variants={itemVariants}>
+            <QuickGuide 
+              title="Getting Started" 
+              steps={[
+                "Complete daily quests to build your streak and earn XP",
+                "Track your mood to observe patterns over time",
+                "Use quick actions to scan QR codes or capture moments",
+                "Check your progress in the Progress Card below"
+              ]}
+            />
+          </motion.div>
+        )}
         
         <motion.div variants={itemVariants}>
           <SearchBar />

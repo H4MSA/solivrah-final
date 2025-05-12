@@ -19,6 +19,9 @@ import Survey from "./pages/Survey";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
+import { Help } from "./pages/Help";
+import { ContextHelp } from "./components/ContextHelp";
+import { OnboardingFlow } from "./components/OnboardingFlow";
 
 // Create a new QueryClient instance with custom options
 const queryClient = new QueryClient({
@@ -170,9 +173,14 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       <NetworkStatusIndicator position="top" variant="minimal" />
       
       {/* Main content area with scroll */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden page-transition dynamic-island-aware notch-aware gesture-area-aware">
-        {children}
+      <main className="flex-1 overflow-y-auto overflow-x-hidden page-transition">
+        <div className="mobile-optimized-container">
+          {children}
+        </div>
       </main>
+
+      {/* Context-sensitive help button */}
+      {showNavigation && <ContextHelp />}
 
       {/* Only show TabNavigation on app pages, not on public pages */}
       {showNavigation && <TabNavigation />}
@@ -184,6 +192,11 @@ const App = () => {
   // Check if app is installed as PWA
   const [isPWA, setIsPWA] = useState(false);
   const [hasSafeArea, setHasSafeArea] = useState(false);
+  
+  // Add state for onboarding
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return localStorage.getItem('onboardingCompleted') !== 'true';
+  });
   
   useEffect(() => {
     // Check if app is running as installed PWA
@@ -269,6 +282,9 @@ const App = () => {
           {/* Theme background applied to the entire app */}
           <ThemeBackground />
 
+          {/* Onboarding flow for first-time users */}
+          {showOnboarding && <OnboardingFlow onComplete={() => setShowOnboarding(false)} />}
+
           {/* Fixed viewport container with safe areas */}
           <div className={`fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-transparent overflow-hidden ${hasSafeArea ? 'dynamic-island-aware' : 'p-4 pb-20'}`}>
             <Toaster />
@@ -323,6 +339,11 @@ const App = () => {
                       <AppLayout>
                         <Profile />
                       </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/help" element={
+                    <ProtectedRoute>
+                      <Help />
                     </ProtectedRoute>
                   } />
 

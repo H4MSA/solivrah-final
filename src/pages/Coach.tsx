@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Send, User, Smile, Meh, Frown, ChevronDown, ChevronUp, Clock } from "lucide-react";
 import { useApp } from "@/context/AppContext";
@@ -421,7 +420,7 @@ const Coach = () => {
         )}
       </motion.div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-4 chat-container">
+      <div className="flex-1 overflow-y-auto px-4 pb-36 chat-container">
         <div className="space-y-3 py-3 max-w-[430px] mx-auto">
           {messages.map((message, index) => (
             <motion.div 
@@ -492,12 +491,12 @@ const Coach = () => {
       </div>
 
       <motion.div 
-        className="fixed left-0 right-0 bottom-20 px-4 z-10 mx-auto max-w-[430px]"
+        className="fixed left-0 right-0 bottom-0 px-4 z-10 mx-auto max-w-[430px] pb-safe mb-16"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.3 }}
       >
-        <Card className="flex items-center gap-2 rounded-full p-1 pr-2 border border-white/10 hover:border-white/20 transition-all shadow-lg">
+        <Card className="flex items-center gap-2 rounded-full p-1 pr-2 border border-white/10 hover:border-white/20 transition-all shadow-lg mb-4">
           <input 
             type="text" 
             value={input}
