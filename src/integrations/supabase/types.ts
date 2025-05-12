@@ -40,6 +40,7 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          role: string | null
           streak: number | null
           theme: string | null
           updated_at: string | null
@@ -48,6 +49,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           id: string
+          role?: string | null
           streak?: number | null
           theme?: string | null
           updated_at?: string | null
@@ -56,6 +58,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           id?: string
+          role?: string | null
           streak?: number | null
           theme?: string | null
           updated_at?: string | null
@@ -146,7 +149,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
