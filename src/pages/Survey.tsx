@@ -135,13 +135,6 @@ const Survey = () => {
       localStorage.setItem('personalizedPlan', JSON.stringify(planData));
       localStorage.setItem('hasCompletedSurvey', 'true');
 
-      // Create the personalized plan in the database
-      const { error: planError } = await supabase.from('user_plans').insert([planData]);
-      
-      if (planError) {
-        console.warn('Failed to save plan to database, using local storage fallback', planError);
-      }
-
       // Show success notification
       toast({
         title: 'Your plan is ready!',

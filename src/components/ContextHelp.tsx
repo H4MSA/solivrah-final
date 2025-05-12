@@ -115,10 +115,18 @@ const helpContent: Record<string, { title: string; sections: { heading: string; 
 
 export const ContextHelp = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const location = useLocation();
   
-  // Get the base path (/home, /quests, etc.)
-  const path = '/' + location.pathname.split('/')[1];
+  // Get the current path, safely handling outside of Router context
+  let path = '/';
+  let location;
+  
+  try {
+    location = useLocation();
+    path = '/' + location.pathname.split('/')[1];
+  } catch (error) {
+    console.warn("Router context not available for ContextHelp");
+  }
+  
   const content = helpContent[path] || {
     title: 'Help Guide',
     sections: [{ heading: 'Navigation', content: 'Use the bottom tabs to navigate between different sections of the app.' }]
