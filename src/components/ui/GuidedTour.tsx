@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, HelpCircle, ChevronRight } from 'lucide-react';
@@ -42,7 +41,7 @@ export const GuidedTour = ({ steps, onComplete, isOpen, onClose }: GuidedTourPro
   
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 bg-black/50 z-50 pointer-events-none">
+      <div className="fixed inset-0 bg-black/50 z-50 pointer-events-none pb-safe pl-safe pr-safe">
         <motion.div 
           className="absolute z-50 bg-black/90 border border-white/20 rounded-lg p-4 max-w-xs pointer-events-auto"
           initial={{ opacity: 0, y: 20 }}
