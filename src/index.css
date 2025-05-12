@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -193,20 +192,33 @@
   
   /* Responsive flex layouts */
   .flex-row-wrap {
-    @apply flex flex-row flex-wrap;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 
-  .flex-col {
-    @apply flex flex-col;
+  .flex-col-layout {
+    display: flex;
+    flex-direction: column;
   }
 
   /* Grid system for responsive layouts */
   .grid-cols-1 {
-    @apply grid grid-cols-1 gap-4;
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
   }
 
   .grid-cols-2 {
-    @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   /* Margin and padding utilities with safe areas */

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -40,11 +39,13 @@ const Admin = () => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('role')
+          .select('*')
           .eq('id', user.id)
           .single();
         
-        if (error || data?.role !== 'admin') {
+        // If role column exists and user is an admin, allow access
+        // Otherwise, redirect to home page
+        if (error || !data || data.role !== 'admin') {
           toast({
             title: "Access Denied",
             description: "You don't have permission to access this page",
