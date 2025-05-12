@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -44,4 +45,4 @@ export const QuickGuide = ({ title, steps }: QuickGuideProps) => {
       </AnimatePresence>
     </div>
   );
-}; 
+};

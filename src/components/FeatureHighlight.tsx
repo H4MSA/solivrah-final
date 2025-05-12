@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Sparkles } from 'lucide-react';
@@ -69,4 +70,4 @@ export const FeatureHighlight = ({ id, title, description, image }: FeatureHighl
       </div>
     </motion.div>
   );
-}; 
+};

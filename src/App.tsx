@@ -287,6 +287,7 @@ const App = () => {
 
           {/* Fixed viewport container with safe areas */}
           <div className={`fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-transparent overflow-hidden ${hasSafeArea ? 'dynamic-island-aware' : 'p-4 pb-20'}`}>
+            <ContextHelp />
             <Toaster />
             <Sonner />
 
@@ -341,11 +342,7 @@ const App = () => {
                       </AppLayout>
                     </ProtectedRoute>
                   } />
-                  <Route path="/help" element={
-                    <ProtectedRoute>
-                      <Help />
-                    </ProtectedRoute>
-                  } />
+                  <Route path="/help" element={<Help />} />
 
                   {/* Catch-all for 404s */}
                   <Route path="*" element={<NotFound />} />

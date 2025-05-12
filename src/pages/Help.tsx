@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Search, ArrowLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -254,4 +255,4 @@ const SearchResult = ({ faq, searchQuery }: { faq: FAQItem; searchQuery: string 
       </AnimatePresence>
     </div>
   );
-}; 
+};

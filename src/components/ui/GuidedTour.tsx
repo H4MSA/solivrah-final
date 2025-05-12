@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, HelpCircle, ChevronRight } from 'lucide-react';
@@ -111,4 +112,4 @@ export const FeatureTip = ({ children, content }: { children: React.ReactNode, c
       </Tooltip>
     </TooltipProvider>
   );
-}; 
+};

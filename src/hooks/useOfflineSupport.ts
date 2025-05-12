@@ -134,8 +134,8 @@ export function useOfflineSupport() {
         const registration = await navigator.serviceWorker.ready;
         
         // Check if the sync API is supported
-        if ('SyncManager' in window && registration.sync) {
-          await registration.sync.register('offline-quest-completion');
+        if ('SyncManager' in window && 'sync' in registration) {
+          await (registration as any).sync.register('offline-quest-completion');
           return true;
         } else {
           // Fall back to manual sync if Background Sync API is not supported
