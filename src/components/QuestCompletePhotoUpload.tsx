@@ -9,14 +9,16 @@ import { useApp } from "@/context/AppContext";
 
 interface QuestCompletePhotoUploadProps {
   questId: string;
-  onSuccess: () => void;
+  onSuccess: (photoUrl?: string) => void;
   onCancel: () => void;
+  isOffline?: boolean;
 }
 
 export const QuestCompletePhotoUpload: React.FC<QuestCompletePhotoUploadProps> = ({ 
   questId, 
   onSuccess, 
-  onCancel 
+  onCancel,
+  isOffline = false
 }) => {
   const [showCamera, setShowCamera] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -30,6 +32,16 @@ export const QuestCompletePhotoUpload: React.FC<QuestCompletePhotoUploadProps> =
     setPreviewUrl(URL.createObjectURL(file));
     
     try {
+      // If offline, just save the photo url locally
+      if (isOffline) {
+        onSuccess(previewUrl || undefined);
+        toast({
+          title: "Photo saved",
+          description: "Your photo will be verified when you're back online.",
+        });
+        return;
+      }
+      
       // Get user's auth token for API request
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
@@ -70,7 +82,7 @@ export const QuestCompletePhotoUpload: React.FC<QuestCompletePhotoUploadProps> =
           addXP(result.xp);
         }
         
-        onSuccess();
+        onSuccess(previewUrl || undefined);
       } else {
         toast({
           title: "Verification Failed",
@@ -135,7 +147,7 @@ export const QuestCompletePhotoUpload: React.FC<QuestCompletePhotoUploadProps> =
           
           {previewUrl && !isUploading && (
             <button
-              onClick={onSuccess}
+              onClick={() => onSuccess(previewUrl || undefined)}
               className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground flex items-center justify-center gap-2"
             >
               <Check size={18} />
