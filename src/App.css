@@ -1,4 +1,3 @@
-
 #root {
   max-width: 100%;
   margin: 0 auto;
@@ -19,6 +18,13 @@
   --sab: env(safe-area-inset-bottom, 0px);
   --sal: env(safe-area-inset-left, 0px);
   --sar: env(safe-area-inset-right, 0px);
+
+  --safe-top: var(--sat);
+  --safe-bottom: var(--sab);
+  --safe-left: var(--sal);
+  --safe-right: var(--sar);
+
+  --app-padding: 1rem;
 }
 
 .pt-safe {

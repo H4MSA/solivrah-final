@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { PremiumCard } from '@/components/PremiumCard';
@@ -161,7 +160,7 @@ const Profile = () => {
   const displayName = user?.email?.split('@')[0] || "Guest User";
 
   return (
-    <div className="pb-24">
+    <div className="mobile-optimized-container">
       <ThemeBackground />
       <motion.div 
         className="px-4 pt-6 pb-24 max-w-[340px] mx-auto"

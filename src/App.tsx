@@ -174,7 +174,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       <NetworkStatusIndicator position="top" variant="minimal" />
       
       {/* Main content area with scroll */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden page-transition">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden page-transition content-with-fixed-nav">
         <div className="mobile-optimized-container">
           {children}
         </div>

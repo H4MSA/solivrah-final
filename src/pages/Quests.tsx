@@ -143,7 +143,7 @@ const Quests = () => {
     { day: 16, title: "MVP Draft", description: "Build a minimal viable product (MVP) draft.", requiresPhoto: true, xp: 70 },
     { day: 17, title: "AR Tools", description: "Use AR tools to visualize your idea.", requiresPhoto: false, xp: 80 },
     { day: 18, title: "Share Progress", description: "Share progress in the Community Hub.", requiresPhoto: true, xp: 90 },
-    { day: 19, title: "Worst That Happens", description: "Replace self-doubt with 'what’s the worst that happens?'", requiresPhoto: false, xp: 100 },
+    { day: 19, title: "Worst That Happens", description: "Replace self-doubt with 'what's the worst that happens?'", requiresPhoto: false, xp: 100 },
     { day: 20, title: "Daily Brainstorming", description: "Practice 15 minutes of daily brainstorming.", requiresPhoto: true, xp: 65 },
     { day: 21, title: "Reframe Criticism", description: "Reframe 1 criticism into constructive feedback.", requiresPhoto: false, xp: 75 },
     { day: 22, title: "Creativity Playlist", description: "Create a 'creativity playlist' for inspiration.", requiresPhoto: true, xp: 85 },
