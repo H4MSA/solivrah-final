@@ -1,31 +1,68 @@
-
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
+
+// Define error class for AI service errors
+export class AIServiceError extends Error {
+  constructor(message: string, public readonly context?: Record<string, any>) {
+    super(message);
+    this.name = 'AIServiceError';
+  }
+}
 
 export class AIService {
   private apiKey: string;
   private model: string;
+  private readonly maxRetries = 2;
 
   constructor() {
     this.apiKey = import.meta.env.VITE_OPENROUTER_API_KEY || '';
     this.model = import.meta.env.VITE_AI_MODEL || 'deepseek/deepseek-coder';
   }
 
-  async generateDailyAffirmation(theme: string, username: string = '', mood: string = ''): Promise<string> {
+  // Helper method to make API calls with retries
+  private async callSupabaseFunction<T>(
+    endpoint: string, 
+    data: Record<string, any>,
+    retryCount = 0
+  ): Promise<T> {
     try {
-      const { data, error } = await supabase.functions.invoke('ai-services', {
+      const { data: responseData, error } = await supabase.functions.invoke('ai-services', {
         body: {
-          endpoint: 'affirmation',
-          data: { theme, username, mood }
+          endpoint,
+          data
         }
       });
       
       if (error) {
-        console.error('Error generating affirmation:', error);
-        throw error;
+        console.error(`Error calling ${endpoint}:`, error);
+        throw new AIServiceError(`Failed to call ${endpoint}`, { originalError: error });
       }
       
-      return data.affirmation;
+      return responseData as T;
+    } catch (error) {
+      // Retry logic with exponential backoff
+      if (retryCount < this.maxRetries) {
+        const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s, 4s...
+        console.log(`Retrying ${endpoint} after ${delay}ms (attempt ${retryCount + 1}/${this.maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return this.callSupabaseFunction(endpoint, data, retryCount + 1);
+      }
+      
+      console.error(`All retry attempts failed for ${endpoint}:`, error);
+      throw error instanceof AIServiceError 
+        ? error 
+        : new AIServiceError('AI service unavailable', { originalError: error });
+    }
+  }
+
+  async generateDailyAffirmation(theme: string, username: string = '', mood: string = ''): Promise<string> {
+    try {
+      const response = await this.callSupabaseFunction<{ affirmation: string }>(
+        'affirmation',
+        { theme, username, mood }
+      );
+      
+      return response.affirmation;
     } catch (error) {
       console.error('Error in generateDailyAffirmation:', error);
       // Provide a fallback affirmation if API call fails
@@ -38,19 +75,12 @@ export class AIService {
       // Check if it's a simple question to potentially optimize response
       const isSimpleQuestion = message.trim().length < 20;
       
-      const { data, error } = await supabase.functions.invoke('ai-services', {
-        body: {
-          endpoint: 'coaching',
-          data: { message, mood, context, userProfile, isSimpleQuestion }
-        }
-      });
+      const response = await this.callSupabaseFunction<{ reply: string }>(
+        'coaching',
+        { message, mood, context, userProfile, isSimpleQuestion }
+      );
       
-      if (error) {
-        console.error('Error generating coaching reply:', error);
-        throw error;
-      }
-      
-      return data.reply;
+      return response.reply;
     } catch (error) {
       console.error('Error in generateCoachingReply:', error);
       return "I'm having trouble connecting right now. Please try again in a moment.";
@@ -65,24 +95,17 @@ export class AIService {
         'Be friendly, witty and casual in your responses' : 
         'Maintain a professional, structured and supportive tone';
       
-      const { data, error } = await supabase.functions.invoke('ai-services', {
-        body: {
-          endpoint: 'coaching',
-          data: { 
-            message, 
-            context: `Tone: ${tone}. History: ${history}`, 
-            userProfile,
-            isSimpleQuestion
-          }
+      const response = await this.callSupabaseFunction<{ reply: string }>(
+        'coaching',
+        { 
+          message, 
+          context: `Tone: ${tone}. History: ${history}`, 
+          userProfile,
+          isSimpleQuestion
         }
-      });
+      );
       
-      if (error) {
-        console.error('Error generating chatbot reply:', error);
-        throw error;
-      }
-      
-      return data.reply;
+      return response.reply;
     } catch (error) {
       console.error('Error in generateChatbotReply:', error);
       return "I'm having trouble connecting right now. Please try again in a moment.";
@@ -115,34 +138,27 @@ export class AIService {
       }
       
       // Make the API request with enhanced prompting
-      const { data, error } = await supabase.functions.invoke('ai-services', {
-        body: {
-          endpoint: 'roadmap',
-          data: { 
-            goals, 
-            struggles, 
-            dailyTime, 
-            userProfile,
-            enhanced: true, // Signal the API to use enhanced prompting
-            requestMetadata: {
-              client: 'web-app',
-              timestamp: new Date().toISOString()
-            }
+      const response = await this.callSupabaseFunction<{ roadmap: any }>(
+        'roadmap',
+        { 
+          goals, 
+          struggles, 
+          dailyTime, 
+          userProfile,
+          enhanced: true, // Signal the API to use enhanced prompting
+          requestMetadata: {
+            client: 'web-app',
+            timestamp: new Date().toISOString()
           }
         }
-      });
-      
-      if (error) {
-        console.error('Error generating roadmap:', error);
-        throw error;
-      }
+      );
       
       // For guest users without auth, store the roadmap in localStorage
-      if (userProfile.is_guest) {
-        localStorage.setItem('guestRoadmap', JSON.stringify(data.roadmap));
+      if (userProfile.is_guest && response.roadmap) {
+        localStorage.setItem('guestRoadmap', JSON.stringify(response.roadmap));
       }
       
-      return data.roadmap;
+      return response.roadmap;
     } catch (error) {
       console.error('Error in generateRoadmap:', error);
       
@@ -174,19 +190,12 @@ export class AIService {
 
   async analyzeMood(journalEntry: string): Promise<string> {
     try {
-      const { data, error } = await supabase.functions.invoke('ai-services', {
-        body: {
-          endpoint: 'mood',
-          data: { journalEntry }
-        }
-      });
+      const response = await this.callSupabaseFunction<{ mood: string }>(
+        'mood',
+        { journalEntry }
+      );
       
-      if (error) {
-        console.error('Error analyzing mood:', error);
-        throw error;
-      }
-      
-      return data.mood;
+      return response.mood;
     } catch (error) {
       console.error('Error in analyzeMood:', error);
       return "neutral"; // Safe fallback
@@ -196,19 +205,12 @@ export class AIService {
   async verifyPhoto(imageUrl: string, questId: string, questTitle: string, questDescription: string): Promise<boolean> {
     try {
       console.log("Verifying photo for quest:", questTitle);
-      const { data, error } = await supabase.functions.invoke('ai-services', {
-        body: {
-          endpoint: 'verification',
-          data: { imageUrl, questId, questTitle, questDescription }
-        }
-      });
+      const response = await this.callSupabaseFunction<{ verified: boolean }>(
+        'verification',
+        { imageUrl, questId, questTitle, questDescription }
+      );
       
-      if (error) {
-        console.error('Error verifying photo:', error);
-        throw error;
-      }
-      
-      return data.verified;
+      return response.verified;
     } catch (error) {
       console.error('Error in verifyPhoto:', error);
       // For now, default to true if verification fails

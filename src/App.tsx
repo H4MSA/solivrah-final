@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from
 import { AppProvider, useApp } from "./context/AppContext";
 import { ThemeBackground } from "./components/ThemeBackground";
 import { TabNavigation } from "./components/TabNavigation";
+import { NetworkStatusIndicator } from "./components/NetworkStatusIndicator";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
@@ -166,6 +166,9 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
+      {/* Network status indicator */}
+      <NetworkStatusIndicator position="top" variant="minimal" />
+      
       {/* Main content area with scroll */}
       <main className="flex-1 overflow-y-auto overflow-x-hidden page-transition dynamic-island-aware notch-aware gesture-area-aware">
         {children}

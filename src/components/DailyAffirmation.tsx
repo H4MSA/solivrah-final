@@ -1,9 +1,9 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import { Quote, RefreshCw } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { AIService } from "@/services/AIService";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useMemoized } from "@/hooks/useMemoized";
 
 // More impactful affirmations based on themes
 const themeAffirmations = {
@@ -51,60 +51,102 @@ const themeAffirmations = {
   ]
 };
 
-export const DailyAffirmation = () => {
+// Create singleton instance of AIService to avoid multiple instances
+const aiServiceInstance = new AIService();
+
+// Create a component for the affirmation text to isolate renders
+const AffirmationText = memo(({ text, isLoading }: { text: string; isLoading: boolean }) => (
+  <motion.p 
+    key={text}
+    initial={{ opacity: 0, y: 5 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+    className={`text-white text-sm font-medium ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+  >
+    {text}
+  </motion.p>
+));
+
+AffirmationText.displayName = 'AffirmationText';
+
+export const DailyAffirmation = memo(() => {
   const { selectedTheme, user } = useApp();
   const [affirmation, setAffirmation] = useState<string>("");
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   
-  const aiService = new AIService();
-  
-  useEffect(() => {
-    // Get a personalized affirmation or use stored one
-    const storedAffirmation = localStorage.getItem("dailyAffirmation");
-    const storedDate = localStorage.getItem("affirmationDate");
-    const today = new Date().toDateString();
-    
-    if (storedAffirmation && storedDate === today) {
-      setAffirmation(storedAffirmation);
-    } else {
-      getNewAffirmation();
-    }
+  // Get fallback affirmations for the selected theme
+  const themeFallbackAffirmations = useMemoized(() => {
+    const theme = selectedTheme || "Default";
+    return themeAffirmations[theme as keyof typeof themeAffirmations] || themeAffirmations.Default;
   }, [selectedTheme]);
   
-  const getNewAffirmation = async () => {
+  // Get a random fallback affirmation when needed
+  const getRandomFallback = useCallback(() => {
+    const randomIndex = Math.floor(Math.random() * themeFallbackAffirmations.length);
+    return themeFallbackAffirmations[randomIndex];
+  }, [themeFallbackAffirmations]);
+  
+  // Memoize user info to prevent unnecessary recomputation
+  const userInfo = useMemoized(() => {
+    return {
+      username: user?.user_metadata?.username || user?.email?.split('@')[0] || "",
+      mood: localStorage.getItem("currentMood") || ""
+    };
+  }, [user]);
+  
+  // Function to check if we should load a new affirmation
+  const shouldLoadNewAffirmation = useCallback(() => {
+    const storedDate = localStorage.getItem("affirmationDate");
+    const today = new Date().toDateString();
+    return storedDate !== today;
+  }, []);
+  
+  // Fetch a new affirmation from the API or get a fallback
+  const getNewAffirmation = useCallback(async (forceRefresh = false) => {
+    // If already refreshing, don't do anything
+    if (refreshing) return;
+    
+    // If not forcing a refresh, check if we have a cached affirmation for today
+    if (!forceRefresh) {
+      const storedAffirmation = localStorage.getItem("dailyAffirmation");
+      const needsNewAffirmation = shouldLoadNewAffirmation();
+      
+      if (storedAffirmation && !needsNewAffirmation) {
+        setAffirmation(storedAffirmation);
+        return;
+      }
+    }
+    
     setRefreshing(true);
     setError(false);
     
     try {
-      // Try to get AI-generated affirmation first
-      const username = user?.user_metadata?.username || user?.email?.split('@')[0] || "";
-      const userMood = localStorage.getItem("currentMood") || "";
-      
-      // Use AI service to generate personalized affirmation
-      const newAffirmation = await aiService.generateDailyAffirmation(
-        selectedTheme,
-        username,
-        userMood
-      );
-      
-      // Save to localStorage
-      localStorage.setItem("dailyAffirmation", newAffirmation);
-      localStorage.setItem("affirmationDate", new Date().toDateString());
-      
-      // Update state
-      setAffirmation(newAffirmation);
+      // Only make API call if online
+      if (navigator.onLine) {
+        // Use AI service to generate personalized affirmation
+        const newAffirmation = await aiServiceInstance.generateDailyAffirmation(
+          selectedTheme,
+          userInfo.username,
+          userInfo.mood
+        );
+        
+        // Save to localStorage
+        localStorage.setItem("dailyAffirmation", newAffirmation);
+        localStorage.setItem("affirmationDate", new Date().toDateString());
+        
+        // Update state
+        setAffirmation(newAffirmation);
+      } else {
+        // If offline, use fallback immediately without trying API
+        throw new Error("Offline - using fallback affirmation");
+      }
     } catch (err) {
       console.error("Failed to generate affirmation:", err);
       setError(true);
       
       // Fall back to our theme-based curated affirmations
-      const theme = selectedTheme || "Default";
-      const affirmations = themeAffirmations[theme as keyof typeof themeAffirmations] || 
-                         themeAffirmations.Default;
-      
-      const randomIndex = Math.floor(Math.random() * affirmations.length);
-      const fallbackAffirmation = affirmations[randomIndex];
+      const fallbackAffirmation = getRandomFallback();
       
       setAffirmation(fallbackAffirmation);
       
@@ -114,7 +156,30 @@ export const DailyAffirmation = () => {
     } finally {
       setRefreshing(false);
     }
-  };
+  }, [selectedTheme, userInfo, getRandomFallback, shouldLoadNewAffirmation, refreshing]);
+  
+  // Initialize affirmation on component mount
+  useEffect(() => {
+    getNewAffirmation(false);
+    
+    // Setup periodic check for new day (at midnight)
+    const checkForNewDay = () => {
+      const now = new Date();
+      if (shouldLoadNewAffirmation()) {
+        getNewAffirmation(false);
+      }
+    };
+    
+    // Check once per hour for a day change
+    const intervalId = setInterval(checkForNewDay, 60 * 60 * 1000);
+    
+    return () => clearInterval(intervalId);
+  }, [getNewAffirmation, shouldLoadNewAffirmation]);
+  
+  // Force refresh when theme changes
+  useEffect(() => {
+    getNewAffirmation(true);
+  }, [selectedTheme]); 
   
   return (
     <div 
@@ -130,15 +195,10 @@ export const DailyAffirmation = () => {
           <span>Daily Affirmation</span>
         </h3>
         
-        <motion.p 
-          key={affirmation}
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className={`text-white text-sm font-medium ${refreshing ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
-        >
-          {affirmation}
-        </motion.p>
+        <AnimatePresence mode="wait">
+          {/* Use the memoized component to avoid unnecessary renders */}
+          <AffirmationText text={affirmation} isLoading={refreshing} />
+        </AnimatePresence>
         
         {error && !refreshing && (
           <p className="text-xs text-white/50 mt-1">Offline mode</p>
@@ -146,12 +206,15 @@ export const DailyAffirmation = () => {
       </div>
       
       <button 
-        onClick={getNewAffirmation}
+        onClick={() => getNewAffirmation(true)}
         className="absolute top-2 right-2 text-white/50 hover:text-white hover:bg-white/10 transition-all active:scale-90 p-1 rounded-full"
         disabled={refreshing}
+        aria-label="Refresh affirmation"
       >
         <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
       </button>
     </div>
   );
-};
+});
+
+DailyAffirmation.displayName = 'DailyAffirmation';

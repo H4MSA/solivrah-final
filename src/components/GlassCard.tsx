@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/context/AppContext";
 import { motion, HTMLMotionProps, Variants } from "framer-motion";
@@ -12,9 +11,13 @@ interface GlassCardProps extends Omit<HTMLMotionProps<"div">, "animate"> {
   interactive?: boolean;
   depth?: "low" | "medium" | "high";
   hoverEffect?: boolean;
+  ariaLabel?: string;
+  role?: string; 
+  ariaLabelledBy?: string;
+  tabIndex?: number;
 }
 
-export const GlassCard: React.FC<GlassCardProps> = ({ 
+export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(({ 
   children, 
   className,
   variant = "default",
@@ -22,8 +25,12 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   interactive = false,
   depth = "medium",
   hoverEffect = false,
+  ariaLabel,
+  role,
+  ariaLabelledBy,
+  tabIndex,
   ...props 
-}) => {
+}, ref) => {
   const { selectedTheme } = useApp();
 
   // Enhanced card animations
@@ -64,16 +71,17 @@ export const GlassCard: React.FC<GlassCardProps> = ({
 
   const getBgClass = () => {
     switch (variant) {
-      case "default": return "bg-[#151515]";
-      case "elevated": return "bg-[#1A1A1A] border-white/10";
-      case "subtle": return "bg-[#111111] border-white/5";
-      case "primary": return "bg-[#1A1A1A] text-white border-white/10";
-      case "interactive": return "bg-[#151515] hover:bg-[#1A1A1A]";
+      // Improved contrast ratios for better accessibility
+      case "default": return "bg-[#1A1A1A]";
+      case "elevated": return "bg-[#1D1D1D] border-white/15";
+      case "subtle": return "bg-[#141414] border-white/5";
+      case "primary": return "bg-[#1D1D1D] text-white border-white/15";
+      case "interactive": return "bg-[#1A1A1A] hover:bg-[#222222]";
       case "dark": return "bg-black/90";
-      case "theme": return "bg-[#151515]";
-      case "premium": return "bg-gradient-to-br from-[#1A1A1A] to-[#0A0A0A]";
-      case "ultra-glass": return "bg-[#151515]/80 backdrop-blur-md border-white/20";
-      default: return "bg-[#151515]";
+      case "theme": return "bg-[#1A1A1A]";
+      case "premium": return "bg-gradient-to-br from-[#1D1D1D] to-[#0D0D0D]";
+      case "ultra-glass": return "bg-[#1A1A1A]/85 backdrop-blur-md border-white/20";
+      default: return "bg-[#1A1A1A]";
     }
   };
 
@@ -85,8 +93,35 @@ export const GlassCard: React.FC<GlassCardProps> = ({
     }
   };
 
+  // Proper ARIA handling for interactive cards
+  const getAriaProps = () => {
+    const ariaProps: Record<string, any> = {};
+    
+    if (interactive) {
+      ariaProps.role = role || "button";
+      ariaProps["aria-label"] = ariaLabel;
+      ariaProps["aria-labelledby"] = ariaLabelledBy;
+      ariaProps.tabIndex = tabIndex ?? 0;
+    } else if (role) {
+      ariaProps.role = role;
+      ariaProps["aria-label"] = ariaLabel;
+      ariaProps["aria-labelledby"] = ariaLabelledBy;
+    }
+    
+    return ariaProps;
+  };
+
+  // Focus handling for keyboard navigation
+  const getInteractiveClasses = () => {
+    if (interactive) {
+      return "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-white/20";
+    }
+    return "";
+  };
+
   return (
     <motion.div 
+      ref={ref}
       className={cn(
         "border rounded-xl p-4 mb-4 transition-all duration-300",
         getBgClass(),
@@ -94,6 +129,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
         interactive && "cursor-pointer",
         getAnimationClass(),
         getDepthStyle(),
+        getInteractiveClasses(),
         className
       )}
       initial="hidden"
@@ -101,6 +137,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       whileHover="hover"
       whileTap="tap"
       variants={cardVariants}
+      {...getAriaProps()}
       {...props}
     >
       <div className="relative">
@@ -108,4 +145,6 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       </div>
     </motion.div>
   );
-};
+});
+
+GlassCard.displayName = "GlassCard";
