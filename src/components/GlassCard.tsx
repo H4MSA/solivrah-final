@@ -1,3 +1,4 @@
+
 import React, { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/context/AppContext";
@@ -123,7 +124,8 @@ export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(({
     <motion.div 
       ref={ref}
       className={cn(
-        "border rounded-xl p-4 mb-4 transition-all duration-300",
+        "border rounded-xl p-4 mb-4 transition-all duration-300 w-full",
+        "max-w-full overflow-hidden", // Prevent overflow
         getBgClass(),
         "border-[#333333]",
         interactive && "cursor-pointer",
@@ -140,7 +142,7 @@ export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(({
       {...getAriaProps()}
       {...props}
     >
-      <div className="relative">
+      <div className="relative w-full">
         {children}
       </div>
     </motion.div>

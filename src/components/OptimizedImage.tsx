@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -152,6 +153,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         onLoad={handleLoad}
         onError={handleError}
         className={cn(
+          'w-full h-auto object-cover max-w-full', // Makes images responsive
           'transition-opacity duration-300',
           isLoading ? 'opacity-0' : 'opacity-100',
           error ? 'invisible' : 'visible',

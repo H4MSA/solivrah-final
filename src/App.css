@@ -1,3 +1,4 @@
+
 #root {
   max-width: 100%;
   margin: 0 auto;
@@ -36,6 +37,24 @@
   padding-right: env(safe-area-inset-right, 0px);
 }
 
+.mobile-optimized-container {
+  padding: var(--app-padding);
+  padding-top: calc(var(--safe-top) + var(--app-padding));
+  padding-bottom: calc(var(--safe-bottom) + var(--app-padding) + 60px); /* For tab navigation */
+  padding-left: calc(var(--safe-left) + var(--app-padding));
+  padding-right: calc(var(--safe-right) + var(--app-padding));
+  width: 100%;
+  max-width: 100%; /* Don't limit width on mobile */
+  margin: 0 auto;
+}
+
+/* For desktop devices */
+@media (min-width: 640px) {
+  .mobile-optimized-container {
+    max-width: 640px;
+  }
+}
+
 .dynamic-island-aware {
   padding-top: max(1rem, calc(env(safe-area-inset-top, 0px) + 1rem));
   padding-bottom: max(5rem, calc(env(safe-area-inset-bottom, 0px) + 5rem));
@@ -49,17 +68,6 @@
 
 .gesture-area-aware {
   padding-bottom: max(env(safe-area-inset-bottom, 20px), 20px);
-}
-
-.mobile-optimized-container {
-  padding: 1.5rem;
-  padding-top: max(1.5rem, calc(env(safe-area-inset-top, 0px) + 1rem));
-  padding-bottom: max(5rem, calc(env(safe-area-inset-bottom, 0px) + 3rem));
-  padding-left: max(1.5rem, calc(env(safe-area-inset-left, 0px) + 1rem));
-  padding-right: max(1.5rem, calc(env(safe-area-inset-right, 0px) + 1rem));
-  max-width: 640px;
-  margin: 0 auto;
-  width: 100%;
 }
 
 /* Premium glassmorphism card - simplified */
@@ -254,4 +262,10 @@
 
 .content-with-fixed-nav {
   padding-bottom: max(calc(env(safe-area-inset-bottom, 16px) + 80px), 96px);
+}
+
+/* Optimize content for better mobile experience */
+body, #root {
+  max-width: 100vw;
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }

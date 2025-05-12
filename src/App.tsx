@@ -162,13 +162,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// App Layout with Navigation
+// App Layout with Navigation - Updated for better mobile experience
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const showNavigation = ['/home', '/quests', '/community', '/coach', '/profile'].includes(location.pathname);
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen w-full overflow-hidden">
       {/* Network status indicator */}
       <NetworkStatusIndicator position="top" variant="minimal" />
       
@@ -184,7 +184,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
       {/* Only show TabNavigation on app pages, not on public pages */}
       {showNavigation && <TabNavigation />}
-    </>
+    </div>
   );
 };
 

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -61,7 +62,7 @@ export const TabNavigation = () => {
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 px-4 flex justify-center pb-safe">
       <motion.div 
-        className="flex items-center justify-between px-4 py-2 rounded-xl backdrop-blur-xl bg-[#1A1A1A]/80 border border-[#333333] shadow-lg max-w-[340px] w-full mb-3"
+        className="flex items-center justify-between px-4 py-2 rounded-xl backdrop-blur-xl bg-[#1A1A1A]/80 border border-[#333333] shadow-lg w-[95%] max-w-[340px] mb-3"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
