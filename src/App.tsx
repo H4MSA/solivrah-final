@@ -163,27 +163,25 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// App Layout with Navigation - Updated for better mobile experience
+// Add SafeAreaLayout component
+const SafeAreaLayout = ({ children, withBottomNav = false }: { children: React.ReactNode, withBottomNav?: boolean }) => (
+  <div className={`mobile-optimized-container overflow-protection flex-fix ${withBottomNav ? 'with-bottom-nav' : ''}`}>{children}</div>
+);
+
+// Refactor AppLayout to use SafeAreaLayout
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const showNavigation = ['/home', '/quests', '/community', '/coach', '/profile'].includes(location.pathname);
 
   return (
     <div className="flex flex-col min-h-screen w-full overflow-hidden">
-      {/* Network status indicator */}
       <NetworkStatusIndicator position="top" variant="minimal" />
-      
-      {/* Main content area with scroll */}
       <main className="flex-1 overflow-y-auto overflow-x-hidden page-transition content-with-fixed-nav">
-        <div className="mobile-optimized-container">
+        <SafeAreaLayout withBottomNav={showNavigation}>
           {children}
-        </div>
+        </SafeAreaLayout>
       </main>
-
-      {/* Context-sensitive help button */}
       {showNavigation && <ContextHelp />}
-
-      {/* Only show TabNavigation on app pages, not on public pages */}
       {showNavigation && <TabNavigation />}
     </div>
   );

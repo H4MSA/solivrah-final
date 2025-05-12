@@ -10,6 +10,7 @@ import { CameraUpload } from '@/components/CameraUpload';
 import { TabNavigation } from '@/components/TabNavigation';
 import { ProfileTabs } from '@/components/ProfileTabs';
 import { ThemeBackground } from '@/components/ThemeBackground';
+import { SafeAreaLayout } from '../App';
 
 const Profile = () => {
   const { user, selectedTheme } = useApp();
@@ -160,7 +161,7 @@ const Profile = () => {
   const displayName = user?.email?.split('@')[0] || "Guest User";
 
   return (
-    <div className="mobile-optimized-container">
+    <SafeAreaLayout withBottomNav={true}>
       <ThemeBackground />
       <motion.div 
         className="px-4 pt-6 pb-24 max-w-[340px] mx-auto"
@@ -260,7 +261,7 @@ const Profile = () => {
       </motion.div>
       
       <TabNavigation />
-    </div>
+    </SafeAreaLayout>
   );
 };
 

@@ -4,6 +4,7 @@ import { useApp } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { TabNavigation } from "@/components/TabNavigation";
+import { SafeAreaLayout } from '../App';
 
 const Community = () => {
   const [activeTab, setActiveTab] = useState("leaderboards");
@@ -168,7 +169,7 @@ const Community = () => {
   };
   
   return (
-    <div className="mobile-optimized-container">
+    <SafeAreaLayout withBottomNav={true}>
       <div className="pb-24">
         <div className="p-4 space-y-4 max-w-[430px] mx-auto">
           <h1 className="text-xl font-bold mb-4">Community</h1>
@@ -224,7 +225,7 @@ const Community = () => {
           </div>
         </div>
       </div>
-    </div>
+    </SafeAreaLayout>
   );
 };
 

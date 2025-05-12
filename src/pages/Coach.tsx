@@ -9,6 +9,7 @@ import { ChatHistoryDrawer } from "@/components/coach/ChatHistoryDrawer";
 import { TabNavigation } from "@/components/TabNavigation";
 import { Card } from "@/components/ui/card";
 import type { Database } from "@/integrations/supabase/types";
+import { SafeAreaLayout } from '../App';
 
 interface Message {
   id?: string;
@@ -310,219 +311,221 @@ const Coach = () => {
   };
 
   return (
-    <div className="pb-24 flex flex-col min-h-screen">
-      <div className="mobile-optimized-container">
-        <ChatHistoryDrawer 
-          isOpen={showHistory} 
-          onClose={() => setShowHistory(false)}
-          historyItems={chatHistory}
-          onSelectChat={selectChat}
-        />
-        
-        <motion.div 
-          className="p-4 flex-shrink-0 border-b border-white/10 bg-[#1A1A1A] z-10 sticky top-0 rounded-b-xl"
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <button
-                onClick={() => setShowHistory(true)}
-                className="p-2 mr-2 rounded-full hover:bg-white/10 transition-colors"
-              >
-                <Clock size={20} />
-              </button>
-              <h1 className="text-lg font-semibold text-white">AI Coach</h1>
-            </div>
-            <div className="flex items-center gap-2">
-              <motion.button 
-                onClick={() => setShowMoodSelector(!showMoodSelector)}
-                className="flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-[#222222] hover:bg-[#333333] border border-white/10 transition-all duration-300 text-sm"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-              >
-                <span>Mood</span>
-                {getMoodIcon(selectedMood)}
-                {showMoodSelector ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-              </motion.button>
-              
-              <motion.div 
-                className="w-9 h-9 rounded-full bg-[#222222] flex items-center justify-center border border-white/10 hover:border-white/20 transition-all hover:bg-[#333333]"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <User className="text-white h-4 w-4" />
-              </motion.div>
-            </div>
-          </div>
-
-          {showMoodSelector && (
-            <motion.div 
-              className="absolute right-4 mt-2 bg-[#1A1A1A] border border-white/10 rounded-xl p-2 shadow-xl z-20"
-              initial={{ opacity: 0, scale: 0.9, y: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: -10 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <div className="grid grid-cols-3 gap-2">
-                <motion.button 
-                  onClick={() => {
-                    setSelectedMood('happy');
-                    setShowMoodSelector(false);
-                  }}
-                  className={`flex flex-col items-center p-3 rounded-lg transition-all duration-300 ${
-                    selectedMood === 'happy' 
-                      ? 'bg-[#222222] border border-white/15 shadow-inner' 
-                      : 'hover:bg-[#222222]/50'
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+    <SafeAreaLayout withBottomNav={true}>
+      <div className="pb-24 flex flex-col min-h-screen">
+        <div className="mobile-optimized-container">
+          <ChatHistoryDrawer 
+            isOpen={showHistory} 
+            onClose={() => setShowHistory(false)}
+            historyItems={chatHistory}
+            onSelectChat={selectChat}
+          />
+          
+          <motion.div 
+            className="p-4 flex-shrink-0 border-b border-white/10 bg-[#1A1A1A] z-10 sticky top-0 rounded-b-xl"
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <button
+                  onClick={() => setShowHistory(true)}
+                  className="p-2 mr-2 rounded-full hover:bg-white/10 transition-colors"
                 >
-                  <Smile size={22} className="text-amber-400 mb-1" />
-                  <span className="text-xs font-medium">Happy</span>
-                </motion.button>
-                
-                <motion.button 
-                  onClick={() => {
-                    setSelectedMood('neutral');
-                    setShowMoodSelector(false);
-                  }}
-                  className={`flex flex-col items-center p-3 rounded-lg transition-all duration-300 ${
-                    selectedMood === 'neutral' 
-                      ? 'bg-[#222222] border border-white/15 shadow-inner' 
-                      : 'hover:bg-[#222222]/50'
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Meh size={22} className="text-white mb-1" />
-                  <span className="text-xs font-medium">Neutral</span>
-                </motion.button>
-                
-                <motion.button 
-                  onClick={() => {
-                    setSelectedMood('sad');
-                    setShowMoodSelector(false);
-                  }}
-                  className={`flex flex-col items-center p-3 rounded-lg transition-all duration-300 ${
-                    selectedMood === 'sad' 
-                      ? 'bg-[#222222] border border-white/15 shadow-inner' 
-                      : 'hover:bg-[#222222]/50'
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Frown size={22} className="text-blue-400 mb-1" />
-                  <span className="text-xs font-medium">Sad</span>
-                </motion.button>
+                  <Clock size={20} />
+                </button>
+                <h1 className="text-lg font-semibold text-white">AI Coach</h1>
               </div>
-            </motion.div>
-          )}
-        </motion.div>
+              <div className="flex items-center gap-2">
+                <motion.button 
+                  onClick={() => setShowMoodSelector(!showMoodSelector)}
+                  className="flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-[#222222] hover:bg-[#333333] border border-white/10 transition-all duration-300 text-sm"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <span>Mood</span>
+                  {getMoodIcon(selectedMood)}
+                  {showMoodSelector ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </motion.button>
+                
+                <motion.div 
+                  className="w-9 h-9 rounded-full bg-[#222222] flex items-center justify-center border border-white/10 hover:border-white/20 transition-all hover:bg-[#333333]"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <User className="text-white h-4 w-4" />
+                </motion.div>
+              </div>
+            </div>
 
-        <div className="flex-1 overflow-y-auto px-4 pb-36 chat-container">
-          <div className="space-y-3 py-3 max-w-[430px] mx-auto">
-            {messages.map((message, index) => (
+            {showMoodSelector && (
               <motion.div 
-                key={index}
-                variants={messageVariants}
-                initial="initial"
-                animate="animate"
-                className={`${
-                  message.sender === "user" 
-                    ? "ml-auto bg-[#222222] text-white" 
-                    : "mr-auto bg-[#1A1A1A] text-white"
-                } p-3 rounded-xl max-w-[85%] shadow-md border ${
-                  message.sender === "user" 
-                    ? "border-white/5" 
-                    : message.error 
-                      ? "border-red-500/20" 
-                      : "border-white/5"
-                }`}
+                className="absolute right-4 mt-2 bg-[#1A1A1A] border border-white/10 rounded-xl p-2 shadow-xl z-20"
+                initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                transition={{ type: "spring", stiffness: 300 }}
               >
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
-              </motion.div>
-            ))}
-
-            {isLoading && (
-              <motion.div 
-                className="mr-auto bg-[#1A1A1A] p-3 rounded-xl max-w-[85%] border border-white/5"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="flex items-center space-x-2">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
-                    <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse delay-150"></div>
-                    <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse delay-300"></div>
-                  </div>
-                  <span className="text-xs text-white/50">AI is thinking...</span>
+                <div className="grid grid-cols-3 gap-2">
+                  <motion.button 
+                    onClick={() => {
+                      setSelectedMood('happy');
+                      setShowMoodSelector(false);
+                    }}
+                    className={`flex flex-col items-center p-3 rounded-lg transition-all duration-300 ${
+                      selectedMood === 'happy' 
+                        ? 'bg-[#222222] border border-white/15 shadow-inner' 
+                        : 'hover:bg-[#222222]/50'
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Smile size={22} className="text-amber-400 mb-1" />
+                    <span className="text-xs font-medium">Happy</span>
+                  </motion.button>
+                  
+                  <motion.button 
+                    onClick={() => {
+                      setSelectedMood('neutral');
+                      setShowMoodSelector(false);
+                    }}
+                    className={`flex flex-col items-center p-3 rounded-lg transition-all duration-300 ${
+                      selectedMood === 'neutral' 
+                        ? 'bg-[#222222] border border-white/15 shadow-inner' 
+                        : 'hover:bg-[#222222]/50'
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Meh size={22} className="text-white mb-1" />
+                    <span className="text-xs font-medium">Neutral</span>
+                  </motion.button>
+                  
+                  <motion.button 
+                    onClick={() => {
+                      setSelectedMood('sad');
+                      setShowMoodSelector(false);
+                    }}
+                    className={`flex flex-col items-center p-3 rounded-lg transition-all duration-300 ${
+                      selectedMood === 'sad' 
+                        ? 'bg-[#222222] border border-white/15 shadow-inner' 
+                        : 'hover:bg-[#222222]/50'
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Frown size={22} className="text-blue-400 mb-1" />
+                    <span className="text-xs font-medium">Sad</span>
+                  </motion.button>
                 </div>
               </motion.div>
             )}
-            
-            {messages.some(m => m.error) && (
-              <motion.div 
-                className="mx-auto my-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <p className="text-xs text-red-400">
-                  There was an error connecting to the AI. Please try again.
-                </p>
-              </motion.div>
-            )}
+          </motion.div>
 
-            {messages.length > 1 && (
-              <div className="flex justify-center my-4">
-                <button
-                  onClick={clearChatHistory}
-                  className="text-xs text-white/50 hover:text-white/70 transition-colors px-3 py-1 bg-black/20 rounded-full border border-white/5"
+          <div className="flex-1 overflow-y-auto px-4 pb-36 chat-container">
+            <div className="space-y-3 py-3 max-w-[430px] mx-auto">
+              {messages.map((message, index) => (
+                <motion.div 
+                  key={index}
+                  variants={messageVariants}
+                  initial="initial"
+                  animate="animate"
+                  className={`${
+                    message.sender === "user" 
+                      ? "ml-auto bg-[#222222] text-white" 
+                      : "mr-auto bg-[#1A1A1A] text-white"
+                  } p-3 rounded-xl max-w-[85%] shadow-md border ${
+                    message.sender === "user" 
+                      ? "border-white/5" 
+                      : message.error 
+                        ? "border-red-500/20" 
+                        : "border-white/5"
+                  }`}
                 >
-                  Clear chat history
-                </button>
-              </div>
-            )}
-            
-            <div ref={messagesEndRef} />
-          </div>
-        </div>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
+                </motion.div>
+              ))}
 
-        <motion.div 
-          className="fixed left-0 right-0 bottom-0 px-4 z-10 mx-auto max-w-[430px] pb-safe mb-16"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.3 }}
-        >
-          <Card className="flex items-center gap-2 rounded-full p-1 pr-2 border border-white/10 hover:border-white/20 transition-all shadow-lg mb-4">
-            <input 
-              type="text" 
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder="Ask me anything..."
-              className="flex-1 bg-transparent border-none outline-none text-sm text-white px-4 py-3"
-              disabled={isLoading}
-            />
-            <motion.button 
-              className={`bg-white text-black rounded-full p-2 transition-all ${
-                input.trim() ? 'hover:bg-white/90 active:scale-95' : 'opacity-50 cursor-not-allowed'
-              }`}
-              onClick={handleSend}
-              disabled={isLoading || !input.trim()}
-              aria-label="Send message"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Send size={16} />
-            </motion.button>
-          </Card>
-        </motion.div>
+              {isLoading && (
+                <motion.div 
+                  className="mr-auto bg-[#1A1A1A] p-3 rounded-xl max-w-[85%] border border-white/5"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="flex items-center space-x-2">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
+                      <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse delay-150"></div>
+                      <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse delay-300"></div>
+                    </div>
+                    <span className="text-xs text-white/50">AI is thinking...</span>
+                  </div>
+                </motion.div>
+              )}
+              
+              {messages.some(m => m.error) && (
+                <motion.div 
+                  className="mx-auto my-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <p className="text-xs text-red-400">
+                    There was an error connecting to the AI. Please try again.
+                  </p>
+                </motion.div>
+              )}
+
+              {messages.length > 1 && (
+                <div className="flex justify-center my-4">
+                  <button
+                    onClick={clearChatHistory}
+                    className="text-xs text-white/50 hover:text-white/70 transition-colors px-3 py-1 bg-black/20 rounded-full border border-white/5"
+                  >
+                    Clear chat history
+                  </button>
+                </div>
+              )}
+              
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
+
+          <motion.div 
+            className="fixed left-0 right-0 bottom-0 px-4 z-10 mx-auto max-w-[430px] pb-safe mb-16"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.3 }}
+          >
+            <Card className="flex items-center gap-2 rounded-full p-1 pr-2 border border-white/10 hover:border-white/20 transition-all shadow-lg mb-4">
+              <input 
+                type="text" 
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyPress}
+                placeholder="Ask me anything..."
+                className="flex-1 bg-transparent border-none outline-none text-sm text-white px-4 py-3"
+                disabled={isLoading}
+              />
+              <motion.button 
+                className={`bg-white text-black rounded-full p-2 transition-all ${
+                  input.trim() ? 'hover:bg-white/90 active:scale-95' : 'opacity-50 cursor-not-allowed'
+                }`}
+                onClick={handleSend}
+                disabled={isLoading || !input.trim()}
+                aria-label="Send message"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Send size={16} />
+              </motion.button>
+            </Card>
+          </motion.div>
+        </div>
       </div>
-    </div>
+    </SafeAreaLayout>
   );
 };
 
