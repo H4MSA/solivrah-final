@@ -1,4 +1,6 @@
+
 import { createRoot } from 'react-dom/client'
+import { StrictMode } from 'react'
 import App from './App.tsx'
 import './index.css'
 
@@ -15,7 +17,15 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
   });
 }
 
-createRoot(document.getElementById("root")!).render(
-  <App />
-);
+// Make sure we're targeting the correct root element
+const rootElement = document.getElementById("root");
 
+if (!rootElement) {
+  console.error("Root element not found! Make sure there's a div with id 'root' in your HTML.");
+} else {
+  createRoot(rootElement).render(
+    <StrictMode>
+      <App />
+    </StrictMode>
+  );
+}

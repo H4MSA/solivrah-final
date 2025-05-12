@@ -1,67 +1,43 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 
-interface LogoProps {
+type LogoProps = {
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
   withText?: boolean;
-}
+};
 
-export const Logo: React.FC<LogoProps> = ({ size = "md", className, withText = false }) => {
-  // Updated size classes with larger dimensions and added "xl" option
-  const sizeClass = {
-    sm: "h-10 w-auto",
-    md: "h-16 w-auto",
-    lg: "h-24 w-auto",
-    xl: "h-32 w-auto",
+export const Logo = ({ size = "md", className = "", withText = true }: LogoProps) => {
+  const sizeClasses = {
+    sm: "w-10 h-10",
+    md: "w-14 h-14",
+    lg: "w-24 h-24", 
+    xl: "w-32 h-32"
   };
-
+  
   return (
-    <motion.div 
-      className={cn("flex items-center", className)}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className={`flex flex-col items-center ${className}`}>
       <motion.div
-        className="relative overflow-hidden rounded-lg"
-        initial={{ rotate: -5, scale: 0.9 }}
-        animate={{ rotate: 0, scale: 1 }}
-        transition={{ 
-          type: "spring",
-          stiffness: 260,
-          damping: 20,
-          delay: 0.2
-        }}
-        whileHover={{ 
-          scale: 1.05,
-          rotate: -3,
-          transition: { duration: 0.3 } 
-        }}
+        className="relative"
+        whileHover={{ scale: 1.05 }}
+        transition={{ type: "spring", stiffness: 400, damping: 10 }}
       >
-        <motion.img 
-          src="/lovable-uploads/68c40b83-f35c-4ca2-a67e-23d5ff575a28.png" 
+        <img 
+          src="/lovable-uploads/0701039a-55df-4138-b784-8d9952f8cded.png" 
           alt="Solivrah Logo" 
-          className={cn(sizeClass[size], "object-contain")}
+          className={`${sizeClasses[size]} drop-shadow-lg filter`}
           style={{
-            filter: "drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))"
+            filter: "drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.25))"
           }}
         />
+        
+        {withText && (
+          <div className="text-center mt-2 font-bold text-white text-xl drop-shadow-md">
+            Solivrah
+          </div>
+        )}
       </motion.div>
-      
-      {withText && (
-        <motion.div 
-          className="ml-4"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-        >
-          <h1 className="text-white text-2xl font-bold">Solivrah</h1>
-          <p className="text-white/60 text-sm">Personal Development</p>
-        </motion.div>
-      )}
-    </motion.div>
+    </div>
   );
 };
