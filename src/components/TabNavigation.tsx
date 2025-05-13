@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -38,33 +39,13 @@ export const TabNavigation = () => {
     return null;
   }
 
-  // Enhanced animation variants
-  const containerVariants = {
-    hidden: { y: 100, opacity: 0 },
-    visible: { 
-      y: 0, 
-      opacity: 1,
-      transition: { 
-        type: "spring", 
-        stiffness: 300, 
-        damping: 30,
-        staggerChildren: 0.05,
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-  };
-  
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center safe-nav-container">
       <motion.div 
         className="nav-bar-container"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
         {navTabs.map((tab, index) => {
           const Icon = tab.icon;
@@ -73,8 +54,9 @@ export const TabNavigation = () => {
           return (
             <motion.div
               key={tab.to}
-              variants={itemVariants}
-              custom={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05, duration: 0.3 }}
             >
               <Link
                 to={tab.to}

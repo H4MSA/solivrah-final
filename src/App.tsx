@@ -9,6 +9,7 @@ import { TabNavigation } from "./components/TabNavigation";
 import { NetworkStatusIndicator } from "./components/NetworkStatusIndicator";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
 import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Quests from "./pages/Quests";
@@ -23,6 +24,7 @@ import { Help } from "./pages/Help";
 import { ContextHelp } from "./components/ContextHelp";
 import { OnboardingFlow } from "./components/OnboardingFlow";
 import Admin from "./pages/Admin";
+import { ThemeProvider } from "./components/ui/ThemeProvider";
 
 // Create a new QueryClient instance with custom options
 const queryClient = new QueryClient({
@@ -164,7 +166,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Add SafeAreaLayout component
-const SafeAreaLayout = ({ children, withBottomNav = false }: { children: React.ReactNode, withBottomNav?: boolean }) => (
+export const SafeAreaLayout = ({ children, withBottomNav = false }: { children: React.ReactNode, withBottomNav?: boolean }) => (
   <div className={`mobile-optimized-container overflow-protection flex-fix ${withBottomNav ? 'with-bottom-nav' : ''}`}>{children}</div>
 );
 
@@ -177,12 +179,21 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="flex flex-col min-h-screen w-full overflow-hidden">
       <NetworkStatusIndicator position="top" variant="minimal" />
       <main className="flex-1 overflow-y-auto overflow-x-hidden page-transition content-with-fixed-nav">
-        <SafeAreaLayout withBottomNav={showNavigation}>
-          {children}
-        </SafeAreaLayout>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            <SafeAreaLayout withBottomNav={showNavigation}>
+              {children}
+            </SafeAreaLayout>
+          </motion.div>
+        </AnimatePresence>
       </main>
       {showNavigation && <ContextHelp />}
-      {showNavigation && <TabNavigation />}
     </div>
   );
 };
@@ -278,78 +289,82 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AppProvider>
         <TooltipProvider>
-          {/* Theme background applied to the entire app */}
-          <ThemeBackground />
+          <ThemeProvider>
+            {/* Theme background applied to the entire app */}
+            <ThemeBackground />
 
-          {/* Onboarding flow for first-time users */}
-          {showOnboarding && <OnboardingFlow onComplete={() => setShowOnboarding(false)} />}
+            {/* Onboarding flow for first-time users */}
+            {showOnboarding && <OnboardingFlow onComplete={() => setShowOnboarding(false)} />}
 
-          {/* Fixed viewport container with safe areas */}
-          <div className={`fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-transparent overflow-hidden ${hasSafeArea ? 'dynamic-island-aware' : 'p-4 pb-20'}`}>
-            <Toaster />
-            <Sonner />
+            {/* Fixed viewport container with safe areas */}
+            <div className={`fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-transparent overflow-hidden ${hasSafeArea ? 'dynamic-island-aware' : 'p-4 pb-20'}`}>
+              <Toaster />
+              <Sonner />
 
-            <BrowserRouter>
-              <SessionHandler>
-                {/* Context help should be inside Router context */}
-                <Routes>
-                  {/* Public routes */}
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/auth/callback" element={<AuthCallback />} />
+              <BrowserRouter>
+                <SessionHandler>
+                  {/* Context help should be inside Router context */}
+                  <Routes>
+                    {/* Public routes */}
+                    <Route path="/" element={<Index />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
 
-                  {/* Survey route (accessible after auth) */}
-                  <Route path="/survey" element={
-                    <ProtectedRoute>
-                      <Survey />
-                    </ProtectedRoute>
-                  } />
+                    {/* Survey route (accessible after auth) */}
+                    <Route path="/survey" element={
+                      <ProtectedRoute>
+                        <Survey />
+                      </ProtectedRoute>
+                    } />
 
-                  {/* Protected routes with TabNavigation */}
-                  <Route path="/home" element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Home />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/quests" element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Quests />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/coach" element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Coach />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/community" element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Community />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/profile" element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Profile />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/help" element={<Help />} />
-                  <Route path="/admin" element={<Admin />} />
+                    {/* Protected routes with TabNavigation */}
+                    <Route path="/home" element={
+                      <ProtectedRoute>
+                        <AppLayout>
+                          <Home />
+                        </AppLayout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/quests" element={
+                      <ProtectedRoute>
+                        <AppLayout>
+                          <Quests />
+                        </AppLayout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/coach" element={
+                      <ProtectedRoute>
+                        <AppLayout>
+                          <Coach />
+                        </AppLayout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/community" element={
+                      <ProtectedRoute>
+                        <AppLayout>
+                          <Community />
+                        </AppLayout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/profile" element={
+                      <ProtectedRoute>
+                        <AppLayout>
+                          <Profile />
+                        </AppLayout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/help" element={<Help />} />
+                    <Route path="/admin" element={<Admin />} />
 
-                  {/* Catch-all for 404s */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </SessionHandler>
-            </BrowserRouter>
-          </div>
+                    {/* Catch-all for 404s */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                  {/* Put TabNavigation here to ensure it appears on all protected routes */}
+                  <TabNavigation />
+                </SessionHandler>
+              </BrowserRouter>
+            </div>
+          </ThemeProvider>
         </TooltipProvider>
       </AppProvider>
     </QueryClientProvider>
