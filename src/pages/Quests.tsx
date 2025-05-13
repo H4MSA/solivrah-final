@@ -5,7 +5,6 @@ import { QuestCompleteModal } from "@/components/QuestCompleteModal";
 import { useApp } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { SafeAreaLayout } from '../App';
 
 interface Quest {
   id: number;
@@ -144,7 +143,7 @@ const Quests = () => {
     { day: 16, title: "MVP Draft", description: "Build a minimal viable product (MVP) draft.", requiresPhoto: true, xp: 70 },
     { day: 17, title: "AR Tools", description: "Use AR tools to visualize your idea.", requiresPhoto: false, xp: 80 },
     { day: 18, title: "Share Progress", description: "Share progress in the Community Hub.", requiresPhoto: true, xp: 90 },
-    { day: 19, title: "Worst That Happens", description: "Replace self-doubt with 'what's the worst that happens?'", requiresPhoto: false, xp: 100 },
+    { day: 19, title: "Worst That Happens", description: "Replace self-doubt with 'what’s the worst that happens?'", requiresPhoto: false, xp: 100 },
     { day: 20, title: "Daily Brainstorming", description: "Practice 15 minutes of daily brainstorming.", requiresPhoto: true, xp: 65 },
     { day: 21, title: "Reframe Criticism", description: "Reframe 1 criticism into constructive feedback.", requiresPhoto: false, xp: 75 },
     { day: 22, title: "Creativity Playlist", description: "Create a 'creativity playlist' for inspiration.", requiresPhoto: true, xp: 85 },
@@ -233,95 +232,93 @@ const Quests = () => {
   const displayedQuests = showAllQuests ? quests : quests.slice(0, 5);
   
   return (
-    <SafeAreaLayout withBottomNav={true}>
-      <div className="min-h-screen pb-24">
-        <div className="p-6 space-y-4">
-          <h1 className="text-xl font-medium">Your Quests</h1>
-          
-          <div className="space-y-4">
-            <AnimatePresence>
-              {displayedQuests.map((quest) => (
-                <motion.div
-                  key={quest.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <GlassCard key={quest.id} className={`relative ${quest.status === "locked" ? "overflow-hidden" : ""}`}>
-                    <div className="absolute top-4 right-4">
-                      {quest.status === "completed" ? (
-                        <div className="bg-primary rounded-full p-1">
-                          <FiCheck className="text-background" />
-                        </div>
-                      ) : quest.status === "locked" ? (
-                        <FiLock className="text-muted" />
-                      ) : null}
-                    </div>
-                    
-                    <h2 className="text-lg font-medium">Day {quest.day}: {quest.title}</h2>
-                    <p className="text-muted text-sm mt-1">{quest.description}</p>
-                    
-                    {quest.status === "active" && (
-                      <button 
-                        className="btn-primary w-full mt-4"
-                        onClick={() => handleOpenCompleteModal(quest)}
-                      >
-                        Complete Quest
-                      </button>
-                    )}
-                    
-                    {quest.status === "locked" && (
-                      <div className="mt-4 text-sm text-muted italic">
-                        Complete previous quests to unlock
-                      </div>
-                    )}
-                    
-                    {/* Add blur overlay for locked quests */}
-                    {quest.status === "locked" && (
-                      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center">
-                        <FiLock className="text-white/50 text-xl" />
-                      </div>
-                    )}
-                  </GlassCard>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-            
-            {/* Show "See More" button if there are more than 5 quests */}
-            {quests.length > 5 && (
-              <button 
-                className="w-full py-3 px-4 rounded-xl bg-[#1A1A1A]/80 backdrop-blur-xl border border-white/10 text-white flex items-center justify-center gap-2 hover:bg-[#222222]/80 hover:border-white/15 active:scale-[0.98] transition-all transform-gpu"
-                onClick={() => setShowAllQuests(!showAllQuests)}
-              >
-                {showAllQuests ? (
-                  <>
-                    <FiChevronUp size={18} />
-                    <span>Show Less</span>
-                  </>
-                ) : (
-                  <>
-                    <FiChevronDown size={18} />
-                    <span>See All ({quests.length - 5} More)</span>
-                  </>
-                )}
-              </button>
-            )}
-          </div>
-        </div>
+    <div className="min-h-screen pb-24">
+      <div className="p-6 space-y-4">
+        <h1 className="text-xl font-medium">Your Quests</h1>
         
-        {showCompleteModal && activeQuest && (
-          <QuestCompleteModal
-            questId={activeQuest.id.toString()}
-            title={activeQuest.title}
-            xp={activeQuest.xp}
-            requiresPhoto={activeQuest.requiresPhoto}
-            onClose={() => setShowCompleteModal(false)}
-            onComplete={handleCompleteQuest}
-          />
-        )}
+        <div className="space-y-4">
+          <AnimatePresence>
+            {displayedQuests.map((quest) => (
+              <motion.div
+                key={quest.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <GlassCard key={quest.id} className={`relative ${quest.status === "locked" ? "overflow-hidden" : ""}`}>
+                  <div className="absolute top-4 right-4">
+                    {quest.status === "completed" ? (
+                      <div className="bg-primary rounded-full p-1">
+                        <FiCheck className="text-background" />
+                      </div>
+                    ) : quest.status === "locked" ? (
+                      <FiLock className="text-muted" />
+                    ) : null}
+                  </div>
+                  
+                  <h2 className="text-lg font-medium">Day {quest.day}: {quest.title}</h2>
+                  <p className="text-muted text-sm mt-1">{quest.description}</p>
+                  
+                  {quest.status === "active" && (
+                    <button 
+                      className="btn-primary w-full mt-4"
+                      onClick={() => handleOpenCompleteModal(quest)}
+                    >
+                      Complete Quest
+                    </button>
+                  )}
+                  
+                  {quest.status === "locked" && (
+                    <div className="mt-4 text-sm text-muted italic">
+                      Complete previous quests to unlock
+                    </div>
+                  )}
+                  
+                  {/* Add blur overlay for locked quests */}
+                  {quest.status === "locked" && (
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center">
+                      <FiLock className="text-white/50 text-xl" />
+                    </div>
+                  )}
+                </GlassCard>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          
+          {/* Show "See More" button if there are more than 5 quests */}
+          {quests.length > 5 && (
+            <button 
+              className="w-full py-3 px-4 rounded-xl bg-[#1A1A1A]/80 backdrop-blur-xl border border-white/10 text-white flex items-center justify-center gap-2 hover:bg-[#222222]/80 hover:border-white/15 active:scale-[0.98] transition-all transform-gpu"
+              onClick={() => setShowAllQuests(!showAllQuests)}
+            >
+              {showAllQuests ? (
+                <>
+                  <FiChevronUp size={18} />
+                  <span>Show Less</span>
+                </>
+              ) : (
+                <>
+                  <FiChevronDown size={18} />
+                  <span>See All ({quests.length - 5} More)</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
-    </SafeAreaLayout>
+      
+      {showCompleteModal && activeQuest && (
+        <QuestCompleteModal
+          questId={activeQuest.id.toString()}
+          title={activeQuest.title}
+          xp={activeQuest.xp}
+          requiresPhoto={activeQuest.requiresPhoto}
+          onClose={() => setShowCompleteModal(false)}
+          onComplete={handleCompleteQuest}
+        />
+      )}
+    </div>
   );
 };
 

@@ -39,13 +39,33 @@ export const TabNavigation = () => {
     return null;
   }
 
+  // Enhanced animation variants
+  const containerVariants = {
+    hidden: { y: 100, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { 
+        type: "spring", 
+        stiffness: 300, 
+        damping: 30,
+        staggerChildren: 0.05,
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
+  
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center safe-nav-container">
+    <div className="fixed inset-x-0 bottom-0 z-50 px-4 flex justify-center pb-safe">
       <motion.div 
-        className="nav-bar-container"
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="flex items-center justify-between px-4 py-2 rounded-xl backdrop-blur-xl bg-[#1A1A1A]/80 border border-[#333333] shadow-lg w-[95%] max-w-[340px] mb-3"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
       >
         {navTabs.map((tab, index) => {
           const Icon = tab.icon;
@@ -54,9 +74,8 @@ export const TabNavigation = () => {
           return (
             <motion.div
               key={tab.to}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05, duration: 0.3 }}
+              variants={itemVariants}
+              custom={index}
             >
               <Link
                 to={tab.to}

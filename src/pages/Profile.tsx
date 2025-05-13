@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { PremiumCard } from '@/components/PremiumCard';
@@ -10,7 +11,6 @@ import { CameraUpload } from '@/components/CameraUpload';
 import { TabNavigation } from '@/components/TabNavigation';
 import { ProfileTabs } from '@/components/ProfileTabs';
 import { ThemeBackground } from '@/components/ThemeBackground';
-import { SafeAreaLayout } from '../App';
 
 const Profile = () => {
   const { user, selectedTheme } = useApp();
@@ -161,7 +161,7 @@ const Profile = () => {
   const displayName = user?.email?.split('@')[0] || "Guest User";
 
   return (
-    <SafeAreaLayout withBottomNav={true}>
+    <div className="pb-24">
       <ThemeBackground />
       <motion.div 
         className="px-4 pt-6 pb-24 max-w-[340px] mx-auto"
@@ -261,7 +261,7 @@ const Profile = () => {
       </motion.div>
       
       <TabNavigation />
-    </SafeAreaLayout>
+    </div>
   );
 };
 
