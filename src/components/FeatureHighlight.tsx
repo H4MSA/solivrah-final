@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Sparkles } from 'lucide-react';
@@ -33,7 +34,7 @@ export const FeatureHighlight = ({ id, title, description, image }: FeatureHighl
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
-      className="fixed bottom-20 inset-x-0 z-40 px-4 pb-safe pl-safe pr-safe pointer-events-none flex justify-center"
+      className="fixed bottom-20 inset-x-0 z-40 px-4 pointer-events-none flex justify-center"
     >
       <div className="bg-gradient-to-br from-[#1a1a1a] to-[#111] rounded-lg border border-white/10 shadow-lg pointer-events-auto max-w-sm w-full overflow-hidden">
         <div className="flex items-center justify-between p-3 border-b border-white/10">

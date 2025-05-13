@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -40,7 +41,7 @@ export const OnboardingFlow = ({ onComplete }: { onComplete: () => void }) => {
   };
   
   return (
-    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-6 pb-safe pl-safe pr-safe">
+    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-6">
       <AnimatePresence mode="wait">
         <motion.div 
           key={currentStep}

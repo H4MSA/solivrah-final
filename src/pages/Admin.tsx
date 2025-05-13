@@ -16,17 +16,6 @@ interface AdminSettings {
   roadmap: string;
 }
 
-// Extended profile type to include the role field
-interface ExtendedProfile {
-  id: string;
-  role: string | null;
-  streak?: number | null;
-  xp?: number | null;
-  theme?: string | null;
-  created_at?: string | null;
-  updated_at?: string | null;
-}
-
 const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -54,12 +43,9 @@ const Admin = () => {
           .eq('id', user.id)
           .single();
         
-        // Cast the data to our extended profile type
-        const profileData = data as unknown as ExtendedProfile;
-        
         // If role column exists and user is an admin, allow access
         // Otherwise, redirect to home page
-        if (error || !profileData || profileData.role !== 'admin') {
+        if (error || !data || data.role !== 'admin') {
           toast({
             title: "Access Denied",
             description: "You don't have permission to access this page",

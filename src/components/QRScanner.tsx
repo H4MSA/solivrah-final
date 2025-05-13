@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { Camera, ChevronLeft, X, Zap } from "lucide-react";
@@ -81,7 +82,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onClose, onScan }) => {
   };
   
   return (
-    <div className="fixed inset-0 bg-background/90 backdrop-blur-md flex flex-col z-50 pb-safe pl-safe pr-safe">
+    <div className="fixed inset-0 bg-background/90 backdrop-blur-md flex flex-col z-50">
       <div className="flex justify-between items-center p-4">
         <h2 className="text-xl font-medium">Scan QR Code</h2>
         <button 

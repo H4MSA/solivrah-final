@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HelpCircle, X, ChevronRight } from 'lucide-react';
@@ -135,7 +136,7 @@ export const ContextHelp = () => {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-20 right-4 z-40 w-10 h-10 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors pb-safe pr-safe"
+        className="fixed bottom-20 right-4 z-40 w-10 h-10 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
         aria-label="Help"
       >
         <HelpCircle size={20} className="text-white" />
@@ -147,7 +148,7 @@ export const ContextHelp = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 pb-safe pl-safe pr-safe"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
           >
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
             

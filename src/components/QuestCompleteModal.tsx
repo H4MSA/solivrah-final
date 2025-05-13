@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { CheckCircle, Camera, Award, ArrowRight, Wifi, WifiOff, Loader } from "lucide-react";
@@ -117,7 +118,7 @@ export const QuestCompleteModal: React.FC<QuestCompleteModalProps> = ({
   };
   
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4 pb-safe pl-safe pr-safe">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         {/* Network status indicator */}
         <div className="flex items-center justify-center mb-2 text-sm">
