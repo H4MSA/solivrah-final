@@ -36,6 +36,19 @@ export const IconButton: React.FC<IconButtonProps> = ({
   );
 };
 
+// Solivrah Brand Icon (NEW - matches your logo style)
+export const SolivrahBrandIcon = ({ size = 24 }: { size?: number }) => (
+  <div className="relative">
+    <img 
+      src="/lovable-uploads/3175d335-84c5-4f7a-954e-9795d0e93059.png" 
+      alt="Solivrah" 
+      width={size}
+      height={size}
+      className="object-contain opacity-90 filter drop-shadow-sm"
+    />
+  </div>
+);
+
 // Custom Premium Icons
 export const TriangleIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

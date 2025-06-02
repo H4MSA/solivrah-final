@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Home, Award, MessageCircle, Users, User } from "lucide-react";
+import { SolivrahBrandIcon } from "./SolivrahIcons";
 
 export const TabNavigation = () => {
   // Safely handle the location to prevent errors outside Router context
@@ -62,11 +63,23 @@ export const TabNavigation = () => {
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 px-4 flex justify-center pb-safe">
       <motion.div 
-        className="flex items-center justify-between px-4 py-2 rounded-xl backdrop-blur-xl bg-[#1A1A1A]/80 border border-[#333333] shadow-lg w-[95%] max-w-[340px] mb-3"
+        className="flex items-center justify-between px-4 py-2 rounded-xl backdrop-blur-xl bg-[#1A1A1A]/80 border border-[#333333] shadow-lg w-[95%] max-w-[340px] mb-3 relative"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
+        {/* Solivrah Brand Icon - positioned in the center */}
+        <div className="absolute left-1/2 top-[-20px] transform -translate-x-1/2">
+          <motion.div
+            className="w-10 h-10 rounded-xl bg-gradient-to-b from-[#1A1A1A] to-[#0A0A0A] border border-white/20 flex items-center justify-center shadow-xl"
+            whileHover={{ scale: 1.1, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
+            <SolivrahBrandIcon size={20} />
+          </motion.div>
+        </div>
+
         {navTabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.to;

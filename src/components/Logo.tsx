@@ -24,7 +24,7 @@ export const Logo = ({ size = "md", className = "", withText = true }: LogoProps
         transition={{ type: "spring", stiffness: 400, damping: 10 }}
       >
         <img 
-          src="/lovable-uploads/0701039a-55df-4138-b784-8d9952f8cded.png" 
+          src="/lovable-uploads/3175d335-84c5-4f7a-954e-9795d0e93059.png" 
           alt="Solivrah Logo" 
           className={`${sizeClasses[size]} drop-shadow-lg filter`}
           style={{
