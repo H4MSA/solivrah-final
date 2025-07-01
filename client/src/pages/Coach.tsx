@@ -3,13 +3,11 @@ import { useSearchParams } from "react-router-dom";
 import { GlassCard } from "@/components/GlassCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, RefreshCw, настроение } from "lucide-react";
+import { Send, RefreshCw } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { useToast } from "@/hooks/use-toast";
-import { ThemeSelect } from "@/components/ThemeSelect";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SolivrahBrandIcon } from "@/components/SolivrahIcons";
-import { useAuth } from "@/context/AuthContext";
 
 const Coach = () => {
   const [searchParams] = useSearchParams();
@@ -23,7 +21,6 @@ const Coach = () => {
   const { selectedTheme } = useApp();
   const { toast } = useToast();
   const bottomRef = useRef<HTMLDivElement>(null);
-	const { session } = useAuth();
   
   useEffect(() => {
     if (initialMessage) {
@@ -108,7 +105,6 @@ const Coach = () => {
       <div className="px-4 py-5 border-b border-white/5">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold">Your Coach</h1>
-          <ThemeSelect />
         </div>
       </div>
       
@@ -133,27 +129,6 @@ const Coach = () => {
             )}
           </button>
           <p className="text-sm mt-2">{affirmation}</p>
-        </GlassCard>
-      </div>
-
-      {/* Mood Selection */}
-      <div className="px-4 py-4">
-        <GlassCard variant="dark" className="p-4">
-          <h3 className="text-lg font-medium mb-3">How are you feeling today?</h3>
-          <div className="flex justify-around">
-            {["Happy", "Neutral", "Sad"].map(mood => (
-              <button
-                key={mood}
-                onClick={() => setSelectedMood(mood)}
-                className={`p-3 rounded-full hover:bg-white/10 transition-colors ${selectedMood === mood ? 'bg-white/20' : ''}`}
-              >
-                {mood === "Happy" && "😊"}
-                {mood === "Neutral" && "😐"}
-                {mood === "Sad" && "😔"}
-                <span className="block text-xs mt-1">{mood}</span>
-              </button>
-            ))}
-          </div>
         </GlassCard>
       </div>
 

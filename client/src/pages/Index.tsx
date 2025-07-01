@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Logo } from "@/components/Logo";
@@ -34,7 +35,7 @@ const Index = () => {
   };
   
   // Custom icon components based on the design references
-  const IconButton = ({ children, className = "", small = false }) => (
+  const IconButton = ({ children, className = "", small = false }: { children: React.ReactNode; className?: string; small?: boolean }) => (
     <motion.div 
       className={`flex items-center justify-center bg-[#1A1A1A] border border-[#333333] rounded-2xl ${small ? 'w-16 h-16' : 'flex-1 h-16'} ${className}`}
       whileHover={{ scale: 1.05 }}

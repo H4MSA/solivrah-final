@@ -21,7 +21,7 @@ import Survey from "./pages/Survey";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
-import { Help } from "./pages/Help";
+import Help from "./pages/Help";
 import { ContextHelp } from "./components/ContextHelp";
 import { OnboardingFlow } from "./components/OnboardingFlow";
 import Admin from "./pages/Admin";

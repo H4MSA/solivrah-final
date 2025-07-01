@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,8 +11,8 @@ export const TabNavigation = () => {
   let locationHook: string | null = null;
   
   try {
-    locationHook = useLocation();
-    pathname = locationHook;
+    [locationHook] = useLocation();
+    pathname = locationHook || '/';
   } catch (error) {
     console.warn("Router context not available in TabNavigation");
   }
