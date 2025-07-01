@@ -12,61 +12,20 @@ export class SupabaseService {
     );
   }
 
-  async saveConversation(userId: string, message: string, reply: string, mood?: string) {
+  async saveChatHistory(userId: string, message: string, response: string, theme?: string) {
     return await this.supabase
-      .from('conversations')
-      .insert({ user_id: userId, message, reply, mood });
+      .from('chat_history')
+      .insert({ user_id: userId, message, response, theme });
   }
 
   async getConversationHistory(userId: string, limit = 10) {
     const { data } = await this.supabase
-      .from('conversations')
-      .select('message, reply, mood, created_at')
+      .from('chat_history')
+      .select('message, response, theme, timestamp')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+      .order('timestamp', { ascending: false })
       .limit(limit);
     return data;
-  }
-
-  async saveRoadmap(userId: string, roadmap: any) {
-    const { data, error } = await this.supabase
-      .from('roadmaps')
-      .insert({ user_id: userId, plan: roadmap })
-      .select();
-    
-    if (error) throw error;
-    
-    // After saving the roadmap, create quest entries for each day
-    if (Array.isArray(roadmap)) {
-      const questsToInsert = roadmap.map(item => ({
-        user_id: userId,
-        day: item.day,
-        title: item.title,
-        description: item.description,
-        xp: item.xp,
-        requires_photo: item.requires_photo || false,
-        theme: 'roadmap',
-        difficulty: item.xp <= 20 ? 'easy' : item.xp <= 35 ? 'medium' : 'hard',
-        completed: false
-      }));
-      
-      await this.supabase
-        .from('quests')
-        .insert(questsToInsert);
-    }
-    
-    return data;
-  }
-
-  async getRoadmap(userId: string) {
-    const { data } = await this.supabase
-      .from('roadmaps')
-      .select('plan')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-    return data?.plan;
   }
 
   async saveMoodEntry(userId: string, mood: string, notes: string) {
@@ -142,40 +101,6 @@ export class SupabaseService {
       .order('completed_at', { ascending: false })
       .limit(10);
     return data;
-  }
-  
-  async saveAffirmation(userId: string, affirmation: string, theme: string) {
-    return await this.supabase
-      .from('affirmations')
-      .insert({ user_id: userId, content: affirmation, theme });
-  }
-
-  async getLatestAffirmation(userId: string, theme?: string) {
-    let query = this.supabase
-      .from('affirmations')
-      .select('content, theme, created_at')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(1);
-      
-    if (theme) {
-      query = query.eq('theme', theme);
-    }
-    
-    const { data } = await query;
-    return data?.[0];
-  }
-  
-  async logAiUsage(userId: string, endpoint: string, prompt: string, response: string, error?: string) {
-    return await this.supabase
-      .from('ai_logs')
-      .insert({ 
-        user_id: userId, 
-        prompt, 
-        response,
-        error,
-        timestamp: new Date().toISOString()
-      });
   }
 
   // Method to update quest completion status

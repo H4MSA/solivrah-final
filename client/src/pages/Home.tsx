@@ -53,7 +53,8 @@ const Home = () => {
     addXP(50);
   };
   
-  const handleCameraCapture = (file: File) => {
+  const handleCameraCapture = (file: File | null) => {
+    if (!file) return;
     console.log("Photo captured:", file);
     setTimeout(() => {
       addXP(30);

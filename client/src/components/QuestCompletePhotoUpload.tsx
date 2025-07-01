@@ -26,7 +26,9 @@ export const QuestCompletePhotoUpload: React.FC<QuestCompletePhotoUploadProps> =
   const { toast } = useToast();
   const { user, addXP } = useApp();
 
-  const handleCapture = async (file: File) => {
+  const handleCapture = async (file: File | null) => {
+    if (!file) return;
+    
     setShowCamera(false);
     setIsUploading(true);
     setPreviewUrl(URL.createObjectURL(file));

@@ -35,8 +35,15 @@ const supabase = createClient(
   process.env.SUPABASE_KEY!
 );
 
+// Extended Request interface
+interface AuthenticatedRequest extends express.Request {
+  user?: any;
+  userContext?: any;
+  file?: Express.Multer.File;
+}
+
 // Middleware to verify authorization token
-const authMiddleware = async (req: any, res: any, next: any) => {
+const authMiddleware = async (req: AuthenticatedRequest, res: express.Response, next: express.NextFunction) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -59,7 +66,7 @@ const authMiddleware = async (req: any, res: any, next: any) => {
 };
 
 // Context enrichment middleware - adds user context for AI personalization
-const contextMiddleware = async (req: any, res: any, next: any) => {
+const contextMiddleware = async (req: AuthenticatedRequest, res: express.Response, next: express.NextFunction) => {
   try {
     if (req.user?.id) {
       req.userContext = await supabaseService.getUserContext(req.user.id);
@@ -82,12 +89,6 @@ const chatbotSchema = z.object({
   personalitySettings: z.enum(['playful', 'professional'])
 });
 
-const roadmapSchema = z.object({
-  goals: z.string(),
-  struggles: z.string(),
-  dailyTime: z.number().min(0)
-});
-
 const moodJournalSchema = z.object({
   mood: z.string().optional(),
   notes: z.string()
@@ -98,7 +99,7 @@ const questCompletionSchema = z.object({
 });
 
 // Error handler middleware
-const errorHandler = (err: any, req: any, res: any, next: any) => {
+const errorHandler = (err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error(err);
   res.status(500).json({ error: 'Internal server error' });
 };
@@ -106,35 +107,14 @@ const errorHandler = (err: any, req: any, res: any, next: any) => {
 // ============= API ENDPOINTS =============
 
 // Daily Affirmation endpoint
-app.get('/affirmation', authMiddleware, async (req, res) => {
+app.get('/affirmation', authMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const theme = req.query.theme as string || 'general';
     const userId = req.user.id;
     
-    // Check if we already have a recent affirmation for this theme
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const latestAffirmation = await supabaseService.getLatestAffirmation(userId, theme);
-    
-    if (latestAffirmation && new Date(latestAffirmation.created_at) >= today) {
-      return res.json({ affirmation: latestAffirmation.content });
-    }
-    
     // Generate a new affirmation
     const username = req.userContext?.profile?.username;
     const affirmation = await aiService.generateDailyAffirmation(theme, username);
-    
-    // Save to database
-    await supabaseService.saveAffirmation(userId, affirmation, theme);
-    
-    // Log AI usage
-    await supabaseService.logAiUsage(
-      userId, 
-      '/affirmation', 
-      `Generate affirmation for theme: ${theme}`, 
-      affirmation
-    );
     
     res.json({ affirmation });
   } catch (error) {
@@ -144,36 +124,22 @@ app.get('/affirmation', authMiddleware, async (req, res) => {
 });
 
 // Coaching assistant endpoint
-app.post('/assistant', authMiddleware, contextMiddleware, async (req, res) => {
+app.post('/assistant', authMiddleware, contextMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { message, mood } = assistantSchema.parse(req.body);
     const userId = req.user.id;
     
     const history = await supabaseService.getConversationHistory(userId);
-    const context = history?.map(h => `${h.message}: ${h.reply}`).join('\n') || '';
-    
-    // Use the user's last logged mood if not provided in the request
-    let userMood = mood;
-    if (!userMood && req.userContext?.moodEntries?.[0]) {
-      userMood = req.userContext.moodEntries[0].mood;
-    }
+    const context = history?.map(h => `${h.message}: ${h.response}`).join('\n') || '';
     
     const reply = await aiService.generateCoachingReply(
       message, 
-      userMood || 'neutral', 
+      mood || 'neutral', 
       context,
       req.userContext?.profile
     );
     
-    await supabaseService.saveConversation(userId, message, reply, userMood);
-    
-    // Log AI usage
-    await supabaseService.logAiUsage(
-      userId, 
-      '/assistant', 
-      `Message: ${message}, Mood: ${userMood || 'neutral'}`, 
-      reply
-    );
+    await supabaseService.saveChatHistory(userId, message, reply, mood);
     
     res.json({ reply, updatedContext: context });
   } catch (error) {
@@ -187,13 +153,13 @@ app.post('/assistant', authMiddleware, contextMiddleware, async (req, res) => {
 });
 
 // Chatbot endpoint
-app.post('/chatbot', authMiddleware, contextMiddleware, async (req, res) => {
+app.post('/chatbot', authMiddleware, contextMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { message, personalitySettings } = chatbotSchema.parse(req.body);
     const userId = req.user.id;
     
     const history = await supabaseService.getConversationHistory(userId);
-    const historyText = history?.map(h => `${h.message}: ${h.reply}`).join('\n') || '';
+    const historyText = history?.map(h => `${h.message}: ${h.response}`).join('\n') || '';
     
     const reply = await aiService.generateChatbotReply(
       message, 
@@ -202,15 +168,7 @@ app.post('/chatbot', authMiddleware, contextMiddleware, async (req, res) => {
       req.userContext?.profile
     );
     
-    await supabaseService.saveConversation(userId, message, reply);
-    
-    // Log AI usage
-    await supabaseService.logAiUsage(
-      userId, 
-      '/chatbot', 
-      `Message: ${message}, Personality: ${personalitySettings}`, 
-      reply
-    );
+    await supabaseService.saveChatHistory(userId, message, reply);
     
     res.json({ reply });
   } catch (error) {
@@ -223,60 +181,8 @@ app.post('/chatbot', authMiddleware, contextMiddleware, async (req, res) => {
   }
 });
 
-// Roadmap generator endpoint
-app.post('/roadmap', authMiddleware, contextMiddleware, async (req, res) => {
-  try {
-    const { goals, struggles, dailyTime } = roadmapSchema.parse(req.body);
-    const userId = req.user.id;
-    
-    const roadmap = await aiService.generateRoadmap(
-      goals, 
-      struggles, 
-      dailyTime,
-      req.userContext?.profile
-    );
-    
-    await supabaseService.saveRoadmap(userId, roadmap);
-    
-    // Log AI usage
-    await supabaseService.logAiUsage(
-      userId, 
-      '/roadmap', 
-      `Goals: ${goals}, Struggles: ${struggles}, Daily Time: ${dailyTime}`, 
-      JSON.stringify(roadmap)
-    );
-    
-    res.json(roadmap);
-  } catch (error) {
-    console.error(error);
-    if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'Invalid request data', details: error.errors });
-    } else {
-      res.status(500).json({ error: 'Failed to generate roadmap' });
-    }
-  }
-});
-
-// Get roadmap endpoint
-app.get('/roadmap', authMiddleware, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const roadmap = await supabaseService.getRoadmap(userId);
-    
-    if (!roadmap) {
-      res.status(404).json({ error: 'Roadmap not found' });
-      return;
-    }
-    
-    res.json(roadmap);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to fetch roadmap' });
-  }
-});
-
 // Mood journaling and analysis endpoint
-app.post('/mood-journal', authMiddleware, async (req, res) => {
+app.post('/mood-journal', authMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { notes, mood } = moodJournalSchema.parse(req.body);
     const userId = req.user.id;
@@ -285,14 +191,6 @@ app.post('/mood-journal', authMiddleware, async (req, res) => {
     let detectedMood = mood;
     if (!detectedMood && notes) {
       detectedMood = await aiService.analyzeMood(notes);
-      
-      // Log AI usage
-      await supabaseService.logAiUsage(
-        userId, 
-        '/mood-journal/analyze', 
-        `Journal: ${notes}`, 
-        `Detected mood: ${detectedMood}`
-      );
     }
     
     await supabaseService.saveMoodEntry(userId, detectedMood || 'neutral', notes);
@@ -310,7 +208,7 @@ app.post('/mood-journal', authMiddleware, async (req, res) => {
 });
 
 // Get mood trend endpoint
-app.get('/mood-trend', authMiddleware, async (req, res) => {
+app.get('/mood-trend', authMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const userId = req.user.id;
     const days = parseInt(req.query.days as string) || 7;
@@ -322,70 +220,8 @@ app.get('/mood-trend', authMiddleware, async (req, res) => {
   }
 });
 
-// Photo verification endpoint
-app.post('/verify-photo', authMiddleware, upload.single('photo'), async (req, res) => {
-  try {
-    if (!req.file) {
-      res.status(400).json({ error: 'No photo uploaded' });
-      return;
-    }
-
-    const userId = req.user.id;
-    const questId = req.body.questId;
-    
-    if (!userId || !questId) {
-      res.status(400).json({ error: 'Missing userId or questId' });
-      return;
-    }
-
-    // For image verification, we need access to quest details
-    const questData = await supabaseService.getActiveQuests(userId);
-    const quest = questData?.find(q => q.id === questId);
-    
-    if (!quest) {
-      res.status(404).json({ error: 'Quest not found' });
-      return;
-    }
-
-    const imageBuffer = req.file.buffer;
-    const imageUrl = `data:${req.file.mimetype};base64,${imageBuffer.toString('base64')}`;
-    
-    // In a real implementation, you might want to store the image first, then get a URL
-    const isVerified = await aiService.verifyPhoto(imageUrl, questId, quest.title, quest.description);
-    
-    // Update the quest status based on verification result
-    await supabaseService.updateVerificationStatus(userId, questId, isVerified);
-    
-    // If verified, update user XP (in a real app, this might be a transaction)
-    if (isVerified && req.userContext?.profile) {
-      const currentXp = req.userContext.profile.xp || 0;
-      await supabase
-        .from('profiles')
-        .update({ xp: currentXp + (quest.xp || 10) })
-        .eq('id', userId);
-    }
-    
-    res.json({ status: isVerified ? 'verified' : 'invalid' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to verify photo' });
-  }
-});
-
-// Get user context for AI personalization
-app.get('/coach/context', authMiddleware, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const context = await supabaseService.getUserContext(userId);
-    res.json(context);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to fetch user context' });
-  }
-});
-
 // Quest completion endpoint (without photo)
-app.post('/complete-quest', authMiddleware, async (req, res) => {
+app.post('/complete-quest', authMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { questId } = questCompletionSchema.parse(req.body);
     const userId = req.user.id;
@@ -396,18 +232,6 @@ app.post('/complete-quest', authMiddleware, async (req, res) => {
     if (error) {
       res.status(400).json({ error: 'Failed to complete quest' });
       return;
-    }
-    
-    // Get the quest details to award XP
-    const questData = await supabaseService.getCompletedQuests(userId);
-    const quest = questData?.find(q => q.id === questId);
-    
-    if (quest && req.userContext?.profile) {
-      const currentXp = req.userContext.profile.xp || 0;
-      await supabase
-        .from('profiles')
-        .update({ xp: currentXp + (quest.xp || 10) })
-        .eq('id', userId);
     }
     
     res.json({ success: true, message: 'Quest completed successfully' });
@@ -424,7 +248,7 @@ app.post('/complete-quest', authMiddleware, async (req, res) => {
 app.use(errorHandler);
 
 export const startServer = () => {
-  const port = process.env.PORT || 5000;
+  const port = parseInt(process.env.PORT || '5000');
   app.listen(port, '0.0.0.0', () => {
     console.log(`Server running on port ${port}`);
   });
