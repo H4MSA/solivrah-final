@@ -80,7 +80,7 @@
   }
 
   body {
-    @apply bg-solivrah-bg text-solivrah-text touch-manipulation;
+    @apply bg-background text-foreground touch-manipulation;
     overscroll-behavior: none;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
     max-width: 100vw;
@@ -127,7 +127,7 @@
   }
 
   .premium-card {
-    @apply bg-solivrah-card border border-solivrah-border rounded-xl shadow-premium transition-transform duration-300 hover:translate-y-[-2px] hover:shadow-card-3d;
+    @apply bg-card border border-border rounded-xl shadow-lg transition-transform duration-300 hover:translate-y-[-2px];
     background-image: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0) 100%);
   }
   
@@ -297,8 +297,8 @@
   }
 
   .menu-item {
-    @apply flex items-center gap-3 p-4 rounded-xl bg-solivrah-card border border-solivrah-border 
-      hover:border-solivrah-border-hover transition-all cursor-pointer active:scale-[0.98];
+    @apply flex items-center gap-3 p-4 rounded-xl bg-card border border-border 
+      hover:border-accent transition-all cursor-pointer active:scale-[0.98];
   }
 
   .nav-item {
