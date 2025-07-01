@@ -270,6 +270,47 @@ body, #root {
   overflow-x: hidden; /* Prevent horizontal scroll */
   height: 100vh;
   height: 100dvh; /* Use dynamic viewport height */
+  position: relative;
+  transform: translateZ(0); /* Enable hardware acceleration */
+  backface-visibility: hidden;
+}
+
+/* Mobile-first responsive breakpoints */
+.mobile-container {
+  width: 100%;
+  max-width: 100vw;
+  margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+  .mobile-container {
+    max-width: 400px; /* Constrain width on larger screens */
+  }
+}
+
+/* Touch-friendly interactive elements */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Optimized animations for mobile */
+@media (prefers-reduced-motion: no-preference) {
+  .mobile-animation {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Enhanced app container */

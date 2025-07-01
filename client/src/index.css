@@ -494,20 +494,39 @@
     @apply overflow-hidden;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     height: 100vh;
-    /* Handle iOS Safari viewport height */
+    height: 100dvh; /* Dynamic viewport height */
     height: -webkit-fill-available;
   }
 
   body {
     @apply overflow-x-hidden min-h-screen;
     touch-action: manipulation;
-    /* Handle iOS Safari viewport height */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
+    min-height: 100vh;
+    min-height: 100dvh;
     min-height: -webkit-fill-available;
   }
 
-  input, button, a {
+  input, button, a, [role="button"] {
     @apply touch-manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    tap-highlight-color: rgba(0, 0, 0, 0);
+  }
+
+  /* Prevent zoom on input focus for iOS Safari */
+  input, select, textarea {
+    font-size: 16px !important;
+    transform: translateZ(0);
+  }
+
+  /* Optimize scrolling performance */
+  * {
+    -webkit-overflow-scrolling: touch;
   }
 }
 
