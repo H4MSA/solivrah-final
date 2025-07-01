@@ -64,6 +64,10 @@ export const EnhancedButton: React.FC<EnhancedButtonProps> = ({
     onDragLeave,
     onDragOver,
     onDrop,
+    onAnimationStart,
+    onAnimationEnd,
+    onAnimationIteration,
+    onTransitionEnd,
     ...filteredProps
   } = props;
 
