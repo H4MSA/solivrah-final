@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, memo } from "react";
 import { Quote, RefreshCw } from "lucide-react";
 import { useApp } from "@/context/AppContext";
@@ -81,19 +80,19 @@ export const DailyAffirmation = memo(() => {
   const [affirmation, setAffirmation] = useState<string>("");
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
-  
+
   // Get fallback affirmations for the selected theme
   const themeFallbackAffirmations = useMemoized(() => {
     const theme = selectedTheme || "Default";
     return themeAffirmations[theme as keyof typeof themeAffirmations] || themeAffirmations.Default;
   }, [selectedTheme]);
-  
+
   // Get a random fallback affirmation when needed
   const getRandomFallback = useCallback(() => {
     const randomIndex = Math.floor(Math.random() * themeFallbackAffirmations.length);
     return themeFallbackAffirmations[randomIndex];
   }, [themeFallbackAffirmations]);
-  
+
   // Memoize user info to prevent unnecessary recomputation
   const userInfo = useMemoized(() => {
     return {
@@ -101,33 +100,33 @@ export const DailyAffirmation = memo(() => {
       mood: localStorage.getItem("currentMood") || ""
     };
   }, [user]);
-  
+
   // Function to check if we should load a new affirmation
   const shouldLoadNewAffirmation = useCallback(() => {
     const storedDate = localStorage.getItem("affirmationDate");
     const today = new Date().toDateString();
     return storedDate !== today;
   }, []);
-  
+
   // Fetch a new affirmation from the API or get a fallback
   const getNewAffirmation = useCallback(async (forceRefresh = false) => {
     // If already refreshing, don't do anything
     if (refreshing) return;
-    
+
     // If not forcing a refresh, check if we have a cached affirmation for today
     if (!forceRefresh) {
       const storedAffirmation = localStorage.getItem("dailyAffirmation");
       const needsNewAffirmation = shouldLoadNewAffirmation();
-      
+
       if (storedAffirmation && !needsNewAffirmation) {
         setAffirmation(storedAffirmation);
         return;
       }
     }
-    
+
     setRefreshing(true);
     setError(false);
-    
+
     try {
       // Only make API call if online
       if (navigator.onLine) {
@@ -137,31 +136,32 @@ export const DailyAffirmation = memo(() => {
           userInfo.username,
           userInfo.mood
         );
-        
+
         // Validate affirmation length to ensure it's not too long
-        const cleanedAffirmation = newAffirmation.length > 120 
+        const cleanedAffirmation = newAffirmation && newAffirmation.length > 120 
           ? newAffirmation.split('.')[0] + '.'  // Take just the first sentence if too long
           : newAffirmation;
-        
+
         // Save to localStorage
-        localStorage.setItem("dailyAffirmation", cleanedAffirmation);
-        localStorage.setItem("affirmationDate", new Date().toDateString());
-        
-        // Update state
-        setAffirmation(cleanedAffirmation);
+        if (cleanedAffirmation) {
+          localStorage.setItem("dailyAffirmation", cleanedAffirmation);
+          localStorage.setItem("affirmationDate", new Date().toDateString());
+          setAffirmation(cleanedAffirmation);
+        } else {
+          throw new Error("Received empty affirmation from AI service.");
+        }
       } else {
         // If offline, use fallback immediately without trying API
         throw new Error("Offline - using fallback affirmation");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to generate affirmation:", err);
       setError(true);
-      
+
       // Fall back to our theme-based curated affirmations
       const fallbackAffirmation = getRandomFallback();
-      
       setAffirmation(fallbackAffirmation);
-      
+
       // Still save to localStorage to prevent repeated attempts
       localStorage.setItem("dailyAffirmation", fallbackAffirmation);
       localStorage.setItem("affirmationDate", new Date().toDateString());
@@ -169,11 +169,11 @@ export const DailyAffirmation = memo(() => {
       setRefreshing(false);
     }
   }, [selectedTheme, userInfo, getRandomFallback, shouldLoadNewAffirmation, refreshing]);
-  
+
   // Initialize affirmation on component mount
   useEffect(() => {
     getNewAffirmation(false);
-    
+
     // Setup periodic check for new day (at midnight)
     const checkForNewDay = () => {
       const now = new Date();
@@ -181,18 +181,18 @@ export const DailyAffirmation = memo(() => {
         getNewAffirmation(false);
       }
     };
-    
+
     // Check once per hour for a day change
     const intervalId = setInterval(checkForNewDay, 60 * 60 * 1000);
-    
+
     return () => clearInterval(intervalId);
   }, [getNewAffirmation, shouldLoadNewAffirmation]);
-  
+
   // Force refresh when theme changes
   useEffect(() => {
     getNewAffirmation(true);
   }, [selectedTheme]); 
-  
+
   return (
     <motion.div 
       className="relative overflow-hidden bg-[#1A1A1A] border border-[#333333] rounded-xl p-3 shadow-sm mb-4"
@@ -213,7 +213,7 @@ export const DailyAffirmation = memo(() => {
       >
         <Quote size={14} className="text-white/30" />
       </motion.div>
-      
+
       <div className="ml-6 mr-6">
         <motion.h3 
           className="text-xs uppercase tracking-wider text-white/60 font-medium mb-1.5 flex items-center gap-1"
@@ -224,15 +224,15 @@ export const DailyAffirmation = memo(() => {
           <span className="w-1 h-1 rounded-full bg-purple-400/70 inline-block"></span>
           <span>Daily Affirmation</span>
         </motion.h3>
-        
+
         {/* Use the memoized component to avoid unnecessary renders */}
         <AffirmationText text={affirmation} isLoading={refreshing} />
-        
+
         {error && !refreshing && (
           <p className="text-xs text-white/50 mt-1">Offline mode</p>
         )}
       </div>
-      
+
       <motion.button 
         onClick={() => getNewAffirmation(true)}
         className="absolute top-2 right-2 text-white/50 hover:text-white hover:bg-white/10 transition-all active:scale-90 p-1 rounded-full"

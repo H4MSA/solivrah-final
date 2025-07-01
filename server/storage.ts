@@ -37,3 +37,24 @@ export class MemStorage implements IStorage {
 }
 
 export const storage = new MemStorage();
+// Basic storage interface implementation
+export interface Storage {
+  insertUser(user: any): Promise<any>;
+  getUserByUsername(username: string): Promise<any>;
+  // Add other storage methods as needed
+}
+
+// Placeholder implementation - replace with actual database operations
+export const storage: Storage = {
+  async insertUser(user: any) {
+    // TODO: Implement user insertion logic
+    console.log("Insert user:", user);
+    return user;
+  },
+
+  async getUserByUsername(username: string) {
+    // TODO: Implement user retrieval logic
+    console.log("Get user by username:", username);
+    return null;
+  }
+};
