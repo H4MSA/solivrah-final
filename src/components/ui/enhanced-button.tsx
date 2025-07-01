@@ -55,6 +55,18 @@ export const EnhancedButton: React.FC<EnhancedButtonProps> = ({
     lg: "px-6 py-3 text-lg"
   };
 
+  // Filter out conflicting props that might interfere with Framer Motion
+  const {
+    onDrag,
+    onDragStart,
+    onDragEnd,
+    onDragEnter,
+    onDragLeave,
+    onDragOver,
+    onDrop,
+    ...filteredProps
+  } = props;
+
   return (
     <motion.button
       className={cn(
@@ -73,7 +85,7 @@ export const EnhancedButton: React.FC<EnhancedButtonProps> = ({
         scale: [1, 1.05, 1]
       } : {}}
       transition={{ duration: 0.2 }}
-      {...props}
+      {...filteredProps}
     >
       <div className="flex items-center justify-center gap-2">
         {loading ? (
