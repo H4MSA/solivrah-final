@@ -11,14 +11,15 @@ import { DailyAffirmation } from "@/components/DailyAffirmation";
 import { QuickGuide } from "@/components/QuickGuide";
 import { FeatureHighlight } from "@/components/FeatureHighlight";
 
-// Import the components
+// Import the enhanced components
 import { HeaderSection } from "@/components/home/HeaderSection";
 import { SearchBar } from "@/components/home/SearchBar";
 import { QuestCard } from "@/components/home/QuestCard";
-import { ProgressCard } from "@/components/home/ProgressCard";
 import { MoodSection } from "@/components/home/MoodSection";
-import { QuickActionSection } from "@/components/home/QuickActionSection";
 import { CollapsibleSection } from "@/components/home/CollapsibleSection";
+import { DailyQuestHero } from "@/components/ui/daily-quest-hero";
+import { StatsDisplay } from "@/components/ui/stats-display";
+import { QuickActionGrid } from "@/components/ui/quick-action-grid";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -119,7 +120,7 @@ const Home = () => {
       />
       
       <motion.div 
-        className="px-4 pt-4 pb-20 space-y-4 max-w-[340px] mx-auto"
+        className="px-4 pt-4 pb-20 space-y-6 max-w-[400px] mx-auto"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -141,7 +142,7 @@ const Home = () => {
                 "Complete daily quests to build your streak and earn XP",
                 "Track your mood to observe patterns over time",
                 "Use quick actions to scan QR codes or capture moments",
-                "Check your progress in the Progress Card below"
+                "Check your progress in the stats below"
               ]}
             />
           </motion.div>
@@ -156,22 +157,22 @@ const Home = () => {
         </motion.div>
         
         <motion.div variants={itemVariants}>
-          <CollapsibleSection title="Today's Quest">
-            <QuestCard 
-              title="Track your time for 24 hours" 
-              description="Document how you spend your day to identify time-wasting activities and opportunities for improvement."
-              onClick={() => navigate("/quests")}
-              active={true}
-            />
-          </CollapsibleSection>
+          <DailyQuestHero
+            title="Track your time for 24 hours"
+            description="Document how you spend your day to identify time-wasting activities and opportunities for improvement."
+            xp={100}
+            progress={25}
+            onStart={() => navigate("/quests")}
+          />
         </motion.div>
         
         <motion.div variants={itemVariants}>
-          <ProgressCard 
+          <StatsDisplay 
             streak={streak} 
             xp={xp} 
             level={level} 
-            progress={progress} 
+            completedQuests={3}
+            layout="grid"
           />
         </motion.div>
         
@@ -184,7 +185,16 @@ const Home = () => {
         </motion.div>
         
         <motion.div variants={itemVariants}>
-          <QuickActionSection onScannerClick={() => setShowScanner(true)} />
+          <CollapsibleSection title="Quick Actions">
+            <QuickActionGrid 
+              onCameraClick={() => setShowCamera(true)}
+              onChatClick={() => navigate("/coach")}
+              onCommunityClick={() => navigate("/community")}
+              onSearchClick={() => {}}
+              onCalendarClick={() => {}}
+              onAchievementsClick={() => navigate("/profile")}
+            />
+          </CollapsibleSection>
         </motion.div>
         
         <motion.div variants={itemVariants}>
@@ -192,6 +202,7 @@ const Home = () => {
             <QuestCard 
               title="Day 2: Morning Routine" 
               description="Establish a productive morning routine to set the tone for your day."
+              xp={75}
               locked={true}
               onClick={() => {}}
             />
