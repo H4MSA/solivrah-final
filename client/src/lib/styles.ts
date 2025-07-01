@@ -4,44 +4,56 @@
  */
 
 export const colors = {
-  // Primary palette
+  // Enhanced primary palette
   primary: {
-    50: "#f5e8ff",
-    100: "#e6cdff",
-    200: "#d4a7ff",
-    300: "#bb81ff",
-    400: "#a05bff",
+    50: "#f8f6ff",
+    100: "#f0ebff",
+    200: "#e4d9ff",
+    300: "#d1bfff",
+    400: "#b794ff",
     500: "#8b5cf6", // Primary purple
-    600: "#7539d4",
-    700: "#5e28ae",
-    800: "#48218a",
-    900: "#331b66",
+    600: "#7c3aed",
+    700: "#6d28d9",
+    800: "#5b21b6",
+    900: "#4c1d95",
+    950: "#2e1065",
   },
   
-  // Accent colors
+  // Enhanced accent colors
   accent: {
-    blue: "#33c3f0",
-    pink: "#f472b6",
-    amber: "#fcd34d",
+    blue: "#3b82f6",
+    cyan: "#06b6d4", 
+    emerald: "#10b981",
+    pink: "#ec4899",
+    amber: "#f59e0b",
     orange: "#f97316",
     teal: "#14b8a6",
     green: "#22c55e",
+    indigo: "#6366f1",
+    violet: "#8b5cf6",
   },
   
-  // Grayscale
+  // Enhanced grayscale with better contrast
   gray: {
-    50: "#ffffff",
-    100: "#f2f2f2",
-    200: "#e5e5e5", 
-    300: "#cccccc",
-    400: "#9e9e9e",
-    500: "#757575",
-    600: "#616161",
-    700: "#424242",
-    800: "#2a2a2a",
-    900: "#212121",
-    950: "#121212",
-    1000: "#000000",
+    50: "#fafafa",
+    100: "#f4f4f5",
+    200: "#e4e4e7", 
+    300: "#d4d4d8",
+    400: "#a1a1aa",
+    500: "#71717a",
+    600: "#52525b",
+    700: "#3f3f46",
+    800: "#27272a",
+    900: "#18181b",
+    950: "#09090b",
+  },
+  
+  // Status colors
+  status: {
+    success: "#10b981",
+    warning: "#f59e0b", 
+    error: "#ef4444",
+    info: "#3b82f6",
   },
 };
 
@@ -90,21 +102,25 @@ export const animations = {
 };
 
 export const cardStyles = {
-  glass: "backdrop-blur-xl bg-gradient-to-br from-[#1E1E1E]/90 to-[#2A2A2A]/80 border border-white/10 rounded-xl shadow-lg",
-  raised: "bg-gradient-to-br from-[#222222] to-[#1A1A1A] border border-white/10 rounded-xl shadow-lg",
-  minimal: "bg-[#121212] border border-white/10 rounded-xl",
-  modern: "modern-card rounded-xl p-6",
-  premium: "gradient-border rounded-xl p-6 hover:scale-[1.02] transition-transform duration-300",
-  floating: "floating-element modern-card rounded-xl p-6",
+  glass: "glass rounded-xl p-6",
+  raised: "premium-card p-6",
+  minimal: "bg-card/50 backdrop-blur-sm border border-border rounded-xl p-4",
+  modern: "bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-lg border border-border rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-500",
+  premium: "glass p-6 hover:scale-[1.02] transition-all duration-500 shimmer-enhanced",
+  floating: "animate-float glass p-6",
+  gradient: "bg-gradient-to-br from-primary/10 via-card/80 to-accent/5 backdrop-blur-xl border border-primary/20 rounded-xl p-6 shadow-2xl",
+  neon: "bg-card/80 backdrop-blur-lg border border-primary/30 rounded-xl p-6 shadow-xl animate-pulse-color",
 };
 
 export const buttonStyles = {
-  primary: "bg-gradient-to-r from-purple-500 to-purple-700 text-white rounded-xl px-4 py-2.5 hover:opacity-90 transition-all active:scale-95",
-  secondary: "bg-white/10 backdrop-blur-sm border border-white/10 text-white rounded-xl px-4 py-2.5 hover:bg-white/15 transition-all active:scale-95",
-  subtle: "bg-transparent text-white/70 hover:text-white hover:bg-white/5 rounded-xl px-4 py-2.5 transition-all active:scale-95",
-  premium: "premium-button-v2",
-  glow: "premium-button-v2 glow-effect",
-  modern: "bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white rounded-xl px-6 py-3 font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 active:scale-95",
+  primary: "btn-primary",
+  secondary: "neo-button text-foreground px-6 py-3 font-medium",
+  subtle: "bg-transparent text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-xl px-4 py-2.5 transition-all active:scale-95",
+  premium: "glass px-6 py-3 font-semibold text-foreground hover:scale-[1.02] transition-all duration-300",
+  glow: "btn-primary animate-pulse-color",
+  modern: "bg-gradient-to-r from-primary/90 to-accent/90 hover:from-primary hover:to-accent text-primary-foreground rounded-xl px-6 py-3 font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 active:scale-95",
+  gradient: "bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%] animate-gradient text-primary-foreground rounded-xl px-6 py-3 font-semibold transition-all duration-300 shadow-lg hover:shadow-xl",
+  outline: "border-2 border-primary/50 text-primary hover:bg-primary/10 hover:border-primary rounded-xl px-6 py-3 font-medium transition-all duration-300 active:scale-95",
 };
 
 export const animationStyles = {
