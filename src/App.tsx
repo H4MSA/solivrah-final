@@ -1,10 +1,10 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AppProvider, useApp } from "./context/AppContext";
+import { AppShell } from "./components/ui/app-shell";
 import { ThemeBackground } from "./components/ThemeBackground";
 import { TabNavigation } from "./components/TabNavigation";
 import { NetworkStatusIndicator } from "./components/NetworkStatusIndicator";
@@ -280,79 +280,81 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AppProvider>
-        <TooltipProvider>
-          {/* Theme background applied to the entire app */}
-          <ThemeBackground />
+        <AppShell>
+          <TooltipProvider>
+            {/* Theme background applied to the entire app */}
+            <ThemeBackground />
 
-          {/* Onboarding flow for first-time users */}
-          {showOnboarding && <OnboardingFlow onComplete={() => setShowOnboarding(false)} />}
+            {/* Onboarding flow for first-time users */}
+            {showOnboarding && <OnboardingFlow onComplete={() => setShowOnboarding(false)} />}
 
-          {/* Mobile-optimized viewport container */}
-          <div className="h-screen w-screen max-w-sm mx-auto bg-transparent overflow-hidden">
-            <Toaster />
-            <Sonner />
+            {/* Mobile-optimized viewport container */}
+            <div className="h-screen w-screen max-w-sm mx-auto bg-transparent overflow-hidden">
+              <Toaster />
+              <Sonner />
 
-            <BrowserRouter>
-              <SessionHandler>
-                <Routes>
-                  {/* Public routes */}
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/auth/callback" element={<AuthCallback />} />
+              <BrowserRouter>
+                <SessionHandler>
+                  <Routes>
+                    {/* Public routes */}
+                    <Route path="/" element={<Index />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
 
-                  {/* Survey route (accessible after auth) */}
-                  <Route path="/survey" element={
-                    <ProtectedRoute>
-                      <Survey />
-                    </ProtectedRoute>
-                  } />
+                    {/* Survey route (accessible after auth) */}
+                    <Route path="/survey" element={
+                      <ProtectedRoute>
+                        <Survey />
+                      </ProtectedRoute>
+                    } />
 
-                  {/* Protected routes with TabNavigation */}
-                  <Route path="/home" element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Home />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/quests" element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Quests />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/coach" element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Coach />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/community" element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Community />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/profile" element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Profile />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/help" element={<Help />} />
-                  <Route path="/admin" element={<Admin />} />
+                    {/* Protected routes with TabNavigation */}
+                    <Route path="/home" element={
+                      <ProtectedRoute>
+                        <AppLayout>
+                          <Home />
+                        </AppLayout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/quests" element={
+                      <ProtectedRoute>
+                        <AppLayout>
+                          <Quests />
+                        </AppLayout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/coach" element={
+                      <ProtectedRoute>
+                        <AppLayout>
+                          <Coach />
+                        </AppLayout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/community" element={
+                      <ProtectedRoute>
+                        <AppLayout>
+                          <Community />
+                        </AppLayout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/profile" element={
+                      <ProtectedRoute>
+                        <AppLayout>
+                          <Profile />
+                        </AppLayout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/help" element={<Help />} />
+                    <Route path="/admin" element={<Admin />} />
 
-                  {/* Catch-all for 404s */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </SessionHandler>
-            </BrowserRouter>
-          </div>
-        </TooltipProvider>
+                    {/* Catch-all for 404s */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </SessionHandler>
+              </BrowserRouter>
+            </div>
+          </TooltipProvider>
+        </AppShell>
       </AppProvider>
     </QueryClientProvider>
   );
