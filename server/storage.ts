@@ -1,60 +1,59 @@
-import { users, type User, type InsertUser } from "@shared/schema";
 
-// modify the interface with any CRUD methods
-// you might need
+import { promises as fs } from "fs";
+import path from "path";
 
-export interface IStorage {
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+const STORAGE_DIR = path.join(process.cwd(), "storage");
+
+// Ensure storage directory exists
+async function ensureStorageDir() {
+  try {
+    await fs.access(STORAGE_DIR);
+  } catch {
+    await fs.mkdir(STORAGE_DIR, { recursive: true });
+  }
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  currentId: number;
+export class Storage {
+  private storageDir: string;
 
   constructor() {
-    this.users = new Map();
-    this.currentId = 1;
+    this.storageDir = STORAGE_DIR;
+    ensureStorageDir();
   }
 
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+  async save(filename: string, data: string): Promise<void> {
+    const filePath = path.join(this.storageDir, filename);
+    await fs.writeFile(filePath, data, "utf-8");
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+  async load(filename: string): Promise<string | null> {
+    try {
+      const filePath = path.join(this.storageDir, filename);
+      return await fs.readFile(filePath, "utf-8");
+    } catch {
+      return null;
+    }
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+  async delete(filename: string): Promise<boolean> {
+    try {
+      const filePath = path.join(this.storageDir, filename);
+      await fs.unlink(filePath);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async exists(filename: string): Promise<boolean> {
+    try {
+      const filePath = path.join(this.storageDir, filename);
+      await fs.access(filePath);
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 
-export const storage = new MemStorage();
-// Basic storage interface implementation
-export interface Storage {
-  insertUser(user: any): Promise<any>;
-  getUserByUsername(username: string): Promise<any>;
-  // Add other storage methods as needed
-}
-
-// Placeholder implementation - replace with actual database operations
-export const storage: Storage = {
-  async insertUser(user: any) {
-    // TODO: Implement user insertion logic
-    console.log("Insert user:", user);
-    return user;
-  },
-
-  async getUserByUsername(username: string) {
-    // TODO: Implement user retrieval logic
-    console.log("Get user by username:", username);
-    return null;
-  }
-};
+export const storage = new Storage();

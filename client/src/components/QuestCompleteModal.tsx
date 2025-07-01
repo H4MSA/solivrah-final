@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { CheckCircle, Camera, Award, ArrowRight, Wifi, WifiOff, Loader } from "lucide-react";
@@ -110,8 +109,8 @@ export const QuestCompleteModal: React.FC<QuestCompleteModalProps> = ({
     }
   };
 
-  const handlePhotoUpload = (url: string) => {
-    setPhotoUrl(url);
+  const handlePhotoUpload = (url?: string) => {
+    setPhotoUrl(url || null);
     if (stage === 'photo') {
       setStage('complete');
     }

@@ -5,6 +5,16 @@ import { useApp } from "@/context/AppContext";
 import { motion } from "framer-motion";
 import { ThemeBackground } from "@/components/ThemeBackground";
 
+const AnimatedButton = ({ children, ...props }: { children: React.ReactNode; [key: string]: any }) => (
+  <motion.button
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    {...props}
+  >
+    {children}
+  </motion.button>
+);
+
 const Index = () => {
   const navigate = useNavigate();
   const { setIsGuest } = useApp();
@@ -200,7 +210,7 @@ const Index = () => {
           initial="hidden"
           animate={isLoaded ? "show" : "hidden"}
         >
-          <motion.button 
+          <AnimatedButton 
             className="group flex items-center justify-center gap-1 px-5 py-4 bg-white text-black rounded-xl font-medium transition-all duration-300 hover:bg-[#EEEEEE] shadow-lg hover:shadow-xl"
             onClick={() => navigate("/auth")}
             variants={{
@@ -212,7 +222,7 @@ const Index = () => {
           >
             Create Account 
             <span className="ml-1 group-hover:translate-x-0.5 transition-transform">›</span>
-          </motion.button>
+          </AnimatedButton>
           
           <motion.button 
             className="flex items-center justify-center gap-1 px-5 py-4 bg-[#1A1A1A] text-white rounded-xl font-medium transition-all duration-300 border border-white/10 hover:bg-[#222222] shadow-md hover:shadow-lg"
