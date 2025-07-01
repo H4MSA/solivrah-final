@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -169,13 +170,13 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const showNavigation = ['/home', '/quests', '/community', '/coach', '/profile'].includes(location.pathname);
 
   return (
-    <div className="flex flex-col min-h-screen w-full overflow-hidden">
+    <div className="flex flex-col h-screen w-full overflow-hidden">
       {/* Network status indicator */}
       <NetworkStatusIndicator position="top" variant="minimal" />
       
-      {/* Main content area with scroll */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden page-transition">
-        <div className="mobile-optimized-container">
+      {/* Main content area with proper mobile scroll */}
+      <main className="flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="min-h-full">
           {children}
         </div>
       </main>
@@ -286,14 +287,13 @@ const App = () => {
           {/* Onboarding flow for first-time users */}
           {showOnboarding && <OnboardingFlow onComplete={() => setShowOnboarding(false)} />}
 
-          {/* Fixed viewport container with safe areas */}
-          <div className={`fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-transparent overflow-hidden ${hasSafeArea ? 'dynamic-island-aware' : 'p-4 pb-20'}`}>
+          {/* Mobile-optimized viewport container */}
+          <div className="h-screen w-screen max-w-sm mx-auto bg-transparent overflow-hidden">
             <Toaster />
             <Sonner />
 
             <BrowserRouter>
               <SessionHandler>
-                {/* Context help should be inside Router context */}
                 <Routes>
                   {/* Public routes */}
                   <Route path="/" element={<Index />} />

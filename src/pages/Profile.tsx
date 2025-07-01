@@ -161,17 +161,17 @@ const Profile = () => {
   const displayName = user?.email?.split('@')[0] || "Guest User";
 
   return (
-    <div className="pb-24">
+    <div className="h-full overflow-y-auto">
       <ThemeBackground />
       <motion.div 
-        className="px-4 pt-6 pb-24 max-w-[340px] mx-auto"
+        className="px-4 py-6 pb-24 w-full max-w-sm mx-auto"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
         {/* Profile Header with Banner and Avatar */}
-        <div className="mb-8">
-          <PremiumCard className="relative h-40 overflow-hidden rounded-xl">
+        <div className="mb-6">
+          <PremiumCard className="relative h-36 overflow-hidden rounded-xl">
             {/* Banner with theme-based background */}
             <div className={`absolute inset-0 bg-gradient-to-tr ${
               selectedTheme === "Discipline" ? "from-red-400/20 to-red-700/10" :
@@ -198,35 +198,35 @@ const Profile = () => {
             {/* Edit banner button */}
             <button
               onClick={() => setShowBannerUpload(true)}
-              className="absolute top-4 right-4 bg-black/40 p-2 rounded-full backdrop-blur-sm border border-white/10 hover:bg-black/60 transition-all"
+              className="absolute top-3 right-3 bg-black/40 p-2 rounded-full backdrop-blur-sm border border-white/10 hover:bg-black/60 transition-all"
             >
-              <Edit size={16} className="text-white" />
+              <Edit size={14} className="text-white" />
             </button>
             
             {/* User avatar */}
-            <div className="absolute bottom-4 left-4 flex items-center gap-3">
+            <div className="absolute bottom-3 left-3 flex items-center gap-3">
               <div className="relative">
-                <Avatar className="h-16 w-16 border-2 border-[#030303] shadow-xl">
+                <Avatar className="h-14 w-14 border-2 border-[#030303] shadow-xl">
                   {profileImageUrl ? (
                     <AvatarImage src={profileImageUrl} alt="Profile" className="object-cover" />
                   ) : (
-                    <AvatarFallback className="bg-black text-white text-xl">
-                      {displayName.charAt(0).toUpperCase() || <UserCircle size={28} />}
+                    <AvatarFallback className="bg-black text-white text-lg">
+                      {displayName.charAt(0).toUpperCase() || <UserCircle size={24} />}
                     </AvatarFallback>
                   )}
                 </Avatar>
                 
                 <button
                   onClick={() => setShowProfileUpload(true)}
-                  className="absolute bottom-0 right-0 bg-black/80 p-1.5 rounded-full backdrop-blur-sm border border-white/10 hover:bg-black/60 transition-all"
+                  className="absolute bottom-0 right-0 bg-black/80 p-1 rounded-full backdrop-blur-sm border border-white/10 hover:bg-black/60 transition-all"
                 >
-                  <Camera size={14} className="text-white" />
+                  <Camera size={12} className="text-white" />
                 </button>
               </div>
               
               {/* User info */}
               <div>
-                <h2 className="font-bold text-white">
+                <h2 className="font-bold text-white text-sm">
                   {displayName}
                 </h2>
                 <p className="text-white/70 text-xs">
@@ -259,8 +259,6 @@ const Profile = () => {
           />
         )}
       </motion.div>
-      
-      <TabNavigation />
     </div>
   );
 };
