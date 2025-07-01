@@ -93,12 +93,26 @@ export const cardStyles = {
   glass: "backdrop-blur-xl bg-gradient-to-br from-[#1E1E1E]/90 to-[#2A2A2A]/80 border border-white/10 rounded-xl shadow-lg",
   raised: "bg-gradient-to-br from-[#222222] to-[#1A1A1A] border border-white/10 rounded-xl shadow-lg",
   minimal: "bg-[#121212] border border-white/10 rounded-xl",
+  modern: "modern-card rounded-xl p-6",
+  premium: "gradient-border rounded-xl p-6 hover:scale-[1.02] transition-transform duration-300",
+  floating: "floating-element modern-card rounded-xl p-6",
 };
 
 export const buttonStyles = {
   primary: "bg-gradient-to-r from-purple-500 to-purple-700 text-white rounded-xl px-4 py-2.5 hover:opacity-90 transition-all active:scale-95",
   secondary: "bg-white/10 backdrop-blur-sm border border-white/10 text-white rounded-xl px-4 py-2.5 hover:bg-white/15 transition-all active:scale-95",
   subtle: "bg-transparent text-white/70 hover:text-white hover:bg-white/5 rounded-xl px-4 py-2.5 transition-all active:scale-95",
+  premium: "premium-button-v2",
+  glow: "premium-button-v2 glow-effect",
+  modern: "bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white rounded-xl px-6 py-3 font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 active:scale-95",
+};
+
+export const animationStyles = {
+  slideUp: "slide-up-animation",
+  scaleIn: "scale-in-animation",
+  float: "floating-element",
+  glow: "glow-effect",
+  stagger: "stagger-item",
 };
 
 export const inputStyles = {

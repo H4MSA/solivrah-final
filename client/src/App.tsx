@@ -50,7 +50,7 @@ const SessionHandler = ({ children }: { children: React.ReactNode }) => {
         console.log("Auth state changed:", event);
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         // Store session in localStorage for persistence between page refreshes
         if (session) {
           localStorage.setItem('authSession', JSON.stringify(session));
@@ -70,19 +70,19 @@ const SessionHandler = ({ children }: { children: React.ReactNode }) => {
           setSession(parsedSession);
           setUser(parsedSession?.user ?? null);
         }
-        
+
         // Check if user has completed a survey
         const hasCompletedSurvey = localStorage.getItem('hasCompletedSurvey') === 'true';
-        
+
         // Then verify with Supabase
         const { data: { session } } = await supabase.auth.getSession();
         console.log("Initial session check:", session?.user?.email || "No session");
-        
+
         if (session) {
           setSession(session);
           setUser(session?.user ?? null);
           localStorage.setItem('authSession', JSON.stringify(session));
-          
+
           // Check if we need to redirect to survey
           if (location.pathname === '/auth' || location.pathname === '/') {
             navigate('/home');
@@ -92,12 +92,12 @@ const SessionHandler = ({ children }: { children: React.ReactNode }) => {
           localStorage.removeItem('authSession');
           setSession(null);
           setUser(null);
-          
+
           // Check if guest mode is active
           const isGuestMode = localStorage.getItem('guestMode') === 'true';
           if (isGuestMode) {
             setIsGuest(true);
-            
+
             // If guest user hasn't completed survey, redirect them
             if (!hasCompletedSurvey && !location.pathname.includes('/survey')) {
               // Wait for the next tick to avoid navigation conflicts
@@ -114,7 +114,7 @@ const SessionHandler = ({ children }: { children: React.ReactNode }) => {
         setChecking(false);
       }
     };
-    
+
     checkSession();
 
     return () => {
@@ -170,10 +170,10 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const showNavigation = ['/home', '/quests', '/community', '/coach', '/profile'].includes(location.pathname);
 
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden">
+    <div className="flex flex-col h-screen w-full overflow-hidden bg-gray-100"> {/* Added background color */}
       {/* Network status indicator */}
       <NetworkStatusIndicator position="top" variant="minimal" />
-      
+
       {/* Main content area with proper mobile scroll */}
       <main className="flex-1 overflow-y-auto overflow-x-hidden">
         <div className="min-h-full">
@@ -194,50 +194,50 @@ const App = () => {
   // Check if app is installed as PWA
   const [isPWA, setIsPWA] = useState(false);
   const [hasSafeArea, setHasSafeArea] = useState(false);
-  
+
   // Add state for onboarding
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return localStorage.getItem('onboardingCompleted') !== 'true';
   });
-  
+
   useEffect(() => {
     // Check if app is running as installed PWA
     const isPWACheck = window.matchMedia('(display-mode: standalone)').matches;
     setIsPWA(isPWACheck);
-    
+
     // Check for device with safe areas
     const detectSafeArea = () => {
       const hasSafeAreaInsets = 
         window.CSS && CSS.supports('padding-top: env(safe-area-inset-top)') && 
         (Number(getComputedStyle(document.documentElement).getPropertyValue('--sat').trim()) > 0 ||
          window.innerWidth >= 375);
-      
+
       setHasSafeArea(hasSafeAreaInsets);
-      
+
       // Add CSS variables for detection
       document.documentElement.style.setProperty('--sat', 'env(safe-area-inset-top, 0px)');
       document.documentElement.style.setProperty('--sab', 'env(safe-area-inset-bottom, 0px)');
       document.documentElement.style.setProperty('--sal', 'env(safe-area-inset-left, 0px)');
       document.documentElement.style.setProperty('--sar', 'env(safe-area-inset-right, 0px)');
-      
+
       // Add classes to handle different devices
       if (hasSafeAreaInsets) {
         document.body.classList.add('has-safe-area');
-        
+
         // Check for iPhone X and newer with notch
         if (window.innerWidth >= 375 && window.innerHeight >= 812) {
           document.body.classList.add('has-notch');
         }
-        
+
         // Check for iPhone with Dynamic Island
         if (window.innerWidth >= 390 && window.innerHeight >= 844) {
           document.body.classList.add('has-dynamic-island');
         }
       }
     };
-    
+
     detectSafeArea();
-    
+
     // Request camera permission on mobile devices
     const requestCameraPermission = async () => {
       if ('mediaDevices' in navigator && isPWACheck) {
@@ -245,7 +245,7 @@ const App = () => {
           // Just check if we can access the camera
           const devices = await navigator.mediaDevices.enumerateDevices();
           const hasCamera = devices.some(device => device.kind === 'videoinput');
-          
+
           if (hasCamera) {
             console.log("Camera access is available");
           }
@@ -254,7 +254,7 @@ const App = () => {
         }
       }
     };
-    
+
     requestCameraPermission();
 
     // Performance improvements
@@ -262,7 +262,7 @@ const App = () => {
     const opts = { passive: true };
     document.addEventListener('touchstart', () => {}, opts);
     document.addEventListener('touchmove', () => {}, opts);
-    
+
     // Optimize image loading
     if ('loading' in HTMLImageElement.prototype) {
       const images = document.querySelectorAll('img[loading="lazy"]');

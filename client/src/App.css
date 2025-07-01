@@ -272,6 +272,51 @@ body, #root {
   height: 100dvh; /* Use dynamic viewport height */
 }
 
+/* Enhanced app container */
+.app-container {
+  position: relative;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a0a 0%, #141414 100%);
+}
+
+.app-container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(ellipse 80% 80% at 50% -20%, rgba(139, 92, 246, 0.15), transparent),
+    radial-gradient(ellipse 80% 80% at 80% 120%, rgba(59, 130, 246, 0.1), transparent),
+    radial-gradient(ellipse 60% 60% at 20% 80%, rgba(236, 72, 153, 0.1), transparent);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Enhanced page transitions */
+.page-enter {
+  opacity: 0;
+  transform: translateY(20px) scale(0.98);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity 300ms ease-out, transform 300ms ease-out;
+}
+
+.page-exit {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.page-exit-active {
+  opacity: 0;
+  transform: translateY(-20px) scale(1.02);
+  transition: opacity 200ms ease-in, transform 200ms ease-in;
+}
+
 /* Mobile-specific adjustments */
 @media (max-width: 430px) {
   .mobile-optimized-container {
