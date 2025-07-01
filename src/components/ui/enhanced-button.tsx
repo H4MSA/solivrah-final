@@ -3,6 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { ArrowRight } from 'lucide-react';
+import { useSoundManager } from './sound-manager';
 
 interface EnhancedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost';
@@ -10,6 +11,7 @@ interface EnhancedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
   loading?: boolean;
   showArrow?: boolean;
   celebrateOnClick?: boolean;
+  soundEffect?: 'button-click' | 'quest-complete' | 'milestone';
 }
 
 export const EnhancedButton: React.FC<EnhancedButtonProps> = ({
@@ -19,17 +21,23 @@ export const EnhancedButton: React.FC<EnhancedButtonProps> = ({
   loading = false,
   showArrow = false,
   celebrateOnClick = false,
+  soundEffect = 'button-click',
   className,
   onClick,
   ...props
 }) => {
   const [isClicked, setIsClicked] = React.useState(false);
+  const { playSound } = useSoundManager();
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (celebrateOnClick) {
       setIsClicked(true);
       setTimeout(() => setIsClicked(false), 200);
     }
+    
+    // Play sound effect
+    playSound(soundEffect);
+    
     onClick?.(e);
   };
 
