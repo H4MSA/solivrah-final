@@ -123,7 +123,7 @@
 
 @layer utilities {
   .glass {
-    @apply bg-black/60 backdrop-blur-xl border border-white/10 shadow-glass hover:bg-black/50 hover:shadow-glass-hover transition-all duration-300;
+    @apply bg-black/60 backdrop-blur-xl border border-white/10 shadow-lg hover:bg-black/50 hover:shadow-xl transition-all duration-300;
   }
 
   .premium-card {
@@ -291,8 +291,8 @@
   }
 
   .card-glass {
-    @apply bg-[#121212]/90 backdrop-blur-lg border border-solivrah-border rounded-xl p-5 
-      transition-all duration-300 shadow-glass hover:shadow-glass-hover hover:bg-[#151515]/90 
+    @apply bg-[#121212]/90 backdrop-blur-lg border border-border rounded-xl p-5 
+      transition-all duration-300 shadow-lg hover:shadow-xl hover:bg-[#151515]/90 
       hover:border-white/15 hover:translate-y-[-2px];
   }
 
