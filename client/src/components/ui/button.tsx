@@ -5,24 +5,43 @@ import { cn } from "@/lib/utils"
 import { motion, type MotionProps } from "framer-motion"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-base font-semibold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0 shadow-lg hover:shadow-xl active:shadow-md",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl font-semibold ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0 touch-manipulation relative overflow-hidden",
   {
     variants: {
       variant: {
-        default: "bg-[#232323]/80 text-white glassmorphism-card border border-white/10 hover:bg-[#232323]/90",
-        destructive: "bg-red-500/90 text-white glassmorphism-card border border-red-500/30 hover:bg-red-600/90",
-        outline: "border border-white/20 bg-black/20 hover:bg-black/30 hover:border-white/30 text-white backdrop-blur-md glassmorphism-card",
-        secondary: "bg-[#232323]/60 text-white glassmorphism-card border border-white/10 hover:bg-[#232323]/80",
-        ghost: "hover:bg-white/10 text-white glassmorphism-card border border-white/5",
-        link: "text-white underline-offset-4 hover:underline",
-        neumorphic: "bg-gradient-to-b from-[#252525] to-[#1A1A1A] text-white border border-white/10 shadow-xl hover:shadow-2xl",
-        premium: "bg-gradient-to-b from-[#232323] to-[#111] text-white border border-white/15 shadow-2xl hover:shadow-3xl glass-premium",
+        // Primary: White button with black text (Duolingo-inspired)
+        default: "bg-white text-black border border-white/20 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] hover:bg-white/95",
+        
+        // Destructive: Gray monochromatic
+        destructive: "bg-gray-600 text-white border border-gray-500/50 hover:bg-gray-700 shadow-lg hover:shadow-xl",
+        
+        // Outline: Transparent with white border
+        outline: "border-2 border-white/30 bg-transparent hover:bg-white/10 hover:border-white/50 text-white backdrop-blur-md shadow-md hover:shadow-lg",
+        
+        // Secondary: Dark with subtle white accents
+        secondary: "bg-gray-800/80 text-white border border-white/10 hover:bg-gray-700/90 hover:border-white/20 shadow-md hover:shadow-lg",
+        
+        // Ghost: Minimal hover effect
+        ghost: "hover:bg-white/10 text-white border border-transparent hover:border-white/10 shadow-none hover:shadow-md",
+        
+        // Link: Simple text button
+        link: "text-white underline-offset-4 hover:underline shadow-none",
+        
+        // Neumorphic: Premium raised effect
+        neumorphic: "bg-gradient-to-b from-gray-700 to-gray-800 text-white border border-white/10 shadow-2xl hover:shadow-3xl hover:scale-[1.02]",
+        
+        // Premium: Maximum visual impact with glow
+        premium: "bg-gradient-to-b from-white to-gray-100 text-black border border-white/30 shadow-2xl hover:shadow-3xl hover:scale-[1.03] hover:shadow-white/20",
+        
+        // Gamification: Special variant for achievements and rewards
+        reward: "bg-gradient-to-r from-white/90 to-white/80 text-black border border-white/40 shadow-xl hover:shadow-2xl hover:scale-[1.05] animate-pulse-subtle",
       },
       size: {
-        default: "h-16 px-8 py-4 text-lg",
-        sm: "h-12 rounded-xl px-6 py-3 text-base",
-        lg: "h-20 rounded-2xl px-10 py-6 text-xl",
-        icon: "h-14 w-14",
+        default: "h-14 px-8 py-4 text-base",
+        sm: "h-10 rounded-xl px-4 py-2 text-sm",
+        lg: "h-16 rounded-2xl px-10 py-5 text-lg",
+        xl: "h-20 rounded-3xl px-12 py-6 text-xl",
+        icon: "h-12 w-12 rounded-xl",
       },
     },
     defaultVariants: {

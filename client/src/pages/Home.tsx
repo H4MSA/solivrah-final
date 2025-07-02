@@ -20,6 +20,9 @@ import { CollapsibleSection } from "@/components/home/CollapsibleSection";
 import { DailyQuestHero } from "@/components/ui/daily-quest-hero";
 import { StatsDisplay } from "@/components/ui/stats-display";
 import { QuickActionGrid } from "@/components/ui/quick-action-grid";
+import { EnhancedQuestCard } from "@/components/ui/enhanced-quest-card";
+import { StreakCounter, LevelIndicator, AchievementBadge, CelebrationAnimation } from "@/components/ui/gamification-elements";
+import { Trophy, Star, Target, Zap, Crown, Medal } from 'lucide-react';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -28,6 +31,9 @@ const Home = () => {
   const { streak, xp, selectedTheme, addXP, user } = useApp();
   const [greeting, setGreeting] = useState("Good morning");
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationType, setCelebrationType] = useState<'xp' | 'level' | 'achievement' | 'streak'>('xp');
+  const [celebrationValue, setCelebrationValue] = useState(0);
   
   // Check if it's the user's first time
   const [isFirstVisit, setIsFirstVisit] = useState(() => {
@@ -51,6 +57,7 @@ const Home = () => {
     console.log("QR code scanned:", code);
     setShowScanner(false);
     addXP(50);
+    triggerCelebration('xp', 50);
   };
   
   const handleCameraCapture = (file: File | null) => {
@@ -59,7 +66,15 @@ const Home = () => {
     setTimeout(() => {
       addXP(30);
       setShowCamera(false);
+      triggerCelebration('xp', 30);
     }, 500);
+  };
+
+  const triggerCelebration = (type: 'xp' | 'level' | 'achievement' | 'streak', value: number) => {
+    setCelebrationType(type);
+    setCelebrationValue(value);
+    setShowCelebration(true);
+    setTimeout(() => setShowCelebration(false), 3000);
   };
   
   const level = Math.floor(xp / 1000) + 1;
@@ -96,8 +111,22 @@ const Home = () => {
   const uiComplexity = localStorage.getItem('uiComplexity') || 'intermediate';
 
   return (
-    <div className="min-h-screen pb-20 text-white">
+    <div className="min-h-screen pb-20 text-white relative overflow-hidden">
+      {/* Sophisticated monochromatic background */}
+      <div className="fixed inset-0 bg-gradient-to-br from-black via-gray-900/50 to-black">
+        <div className="absolute inset-0 bg-grid-white opacity-5" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
+      </div>
+      
       <ThemeBackground />
+      
+      {/* Celebration Animation */}
+      <CelebrationAnimation 
+        show={showCelebration}
+        type={celebrationType}
+        value={celebrationValue}
+      />
+
       {showScanner && (
         <QRScanner 
           onClose={() => setShowScanner(false)} 
@@ -167,14 +196,69 @@ const Home = () => {
           />
         </motion.div>
         
+        {/* Gamification Hub - Enhanced with monochromatic design */}
         <motion.div variants={itemVariants}>
-          <StatsDisplay 
-            streak={streak} 
-            xp={xp} 
-            level={level} 
-            completedQuests={3}
-            layout="grid"
-          />
+          <div className="bg-gradient-to-br from-white/8 to-white/3 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-2xl">
+            <h3 className="text-lg font-bold text-white mb-4">Your Progress</h3>
+            
+            <div className="flex items-center justify-between mb-6">
+              <LevelIndicator 
+                currentLevel={level}
+                currentXP={xp}
+                xpToNext={1000 - (xp % 1000)}
+                size="lg"
+              />
+              
+              <StreakCounter 
+                days={streak}
+                size="lg"
+                glowing={streak > 0}
+              />
+            </div>
+            
+            <StatsDisplay 
+              streak={streak} 
+              xp={xp} 
+              level={level} 
+              completedQuests={3}
+              layout="grid"
+            />
+          </div>
+        </motion.div>
+
+        {/* Achievement Gallery */}
+        <motion.div variants={itemVariants}>
+          <div className="bg-gradient-to-br from-white/6 to-white/2 backdrop-blur-xl border border-white/15 rounded-2xl p-6">
+            <h3 className="text-lg font-bold text-white mb-4">Achievements</h3>
+            
+            <div className="grid grid-cols-4 gap-3">
+              <AchievementBadge 
+                icon={<Star size={20} />}
+                title="First Quest"
+                description="Complete your first quest"
+                earned={true}
+                onClick={() => triggerCelebration('achievement', 0)}
+              />
+              <AchievementBadge 
+                icon={<Trophy size={20} />}
+                title="Week Warrior"
+                description="7-day streak"
+                earned={streak >= 7}
+              />
+              <AchievementBadge 
+                icon={<Target size={20} />}
+                title="Goal Getter"
+                description="Complete 10 quests"
+                earned={false}
+              />
+              <AchievementBadge 
+                icon={<Medal size={20} />}
+                title="Champion"
+                description="Reach level 5"
+                earned={level >= 5}
+              />
+            </div>
+          </div>
         </motion.div>
         
         <motion.div variants={itemVariants}>
@@ -200,13 +284,27 @@ const Home = () => {
         
         <motion.div variants={itemVariants}>
           <CollapsibleSection title="Coming Up">
-            <QuestCard 
-              title="Day 2: Morning Routine" 
-              description="Establish a productive morning routine to set the tone for your day."
-              xp={75}
-              locked={true}
-              onClick={() => {}}
-            />
+            <div className="space-y-4">
+              <EnhancedQuestCard 
+                title="Day 2: Morning Routine" 
+                description="Establish a productive morning routine to set the tone for your day."
+                xp={75}
+                difficulty="Medium"
+                timeEstimate="15 min"
+                locked={true}
+                onClick={() => {}}
+              />
+              
+              <EnhancedQuestCard 
+                title="Day 3: Digital Detox Hour" 
+                description="Spend one hour completely disconnected from digital devices."
+                xp={100}
+                difficulty="Hard"
+                timeEstimate="60 min"
+                locked={true}
+                onClick={() => {}}
+              />
+            </div>
           </CollapsibleSection>
         </motion.div>
       </motion.div>
