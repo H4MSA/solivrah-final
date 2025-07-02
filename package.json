@@ -3,6 +3,7 @@
     "dev": "node server/index.js",
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build --outDir dist/public",
+    "build:dev": "vite build --mode development",
     "build:server": "tsc server/index.ts --outDir dist --target es2022 --module nodenext --moduleResolution nodenext --allowSyntheticDefaultImports",
     "start": "node dist/index.js",
     "db:generate": "drizzle-kit generate",
