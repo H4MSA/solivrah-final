@@ -463,7 +463,7 @@
   }
 }
 
-/* Enhanced Animations */
+/* Enhanced Animations for Premium Monochromatic UI */
 @keyframes float {
   0% { transform: translateY(0) rotate(0deg); }
   33% { transform: translateY(-8px) rotate(1deg); }
@@ -486,17 +486,127 @@
   animation: gradient-shift 8s ease infinite;
 }
 
-@keyframes pulse-color {
+@keyframes pulse-glow-white {
   0%, 100% { 
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
   }
   50% { 
-    box-shadow: 0 0 40px rgba(139, 92, 246, 0.6), 0 0 60px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.4), 0 0 60px rgba(255, 255, 255, 0.2);
   }
 }
 
 .animate-pulse-color {
-  animation: pulse-color 3s ease-in-out infinite;
+  animation: pulse-glow-white 3s ease-in-out infinite;
+}
+
+/* Duolingo-inspired micro-interactions */
+@keyframes tap-feedback {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.animate-tap {
+  animation: tap-feedback 0.2s ease-out;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+/* Progress animation */
+@keyframes progress-fill {
+  0% { width: 0%; }
+  100% { width: var(--progress-width); }
+}
+
+.animate-progress {
+  animation: progress-fill 1s ease-out;
+}
+
+/* Streak celebration */
+@keyframes streak-bounce {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.1) rotate(5deg); }
+  50% { transform: scale(1.2) rotate(-5deg); }
+  75% { transform: scale(1.1) rotate(2deg); }
+}
+
+.animate-streak-celebration {
+  animation: streak-bounce 0.8s ease-out;
+}
+
+/* Achievement unlock animation */
+@keyframes achievement-glow {
+  0% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.8), 0 0 50px rgba(255, 255, 255, 0.4); }
+  100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.3); }
+}
+
+.animate-achievement-unlock {
+  animation: achievement-glow 2s ease-in-out;
+}
+
+/* Button hover with sophisticated shadow */
+@keyframes button-hover {
+  0% { transform: translateY(0); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
+  100% { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); }
+}
+
+.hover-elevate:hover {
+  animation: button-hover 0.2s ease-out forwards;
+}
+
+/* Card entrance animation */
+@keyframes card-entrance {
+  0% { 
+    opacity: 0; 
+    transform: translateY(20px) scale(0.95); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+.animate-card-entrance {
+  animation: card-entrance 0.5s ease-out;
+}
+
+/* XP counter animation */
+@keyframes xp-count-up {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.animate-xp-gain {
+  animation: xp-count-up 0.6s ease-out;
+}
+
+/* Loading spinner for monochromatic theme */
+@keyframes spin-elegant {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-spin-elegant {
+  animation: spin-elegant 1s linear infinite;
+}
+
+/* Breathing animation for interactive elements */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
 }
 
 @keyframes shimmer-enhanced {

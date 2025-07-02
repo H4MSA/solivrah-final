@@ -22,6 +22,9 @@ import { StatsDisplay } from "@/components/ui/stats-display";
 import { QuickActionGrid } from "@/components/ui/quick-action-grid";
 import { EnhancedQuestCard } from "@/components/ui/enhanced-quest-card";
 import { StreakCounter, LevelIndicator, AchievementBadge, CelebrationAnimation } from "@/components/ui/gamification-elements";
+import { PremiumButton } from "@/components/ui/premium-button";
+import { EnhancedProgressCircle } from "@/components/ui/enhanced-progress-circle";
+import { StreakDisplay } from "@/components/ui/streak-display";
 import { Trophy, Star, Target, Zap, Crown, Medal } from 'lucide-react';
 
 const Home = () => {
@@ -112,10 +115,18 @@ const Home = () => {
 
   return (
     <div className="min-h-screen pb-20 text-white relative overflow-hidden">
-      {/* Sophisticated monochromatic background */}
-      <div className="fixed inset-0 bg-gradient-to-br from-black via-gray-900/50 to-black">
-        <div className="absolute inset-0 bg-grid-white opacity-5" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
+      {/* Premium Monochromatic Background with Sophisticated Depth */}
+      <div className="fixed inset-0 bg-gradient-to-br from-black via-gray-950 to-black">
+        {/* Subtle texture overlay */}
+        <div className="absolute inset-0 bg-grid-white opacity-[0.02]" />
+        
+        {/* Elegant depth gradients */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/[0.01] to-transparent" />
+        
+        {/* Dynamic ambient lighting */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/[0.02] rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-white/[0.015] rounded-full blur-2xl animate-float" />
       </div>
       
       <ThemeBackground />
@@ -186,78 +197,253 @@ const Home = () => {
           <DailyAffirmation />
         </motion.div>
         
+        {/* Hero Quest Card - Premium Duolingo-inspired Design */}
         <motion.div variants={itemVariants}>
-          <DailyQuestHero
-            title="Track your time for 24 hours"
-            description="Document how you spend your day to identify time-wasting activities and opportunities for improvement."
-            xp={100}
-            progress={25}
-            onStart={() => navigate("/quests")}
-          />
+          <motion.div 
+            className="glass p-6 hover:shadow-3xl transition-all duration-500"
+            whileHover={{ scale: 1.02, y: -4 }}
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <motion.h2 
+                  className="text-xl font-bold text-white mb-2"
+                  animate={{ opacity: [0.9, 1, 0.9] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                >
+                  Today's Challenge
+                </motion.h2>
+                <p className="text-white/70 text-sm leading-relaxed mb-4">
+                  Track your time for 24 hours to identify patterns and optimize your daily routine.
+                </p>
+              </div>
+              
+              <motion.div 
+                className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full ml-4"
+                whileHover={{ scale: 1.05 }}
+              >
+                <Star size={14} className="text-white" />
+                <span className="text-sm font-bold text-white">100 XP</span>
+              </motion.div>
+            </div>
+            
+            {/* Progress Section */}
+            <div className="space-y-3 mb-6">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-white/80">Progress</span>
+                <span className="text-sm text-white/60">25%</span>
+              </div>
+              
+              <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-white/80 to-white/60 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: '25%' }}
+                  transition={{ duration: 1.5, ease: "easeOut" }}
+                />
+              </div>
+            </div>
+            
+            {/* Action Button */}
+            <PremiumButton
+              variant="primary"
+              size="md"
+              showArrow={true}
+              celebrateOnClick={true}
+              onClick={() => navigate("/quests")}
+              className="w-full font-semibold"
+            >
+              Continue Quest
+            </PremiumButton>
+          </motion.div>
         </motion.div>
         
-        {/* Gamification Hub - Enhanced with monochromatic design */}
+        {/* Premium Progress Hub - Duolingo-inspired with sophisticated monochromatic design */}
         <motion.div variants={itemVariants}>
-          <div className="bg-gradient-to-br from-white/8 to-white/3 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white mb-4">Your Progress</h3>
+          <div className="glass p-6 shadow-2xl hover:shadow-3xl transition-all duration-500">
+            <motion.h3 
+              className="text-xl font-bold text-white mb-6 text-center"
+              animate={{ opacity: [0.8, 1, 0.8] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            >
+              Your Journey
+            </motion.h3>
             
-            <div className="flex items-center justify-between mb-6">
-              <LevelIndicator 
-                currentLevel={level}
-                currentXP={xp}
-                xpToNext={1000 - (xp % 1000)}
-                size="lg"
-              />
+            {/* Level & Streak Display */}
+            <div className="flex items-center justify-center gap-8 mb-8">
+              <motion.div 
+                className="flex flex-col items-center"
+                whileHover={{ scale: 1.05 }}
+              >
+                <EnhancedProgressCircle
+                  progress={progress}
+                  size="lg"
+                  variant="premium"
+                  animated={true}
+                  showPercentage={false}
+                >
+                  <div className="text-center">
+                    <Crown size={20} className="text-white mb-1 mx-auto" />
+                    <div className="text-2xl font-bold text-white">{level}</div>
+                    <div className="text-xs text-white/70">Level</div>
+                  </div>
+                </EnhancedProgressCircle>
+              </motion.div>
               
-              <StreakCounter 
+              <StreakDisplay 
                 days={streak}
                 size="lg"
+                variant="fire"
                 glowing={streak > 0}
+                onClick={() => triggerCelebration('streak', streak)}
               />
             </div>
             
-            <StatsDisplay 
-              streak={streak} 
-              xp={xp} 
-              level={level} 
-              completedQuests={3}
-              layout="grid"
-            />
+            {/* XP Progress */}
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-white/80">
+                  {xp % 1000} / 1000 XP
+                </span>
+                <span className="text-xs text-white/60">
+                  {1000 - (xp % 1000)} XP to Level {level + 1}
+                </span>
+              </div>
+              
+              <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden backdrop-blur-sm border border-white/20">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-white/80 to-white/60 rounded-full relative overflow-hidden"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 1.5, ease: "easeOut" }}
+                >
+                  {/* Animated shine effect */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                    animate={{ x: [-100, 300] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                  />
+                </motion.div>
+              </div>
+            </div>
+            
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-3 gap-4 mt-6">
+              <motion.div 
+                className="text-center p-3 bg-white/5 rounded-xl border border-white/10"
+                whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.08)" }}
+              >
+                <div className="text-xl font-bold text-white">{streak}</div>
+                <div className="text-xs text-white/60">Day Streak</div>
+              </motion.div>
+              
+              <motion.div 
+                className="text-center p-3 bg-white/5 rounded-xl border border-white/10"
+                whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.08)" }}
+              >
+                <div className="text-xl font-bold text-white">{xp}</div>
+                <div className="text-xs text-white/60">Total XP</div>
+              </motion.div>
+              
+              <motion.div 
+                className="text-center p-3 bg-white/5 rounded-xl border border-white/10"
+                whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.08)" }}
+              >
+                <div className="text-xl font-bold text-white">3</div>
+                <div className="text-xs text-white/60">Completed</div>
+              </motion.div>
+            </div>
           </div>
         </motion.div>
 
-        {/* Achievement Gallery */}
+        {/* Premium Achievement Gallery - Sophisticated Showcase */}
         <motion.div variants={itemVariants}>
-          <div className="bg-gradient-to-br from-white/6 to-white/2 backdrop-blur-xl border border-white/15 rounded-2xl p-6">
-            <h3 className="text-lg font-bold text-white mb-4">Achievements</h3>
-            
-            <div className="grid grid-cols-4 gap-3">
-              <AchievementBadge 
-                icon={<Star size={20} />}
-                title="First Quest"
-                description="Complete your first quest"
-                earned={true}
-                onClick={() => triggerCelebration('achievement', 0)}
-              />
-              <AchievementBadge 
-                icon={<Trophy size={20} />}
-                title="Week Warrior"
-                description="7-day streak"
-                earned={streak >= 7}
-              />
-              <AchievementBadge 
-                icon={<Target size={20} />}
-                title="Goal Getter"
-                description="Complete 10 quests"
-                earned={false}
-              />
-              <AchievementBadge 
-                icon={<Medal size={20} />}
-                title="Champion"
-                description="Reach level 5"
-                earned={level >= 5}
-              />
+          <div className="glass p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-white">Achievements</h3>
+              <motion.div 
+                className="text-xs text-white/60 px-3 py-1 bg-white/10 rounded-full border border-white/20"
+                animate={{ opacity: [0.6, 1, 0.6] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                {[true, streak >= 7, false, level >= 5].filter(Boolean).length}/4 Unlocked
+              </motion.div>
             </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => triggerCelebration('achievement', 0)}
+              >
+                <AchievementBadge 
+                  icon={<Star size={24} />}
+                  title="First Quest"
+                  description="Complete your first quest"
+                  earned={true}
+                  size="lg"
+                />
+              </motion.div>
+              
+              <motion.div
+                whileHover={{ scale: streak >= 7 ? 1.05 : 1.02 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <AchievementBadge 
+                  icon={<Trophy size={24} />}
+                  title="Week Warrior"
+                  description="7-day streak"
+                  earned={streak >= 7}
+                  size="lg"
+                />
+              </motion.div>
+              
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className="opacity-60"
+              >
+                <AchievementBadge 
+                  icon={<Target size={24} />}
+                  title="Goal Getter"
+                  description="Complete 10 quests"
+                  earned={false}
+                  size="lg"
+                />
+              </motion.div>
+              
+              <motion.div
+                whileHover={{ scale: level >= 5 ? 1.05 : 1.02 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <AchievementBadge 
+                  icon={<Medal size={24} />}
+                  title="Champion"
+                  description="Reach level 5"
+                  earned={level >= 5}
+                  size="lg"
+                />
+              </motion.div>
+            </div>
+            
+            {/* Progress towards next achievement */}
+            <motion.div 
+              className="mt-6 p-4 bg-white/5 rounded-xl border border-white/10"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="text-sm font-medium text-white/80 mb-2">Next Achievement</div>
+              <div className="text-xs text-white/60 mb-3">
+                {level < 5 ? `${5 - level} more levels to Champion` : 'Complete 7 more quests for Goal Getter'}
+              </div>
+              <div className="w-full bg-white/10 rounded-full h-2">
+                <motion.div
+                  className="h-full bg-white/60 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: level < 5 ? `${(level / 5) * 100}%` : '30%' }}
+                  transition={{ duration: 1, delay: 0.5 }}
+                />
+              </div>
+            </motion.div>
           </div>
         </motion.div>
         
