@@ -18,7 +18,7 @@ const Coach = () => {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [affirmation, setAffirmation] = useState<string>("Tap to generate your daily affirmation");
   const [isGeneratingAffirmation, setIsGeneratingAffirmation] = useState(false);
-  const { selectedTheme } = useApp();
+  const { selectedTheme, session } = useApp();
   const { toast } = useToast();
   const bottomRef = useRef<HTMLDivElement>(null);
   
