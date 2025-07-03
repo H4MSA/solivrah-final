@@ -10,6 +10,9 @@ import { TabNavigation } from "@/components/TabNavigation";
 import { Card } from "@/components/ui/card";
 import type { Database } from "@/integrations/supabase/types";
 
+import { Brain, MessageCircle, Target, Shield, ChevronRight } from "lucide-react";
+import { ThemeBackground } from "@/components/ThemeBackground";
+
 interface Message {
   id?: string;
   sender: "user" | "ai";
@@ -519,6 +522,132 @@ const Coach = () => {
             <Send size={16} />
           </motion.button>
         </Card>
+      </motion.div>
+    </div>
+  );
+};
+
+export default Coach;
+
+const Coach = () => {
+  const [currentMood, setCurrentMood] = useState("neutral");
+  
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 300, damping: 24 }
+    }
+  };
+
+  return (
+    <div className="min-h-screen text-white pb-24 px-6 py-8 max-w-md mx-auto">
+      <ThemeBackground />
+      
+      <motion.div 
+        className="space-y-8"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        <motion.div variants={itemVariants} className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
+              <Brain size={28} className="text-white" strokeWidth={2} />
+            </div>
+            <div>
+              <h1 className="text-3xl font-black text-white">AI Coach</h1>
+              <p className="text-gray-400 text-lg font-medium">Your personal growth mentor</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <select 
+              value={currentMood} 
+              onChange={(e) => setCurrentMood(e.target.value)}
+              className="bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 text-white px-4 py-3 rounded-2xl focus:outline-none focus:border-white/30 font-medium"
+            >
+              <option value="great">😊 Amazing</option>
+              <option value="good">🙂 Good</option>
+              <option value="neutral">😐 Neutral</option>
+              <option value="low">😔 Low</option>
+              <option value="stressed">😰 Stressed</option>
+            </select>
+          </div>
+        </motion.div>
+
+        <motion.div variants={itemVariants} className="bg-gradient-to-br from-gray-900/90 to-gray-800/90 backdrop-blur-sm rounded-3xl p-8 border border-gray-700/50">
+          <div className="flex items-start gap-5">
+            <div className="p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
+              <Brain size={32} className="text-white" strokeWidth={2} />
+            </div>
+            <div className="flex-1">
+              <p className="text-white text-xl leading-relaxed font-medium">
+                Hi Alex! I'm here to help you navigate challenges, build resilience, and achieve your personal growth goals. 
+                What's on your mind today?
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div variants={itemVariants} className="space-y-4">
+          <button className="w-full bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 text-left hover:bg-gray-800/70 hover:border-gray-600/50 transition-all duration-300 group">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 group-hover:bg-white/20 transition-all duration-300">
+                <MessageCircle size={24} className="text-white" strokeWidth={2} />
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-lg mb-1">Work Through a Challenge</h3>
+                <p className="text-gray-400 font-medium">Let's process what happened and find the lessons within</p>
+              </div>
+            </div>
+          </button>
+          
+          <button className="w-full bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 text-left hover:bg-gray-800/70 hover:border-gray-600/50 transition-all duration-300 group">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 group-hover:bg-white/20 transition-all duration-300">
+                <Target size={24} className="text-white" strokeWidth={2} />
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-lg mb-1">Create an Action Plan</h3>
+                <p className="text-gray-400 font-medium">Build a personalized roadmap for your goals</p>
+              </div>
+            </div>
+          </button>
+          
+          <button className="w-full bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 text-left hover:bg-gray-800/70 hover:border-gray-600/50 transition-all duration-300 group">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 group-hover:bg-white/20 transition-all duration-300">
+                <Shield size={24} className="text-white" strokeWidth={2} />
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-lg mb-1">Build Mental Strength</h3>
+                <p className="text-gray-400 font-medium">Develop strategies for resilience and emotional balance</p>
+              </div>
+            </div>
+          </button>
+        </motion.div>
+
+        <motion.div variants={itemVariants} className="relative">
+          <input
+            type="text"
+            placeholder="What would you like to explore today?"
+            className="w-full bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-2xl pl-6 pr-16 py-5 text-white placeholder-gray-400 focus:outline-none focus:border-white/30 focus:bg-gray-900/80 transition-all duration-300 text-lg"
+          />
+          <button className="absolute right-3 top-1/2 transform -translate-y-1/2 p-3 bg-white rounded-2xl hover:bg-gray-100 transition-all duration-300">
+            <ChevronRight size={20} className="text-black" strokeWidth={2} />
+          </button>
+        </motion.div>
       </motion.div>
     </div>
   );

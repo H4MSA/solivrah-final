@@ -2,72 +2,25 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { TabNavigation } from "@/components/TabNavigation";
+import { Search, Camera, User, Heart, Target, Clock, Flame, Trophy, Brain, Shield, ChevronRight } from "lucide-react";
 import { useApp } from "@/context/AppContext";
-import { QRScanner } from "@/components/QRScanner";
-import { CameraUpload } from "@/components/CameraUpload";
 import { ThemeBackground } from "@/components/ThemeBackground";
-import { DailyAffirmation } from "@/components/DailyAffirmation";
-import { QuickGuide } from "@/components/QuickGuide";
-import { FeatureHighlight } from "@/components/FeatureHighlight";
-
-// Import the components
-import { HeaderSection } from "@/components/home/HeaderSection";
-import { SearchBar } from "@/components/home/SearchBar";
-import { QuestCard } from "@/components/home/QuestCard";
-import { ProgressCard } from "@/components/home/ProgressCard";
-import { MoodSection } from "@/components/home/MoodSection";
-import { QuickActionSection } from "@/components/home/QuickActionSection";
-import { CollapsibleSection } from "@/components/home/CollapsibleSection";
+import QuestCard from "@/components/ui/QuestCard";
+import StatCard from "@/components/ui/StatCard";
 
 const Home = () => {
   const navigate = useNavigate();
-  const [showScanner, setShowScanner] = useState(false);
-  const [showCamera, setShowCamera] = useState(false);
-  const { streak, xp, selectedTheme, addXP, user } = useApp();
+  const { streak, xp, user } = useApp();
   const [greeting, setGreeting] = useState("Good morning");
-  const [selectedMood, setSelectedMood] = useState<string | null>(null);
   
-  // Check if it's the user's first time
-  const [isFirstVisit, setIsFirstVisit] = useState(() => {
-    return localStorage.getItem("hasVisitedHome") !== "true";
-  });
-  
-  useEffect(() => {
-    if (isFirstVisit) {
-      localStorage.setItem("hasVisitedHome", "true");
-    }
-    
+  useEffect(() => {    
     const hour = new Date().getHours();
     if (hour >= 12 && hour < 17) {
       setGreeting("Good afternoon");
     } else if (hour >= 17) {
       setGreeting("Good evening");
     }
-  }, [isFirstVisit]);
-  
-  const handleScan = (code: string) => {
-    console.log("QR code scanned:", code);
-    setShowScanner(false);
-    addXP(50);
-  };
-  
-  const handleCameraCapture = (file: File) => {
-    console.log("Photo captured:", file);
-    setTimeout(() => {
-      addXP(30);
-      setShowCamera(false);
-    }, 500);
-  };
-  
-  const level = Math.floor(xp / 1000) + 1;
-  const progress = ((xp % 1000) / 1000) * 100;
-  
-  const moods = [
-    { emoji: "😊", label: "Happy" },
-    { emoji: "😐", label: "Neutral" },
-    { emoji: "😔", label: "Sad" }
-  ];
+  }, []);
   
   const displayName = user?.user_metadata?.username || user?.email?.split('@')[0] || "Friend";
   
@@ -90,116 +43,91 @@ const Home = () => {
     }
   };
 
-  // Get the current UI complexity preference
-  const uiComplexity = localStorage.getItem('uiComplexity') || 'intermediate';
-
   return (
-    <div className="min-h-screen pb-20 text-white">
+    <div className="min-h-screen text-white pb-24 px-6 py-8 max-w-md mx-auto">
       <ThemeBackground />
-      {showScanner && (
-        <QRScanner 
-          onClose={() => setShowScanner(false)} 
-          onScan={handleScan} 
-        />
-      )}
-      
-      {showCamera && (
-        <CameraUpload 
-          onCapture={handleCameraCapture}
-          onClose={() => setShowCamera(false)}
-          title="Capture a Moment"
-        />
-      )}
-      
-      {/* Feature highlight for the help system */}
-      <FeatureHighlight 
-        id="context-help-system"
-        title="New Help System Available"
-        description="We've added a context-aware help button! Look for the ? icon at the bottom of the screen for guidance specific to each page."
-      />
       
       <motion.div 
-        className="px-4 pt-4 pb-20 space-y-4 max-w-[340px] mx-auto"
+        className="space-y-8"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
-        <motion.div variants={itemVariants}>
-          <HeaderSection 
-            greeting={greeting} 
-            displayName={displayName} 
-            onCameraClick={() => setShowCamera(true)} 
+        {/* Header */}
+        <motion.div variants={itemVariants} className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-black text-white mb-2">Welcome back, {displayName}</h1>
+            <p className="text-gray-400 text-lg font-medium">Let's build something amazing today</p>
+          </div>
+          <div className="flex gap-3">
+            <button className="p-4 bg-gray-900/60 backdrop-blur-sm rounded-2xl border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
+              <Camera size={22} className="text-gray-400" strokeWidth={2} />
+            </button>
+            <button className="p-4 bg-gray-900/60 backdrop-blur-sm rounded-2xl border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
+              <User size={22} className="text-gray-400" strokeWidth={2} />
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Search */}
+        <motion.div variants={itemVariants} className="relative">
+          <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400" size={22} strokeWidth={2} />
+          <input
+            type="text"
+            placeholder="Search your quests and goals..."
+            className="w-full bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-2xl pl-14 pr-6 py-5 text-white placeholder-gray-400 focus:outline-none focus:border-white/30 focus:bg-gray-900/80 transition-all duration-300 text-lg"
           />
         </motion.div>
-        
-        {/* Show beginner guide for first-time or 'beginner' UI complexity users */}
-        {(isFirstVisit || uiComplexity === 'beginner') && (
-          <motion.div variants={itemVariants}>
-            <QuickGuide 
-              title="Getting Started" 
-              steps={[
-                "Complete daily quests to build your streak and earn XP",
-                "Track your mood to observe patterns over time",
-                "Use quick actions to scan QR codes or capture moments",
-                "Check your progress in the Progress Card below"
-              ]}
-            />
-          </motion.div>
-        )}
-        
-        <motion.div variants={itemVariants}>
-          <SearchBar />
+
+        {/* Daily Inspiration */}
+        <motion.div variants={itemVariants} className="bg-gradient-to-br from-gray-900/90 to-gray-800/90 backdrop-blur-sm rounded-3xl p-8 border border-gray-700/50">
+          <div className="flex items-start gap-5">
+            <div className="p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
+              <Heart size={28} className="text-white" strokeWidth={2} />
+            </div>
+            <div>
+              <h3 className="text-white/80 font-bold text-sm uppercase tracking-wider mb-3">Daily Inspiration</h3>
+              <p className="text-white text-2xl font-bold leading-relaxed">
+                "Every small step forward is a victory worth celebrating."
+              </p>
+            </div>
+          </div>
         </motion.div>
-        
+
+        {/* Current Quest */}
         <motion.div variants={itemVariants}>
-          <DailyAffirmation />
-        </motion.div>
-        
-        <motion.div variants={itemVariants}>
-          <CollapsibleSection title="Today's Quest">
-            <QuestCard 
-              title="Track your time for 24 hours" 
-              description="Document how you spend your day to identify time-wasting activities and opportunities for improvement."
-              onClick={() => navigate("/quests")}
-              active={true}
-            />
-          </CollapsibleSection>
-        </motion.div>
-        
-        <motion.div variants={itemVariants}>
-          <ProgressCard 
-            streak={streak} 
-            xp={xp} 
-            level={level} 
-            progress={progress} 
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+              <Target size={20} className="text-white" strokeWidth={2} />
+            </div>
+            <h2 className="text-white font-black text-2xl">Today's Quest</h2>
+          </div>
+          <QuestCard
+            title="Time Awareness Challenge"
+            description="Document your daily activities to identify patterns and optimize your productivity for peak performance."
+            progress={25}
+            xp={100}
+            icon={Clock}
+            difficulty="Easy"
+            onClick={() => navigate('/quests')}
           />
         </motion.div>
-        
-        <motion.div variants={itemVariants}>
-          <MoodSection 
-            moods={moods} 
-            selectedMood={selectedMood} 
-            setSelectedMood={setSelectedMood} 
+
+        {/* Stats Row */}
+        <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
+          <StatCard
+            icon={Flame}
+            value={streak.toString()}
+            label="Day Streak"
+            gradient={true}
           />
-        </motion.div>
-        
-        <motion.div variants={itemVariants}>
-          <QuickActionSection onScannerClick={() => setShowScanner(true)} />
-        </motion.div>
-        
-        <motion.div variants={itemVariants}>
-          <CollapsibleSection title="Coming Up">
-            <QuestCard 
-              title="Day 2: Morning Routine" 
-              description="Establish a productive morning routine to set the tone for your day."
-              locked={true}
-              onClick={() => {}}
-            />
-          </CollapsibleSection>
+          <StatCard
+            icon={Trophy}
+            value={xp.toString()}
+            label="Total XP"
+          />
         </motion.div>
       </motion.div>
-      
-      <TabNavigation />
     </div>
   );
 };

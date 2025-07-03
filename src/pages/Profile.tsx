@@ -1,266 +1,106 @@
 
-import React, { useState, useEffect } from 'react';
-import { useApp } from '@/context/AppContext';
-import { PremiumCard } from '@/components/PremiumCard';
-import { supabase } from '@/integrations/supabase/client';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { motion } from 'framer-motion';
-import { Camera, Edit, UserCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { CameraUpload } from '@/components/CameraUpload';
-import { TabNavigation } from '@/components/TabNavigation';
-import { ProfileTabs } from '@/components/ProfileTabs';
-import { ThemeBackground } from '@/components/ThemeBackground';
+import React from "react";
+import { motion } from "framer-motion";
+import { User, Flame, Trophy, Target, Play, Award, Users } from "lucide-react";
+import { ThemeBackground } from "@/components/ThemeBackground";
+import StatCard from "@/components/ui/StatCard";
+import { useApp } from "@/context/AppContext";
 
 const Profile = () => {
-  const { user, selectedTheme } = useApp();
-  const { toast } = useToast();
-  const [showProfileUpload, setShowProfileUpload] = useState(false);
-  const [showBannerUpload, setShowBannerUpload] = useState(false);
-  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
-  const [bannerImageUrl, setBannerImageUrl] = useState<string | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const { streak, xp } = useApp();
   
-  // Load profile and banner images if available
-  useEffect(() => {
-    const loadUserImages = async () => {
-      if (!user) return;
-      
-      try {
-        // Check if the bucket exists first and create it if needed
-        let { data: buckets } = await supabase.storage.listBuckets();
-        
-        const profileBucketExists = buckets?.some(bucket => bucket.name === 'profile-images');
-        
-        if (!profileBucketExists) {
-          // Create bucket if it doesn't exist
-          await supabase.storage.createBucket('profile-images', { 
-            public: true,
-            fileSizeLimit: 2 * 1024 * 1024 // 2MB
-          });
-        }
-        
-        // Try to get profile image
-        try {
-          const { data: profileData } = await supabase.storage
-            .from('profile-images')
-            .getPublicUrl(`${user.id}/profile`);
-            
-          if (profileData?.publicUrl) {
-            // Add cache-busting parameter
-            setProfileImageUrl(`${profileData.publicUrl}?t=${new Date().getTime()}`);
-          }
-        } catch (error) {
-          console.log("No profile image found");
-        }
-        
-        // Try to get banner image
-        try {
-          const { data: bannerData } = await supabase.storage
-            .from('profile-images')
-            .getPublicUrl(`${user.id}/banner`);
-            
-          if (bannerData?.publicUrl) {
-            // Add cache-busting parameter
-            setBannerImageUrl(`${bannerData.publicUrl}?t=${new Date().getTime()}`);
-          }
-        } catch (error) {
-          console.log("No banner image found");
-        }
-      } catch (error) {
-        console.error("Error loading profile images:", error);
-      } finally {
-        setLoaded(true);
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08
       }
-    };
-    
-    loadUserImages();
-  }, [user]);
-
-  // Handle profile image upload/change
-  const handleProfileImageChange = async (file: File | null) => {
-    if (!file || !user) return;
-    
-    try {
-      // Upload to Supabase Storage
-      const filePath = `${user.id}/profile`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('profile-images')
-        .upload(filePath, file, { upsert: true });
-        
-      if (uploadError) throw uploadError;
-      
-      // Get the URL for the uploaded image
-      const { data } = await supabase.storage
-        .from('profile-images')
-        .getPublicUrl(filePath);
-      
-      if (data) {
-        // Add cache-busting parameter
-        setProfileImageUrl(`${data.publicUrl}?t=${new Date().getTime()}`);
-        
-        toast({
-          title: "Profile image updated",
-          description: "Your new profile image has been set.",
-        });
-      }
-      
-      setShowProfileUpload(false);
-    } catch (error) {
-      console.error("Error uploading profile image:", error);
-      toast({
-        variant: "destructive",
-        title: "Upload failed",
-        description: "There was a problem uploading your image.",
-      });
-    }
-  };
-  
-  // Handle banner image upload/change
-  const handleBannerImageChange = async (file: File | null) => {
-    if (!file || !user) return;
-    
-    try {
-      // Upload to Supabase Storage
-      const filePath = `${user.id}/banner`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('profile-images')
-        .upload(filePath, file, { upsert: true });
-        
-      if (uploadError) throw uploadError;
-      
-      // Get the URL for the uploaded image
-      const { data } = await supabase.storage
-        .from('profile-images')
-        .getPublicUrl(filePath);
-      
-      if (data) {
-        // Add cache-busting parameter
-        setBannerImageUrl(`${data.publicUrl}?t=${new Date().getTime()}`);
-        
-        toast({
-          title: "Banner image updated",
-          description: "Your new banner image has been set.",
-        });
-      }
-      
-      setShowBannerUpload(false);
-    } catch (error) {
-      console.error("Error uploading banner image:", error);
-      toast({
-        variant: "destructive",
-        title: "Upload failed",
-        description: "There was a problem uploading your image.",
-      });
     }
   };
 
-  // Get display name from email
-  const displayName = user?.email?.split('@')[0] || "Guest User";
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 300, damping: 24 }
+    }
+  };
+
+  const completedQuests = 0;
 
   return (
-    <div className="pb-24">
+    <div className="min-h-screen text-white pb-24 px-6 py-8 max-w-md mx-auto">
       <ThemeBackground />
-      <motion.div 
-        className="px-4 pt-6 pb-24 max-w-[340px] mx-auto"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-      >
-        {/* Profile Header with Banner and Avatar */}
-        <div className="mb-8">
-          <PremiumCard className="relative h-40 overflow-hidden rounded-xl">
-            {/* Banner with theme-based background */}
-            <div className={`absolute inset-0 bg-gradient-to-tr ${
-              selectedTheme === "Discipline" ? "from-red-400/20 to-red-700/10" :
-              selectedTheme === "Focus" ? "from-purple-400/20 to-purple-700/10" :
-              selectedTheme === "Resilience" ? "from-green-400/20 to-green-700/10" :
-              "from-amber-400/20 to-amber-700/10"
-            }`}>
-              {bannerImageUrl ? (
-                <img
-                  src={bannerImageUrl}
-                  alt="Profile Banner"
-                  className="w-full h-full object-cover opacity-70"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="absolute inset-0 bg-grid-white/[0.02]"></div>
-                </div>
-              )}
-            </div>
-            
-            {/* Banner overlay gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-            
-            {/* Edit banner button */}
-            <button
-              onClick={() => setShowBannerUpload(true)}
-              className="absolute top-4 right-4 bg-black/40 p-2 rounded-full backdrop-blur-sm border border-white/10 hover:bg-black/60 transition-all"
-            >
-              <Edit size={16} className="text-white" />
-            </button>
-            
-            {/* User avatar */}
-            <div className="absolute bottom-4 left-4 flex items-center gap-3">
-              <div className="relative">
-                <Avatar className="h-16 w-16 border-2 border-[#030303] shadow-xl">
-                  {profileImageUrl ? (
-                    <AvatarImage src={profileImageUrl} alt="Profile" className="object-cover" />
-                  ) : (
-                    <AvatarFallback className="bg-black text-white text-xl">
-                      {displayName.charAt(0).toUpperCase() || <UserCircle size={28} />}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                
-                <button
-                  onClick={() => setShowProfileUpload(true)}
-                  className="absolute bottom-0 right-0 bg-black/80 p-1.5 rounded-full backdrop-blur-sm border border-white/10 hover:bg-black/60 transition-all"
-                >
-                  <Camera size={14} className="text-white" />
-                </button>
-              </div>
-              
-              {/* User info */}
-              <div>
-                <h2 className="font-bold text-white">
-                  {displayName}
-                </h2>
-                <p className="text-white/70 text-xs">
-                  {selectedTheme}
-                </p>
-              </div>
-            </div>
-          </PremiumCard>
-        </div>
-        
-        {/* Tabs for Overview, Achievements, Settings */}
-        <ProfileTabs />
-        
-        {/* Camera Upload Modals */}
-        {showProfileUpload && (
-          <CameraUpload
-            onClose={() => setShowProfileUpload(false)}
-            onCapture={handleProfileImageChange}
-            title="Update Profile Photo"
-            aspectRatio="1:1"
-          />
-        )}
-        
-        {showBannerUpload && (
-          <CameraUpload
-            onClose={() => setShowBannerUpload(false)}
-            onCapture={handleBannerImageChange}
-            title="Update Banner Image"
-            aspectRatio="16:9"
-          />
-        )}
-      </motion.div>
       
-      <TabNavigation />
+      <motion.div 
+        className="space-y-8"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        <motion.div variants={itemVariants} className="text-center">
+          <div className="w-24 h-24 bg-gradient-to-br from-white/20 to-gray-200/20 backdrop-blur-sm rounded-3xl mx-auto mb-6 flex items-center justify-center border border-white/30">
+            <User size={48} className="text-white" strokeWidth={2} />
+          </div>
+          <h2 className="text-3xl font-black text-white mb-2">Alex Johnson</h2>
+          <p className="text-gray-400 text-lg font-medium">Resilience Explorer</p>
+        </motion.div>
+
+        <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4">
+          <StatCard icon={Flame} value={streak.toString()} label="Current Streak" />
+          <StatCard icon={Trophy} value={xp.toString()} label="Total XP" />
+          <StatCard icon={Target} value={completedQuests.toString()} label="Completed" />
+        </motion.div>
+
+        <motion.div variants={itemVariants} className="bg-gradient-to-br from-gray-900/90 to-gray-800/90 backdrop-blur-sm rounded-3xl p-8 border border-gray-700/50">
+          <h3 className="text-white font-black text-2xl mb-6">Level Progress</h3>
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-gray-400 font-bold">Level 1</span>
+            <span className="text-white font-black">{xp} / 1,000 XP</span>
+          </div>
+          <div className="w-full bg-gray-800/60 rounded-full h-4 mb-4 overflow-hidden">
+            <motion.div 
+              className="bg-gradient-to-r from-white to-gray-300 h-4 rounded-full transition-all duration-700"
+              initial={{ width: 0 }}
+              animate={{ width: `${(xp % 1000) / 10}%` }}
+              transition={{ duration: 1, ease: "easeOut" }}
+            />
+          </div>
+          <p className="text-gray-400 font-medium">Complete quests to unlock new challenges and rewards!</p>
+        </motion.div>
+
+        <motion.div variants={itemVariants} className="bg-gradient-to-br from-gray-900/90 to-gray-800/90 backdrop-blur-sm rounded-3xl p-8 border border-gray-700/50">
+          <h3 className="text-white font-black text-2xl mb-6">Achievements</h3>
+          <div className="grid grid-cols-4 gap-6">
+            <div className="text-center opacity-40">
+              <div className="w-16 h-16 bg-gray-800/60 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-gray-700/50">
+                <Play size={24} className="text-gray-500" strokeWidth={2} />
+              </div>
+              <p className="text-xs text-gray-500 font-medium">First Quest</p>
+            </div>
+            <div className="text-center opacity-40">
+              <div className="w-16 h-16 bg-gray-800/60 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-gray-700/50">
+                <Flame size={24} className="text-gray-500" strokeWidth={2} />
+              </div>
+              <p className="text-xs text-gray-500 font-medium">Week Warrior</p>
+            </div>
+            <div className="text-center opacity-40">
+              <div className="w-16 h-16 bg-gray-800/60 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-gray-700/50">
+                <Award size={24} className="text-gray-500" strokeWidth={2} />
+              </div>
+              <p className="text-xs text-gray-500 font-medium">Goal Crusher</p>
+            </div>
+            <div className="text-center opacity-40">
+              <div className="w-16 h-16 bg-gray-800/60 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-gray-700/50">
+                <Users size={24} className="text-gray-500" strokeWidth={2} />
+              </div>
+              <p className="text-xs text-gray-500 font-medium">Community</p>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };
