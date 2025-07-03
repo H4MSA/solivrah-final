@@ -133,7 +133,7 @@ const Home = () => {
       <div className="fixed inset-0 bg-gradient-to-br from-black via-gray-950 to-black">
         <div className="absolute inset-0 bg-grid-white opacity-[0.015]" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-transparent to-black/20" />
-        <div static className="absolute top-1/3 left-1/3 w-80 h-80 bg-white/[0.01] rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/3 left-1/3 w-80 h-80 bg-white/[0.01] rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/3 right-1/3 w-60 h-60 bg-white/[0.008] rounded-full blur-2xl animate-float" />
       </div>
       

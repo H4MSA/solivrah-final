@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AuthService } from "@/services/AuthService";
@@ -31,10 +32,11 @@ const Auth = () => {
 
     try {
       if (isSignup) {
-        const response = await AuthService.signUp({
-          email,
-          password,
-        });
+        const { data, error } = await AuthService.signUp(email, password);
+
+        if (error) {
+          throw error;
+        }
 
         toast({
           title: "Account created!",
@@ -42,15 +44,16 @@ const Auth = () => {
         });
 
         // Auto-login if email confirmation is disabled
-        if (response.user && !response.user.email_confirmed_at) {
+        if (data.user && !data.user.email_confirmed_at) {
           navigate("/home");
         }
 
       } else {
-        await AuthService.signIn({
-          email,
-          password,
-        });
+        const { data, error } = await AuthService.signIn(email, password);
+
+        if (error) {
+          throw error;
+        }
 
         navigate(returnUrl);
       }
