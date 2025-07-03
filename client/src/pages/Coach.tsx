@@ -100,70 +100,131 @@ const Coach = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1A1A1A] to-[#0A0A0A] text-white flex flex-col">
-      {/* Header */}
-      <div className="px-4 py-5 border-b border-white/5">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Your Coach</h1>
+    <div className="min-h-screen text-white flex flex-col relative overflow-hidden">
+      {/* Premium Monochromatic Background */}
+      <div className="fixed inset-0 bg-gradient-to-br from-black via-gray-950 to-black">
+        <div className="absolute inset-0 bg-grid-white opacity-[0.02]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/30" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/[0.02] rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-white/[0.015] rounded-full blur-2xl animate-float" />
+      </div>
+      
+      {/* Header with Sophisticated Glass Effect */}
+      <div className="relative z-10 px-4 py-6 backdrop-blur-xl border-b border-white/10">
+        <div className="flex items-center justify-between max-w-md mx-auto">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-xl border border-white/20 flex items-center justify-center">
+              <SolivrahBrandIcon />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-gradient">Your AI Coach</h1>
+              <p className="text-xs text-white/60">Personalized guidance & support</p>
+            </div>
+          </div>
         </div>
       </div>
       
-      {/* Affirmation Section */}
-      <div className="px-4 py-6">
-        <GlassCard variant="dark" className="p-4 text-center">
+      {/* Daily Affirmation - Duolingo Inspired */}
+      <div className="relative z-10 px-4 py-6 max-w-md mx-auto w-full">
+        <GlassCard variant="duolingo" className="p-6 text-center">
+          <div className="mb-4">
+            <h3 className="text-lg font-bold text-white mb-2">Daily Affirmation</h3>
+            <div className="w-12 h-1 bg-gradient-to-r from-white/60 to-white/20 rounded-full mx-auto"></div>
+          </div>
+          
           <button 
             onClick={generateAffirmation}
             disabled={isGeneratingAffirmation}
-            className="flex items-center justify-center gap-2 opacity-70 hover:opacity-100 transition-opacity"
+            className="neo-button w-full p-4 mb-4 hover:-translate-y-1 transition-all duration-300"
           >
-            {isGeneratingAffirmation ? (
-              <>
-                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Generate Affirmation
-              </>
-            )}
+            <div className="flex items-center justify-center gap-2">
+              {isGeneratingAffirmation ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <span className="font-medium">Generating wisdom...</span>
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4" />
+                  <span className="font-medium">Generate New Affirmation</span>
+                </>
+              )}
+            </div>
           </button>
-          <p className="text-sm mt-2">{affirmation}</p>
+          
+          <div className="glass p-4 rounded-xl bg-white/5">
+            <p className="text-sm leading-relaxed text-white/90 italic">"{affirmation}"</p>
+          </div>
         </GlassCard>
       </div>
 
-      {/* Chat Messages */}
-      <div className="flex-grow px-4 py-6 overflow-y-auto space-y-3">
+      {/* Chat Messages with Enhanced Styling */}
+      <div className="flex-grow px-4 py-6 overflow-y-auto space-y-4 max-w-md mx-auto w-full relative z-10">
+        {messages.length === 0 && (
+          <div className="text-center py-12">
+            <div className="glass p-8 rounded-2xl">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center">
+                <SolivrahBrandIcon />
+              </div>
+              <h3 className="text-lg font-bold mb-2">Start Your Conversation</h3>
+              <p className="text-white/70 text-sm">Ask me anything! I'm here to help guide you on your journey.</p>
+            </div>
+          </div>
+        )}
+        
         {messages.map((message, index) => (
           <div key={index} className={`flex items-start gap-3 ${message.isUser ? 'justify-end' : ''}`}>
             {!message.isUser && (
-              <Avatar className="w-8 h-8">
-                <AvatarImage src="mascot.png" />
-                <AvatarFallback><SolivrahBrandIcon /></AvatarFallback>
-              </Avatar>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-white/20 to-white/5 border border-white/20 flex items-center justify-center flex-shrink-0">
+                <SolivrahBrandIcon />
+              </div>
             )}
-            <GlassCard variant="dark" className={`p-3 rounded-lg max-w-[80%] ${message.isUser ? 'bg-primary/10 text-right' : 'bg-secondary/10'}`}>
-              <p className="text-sm">{message.text}</p>
-            </GlassCard>
+            <div className={`max-w-[80%] ${message.isUser ? 'order-first' : ''}`}>
+              <GlassCard 
+                variant={message.isUser ? "primary" : "ultra-glass"} 
+                className={`p-4 ${message.isUser ? 'bg-white text-black' : ''}`}
+              >
+                <p className="text-sm leading-relaxed">{message.text}</p>
+              </GlassCard>
+            </div>
+            {message.isUser && (
+              <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
+                <div className="w-4 h-4 rounded-full bg-white/60"></div>
+              </div>
+            )}
           </div>
         ))}
         <div ref={bottomRef} />
       </div>
 
-      {/* Chat Input */}
-      <div className="sticky bottom-0 px-4 py-5 bg-gradient-to-t from-[#0A0A0A]/80 to-transparent backdrop-blur-sm border-t border-white/5">
-        <div className="flex items-center gap-3">
-          <Input
-            type="text"
-            placeholder="Ask me anything..."
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' ? sendMessage() : null}
-            className="rounded-full bg-[#1A1A1A] border-white/10 text-white placeholder:text-white/50"
-          />
-          <Button onClick={sendMessage} disabled={isLoading} className="rounded-full p-3 bg-primary text-primary-foreground hover:bg-primary/90">
-            {isLoading ? <Send className="animate-spin" /> : <Send />}
-          </Button>
+      {/* Enhanced Chat Input with Premium Styling */}
+      <div className="sticky bottom-0 px-4 py-6 backdrop-blur-2xl border-t border-white/10 relative z-10">
+        <div className="max-w-md mx-auto">
+          <div className="glass p-4 rounded-2xl">
+            <div className="flex items-center gap-3">
+              <div className="flex-1 relative">
+                <Input
+                  type="text"
+                  placeholder="Ask me anything..."
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' ? sendMessage() : null}
+                  className="w-full rounded-xl bg-white/5 border-white/20 text-white placeholder:text-white/50 pl-4 pr-4 py-3 focus:ring-2 focus:ring-white/30 focus:border-white/40 transition-all"
+                />
+              </div>
+              <button 
+                onClick={sendMessage} 
+                disabled={isLoading}
+                className="neo-button p-3 rounded-xl bg-white text-black hover:bg-white/90 disabled:opacity-50 transition-all duration-300"
+              >
+                {isLoading ? (
+                  <Send className="w-5 h-5 animate-pulse" />
+                ) : (
+                  <Send className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

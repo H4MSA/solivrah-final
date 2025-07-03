@@ -7,7 +7,7 @@ import { motion, HTMLMotionProps, Variants } from "framer-motion";
 interface GlassCardProps extends Omit<HTMLMotionProps<"div">, "animate"> {
   children: React.ReactNode;
   className?: string;
-  variant?: "default" | "elevated" | "subtle" | "primary" | "interactive" | "dark" | "theme" | "premium" | "ultra-glass";
+  variant?: "default" | "elevated" | "subtle" | "primary" | "interactive" | "dark" | "theme" | "premium" | "ultra-glass" | "duolingo" | "achievement";
   animate?: "fade" | "pop" | "blur" | "none";
   interactive?: boolean;
   depth?: "low" | "medium" | "high";
@@ -72,17 +72,19 @@ export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(({
 
   const getBgClass = () => {
     switch (variant) {
-      // Improved contrast ratios for better accessibility
-      case "default": return "bg-[#1A1A1A]";
-      case "elevated": return "bg-[#1D1D1D] border-white/15";
-      case "subtle": return "bg-[#141414] border-white/5";
-      case "primary": return "bg-[#1D1D1D] text-white border-white/15";
-      case "interactive": return "bg-[#1A1A1A] hover:bg-[#222222]";
-      case "dark": return "bg-black/90";
-      case "theme": return "bg-[#1A1A1A]";
-      case "premium": return "bg-gradient-to-br from-[#1D1D1D] to-[#0D0D0D]";
-      case "ultra-glass": return "bg-[#1A1A1A]/85 backdrop-blur-md border-white/20";
-      default: return "bg-[#1A1A1A]";
+      // Enhanced monochromatic variants with sophisticated glass effects
+      case "default": return "glass";
+      case "elevated": return "glass border-white/20 bg-gradient-to-br from-white/8 to-white/3";
+      case "subtle": return "bg-white/[0.02] backdrop-blur-sm border-white/5";
+      case "primary": return "bg-white text-black border-white/30 shadow-lg";
+      case "interactive": return "glass hover:bg-white/10 cursor-pointer";
+      case "dark": return "bg-black/95 backdrop-blur-xl border-white/10";
+      case "theme": return "glass";
+      case "premium": return "bg-gradient-to-br from-white/12 to-white/4 backdrop-blur-2xl border-white/15 shadow-2xl";
+      case "ultra-glass": return "bg-white/[0.03] backdrop-blur-2xl border-white/25 shadow-3xl";
+      case "duolingo": return "bg-gradient-to-br from-white/10 via-white/5 to-white/2 backdrop-blur-xl border-white/20 hover:from-white/15 hover:via-white/8 hover:to-white/4";
+      case "achievement": return "bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl border-white/30 shadow-2xl animate-pulse-color";
+      default: return "glass";
     }
   };
 
