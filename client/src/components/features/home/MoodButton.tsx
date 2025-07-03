@@ -1,4 +1,3 @@
-
 import React from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -76,4 +75,4 @@ export const MoodButton: React.FC<MoodButtonProps> = ({
       />
     </motion.button>
   );
-};
+}; 

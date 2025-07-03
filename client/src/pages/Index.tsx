@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Logo } from "@/components/Logo";
+import { Logo } from "@/components/common/Logo";
 import { useApp } from "@/context/AppContext";
 import { motion } from "framer-motion";
-import { ThemeBackground } from "@/components/ThemeBackground";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -36,7 +35,6 @@ const Index = () => {
   
   return (
     <div className="min-h-screen flex flex-col justify-between px-6 py-10 overflow-hidden max-w-[430px] mx-auto">
-      <ThemeBackground />
       
       {/* Main content */}
       <div className={`flex-1 flex flex-col justify-center items-center text-center space-y-6 transition-all duration-1000 z-10 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>

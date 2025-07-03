@@ -1,9 +1,10 @@
-
-import React, { useState, useRef } from 'react';
-import { X, Camera, Upload, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { GlassCard } from '@/components/GlassCard';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Camera, X, Upload, Check, RefreshCw, Send, Image as ImageIcon } from 'lucide-react';
+import { GlassCard } from '@/components/common/GlassCard';
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useDropzone } from "react-dropzone";
 import { useToast } from '@/hooks/use-toast';
 
 interface CameraUploadProps {
@@ -249,30 +250,27 @@ export const CameraUpload: React.FC<CameraUploadProps> = ({
               ) : (
                 <Button 
                   onClick={takePicture}
-                  className="flex-1 bg-white text-black hover:bg-white/90"
+                  variant="primary"
+                  className="flex-1"
                 >
-                  <Camera size={18} className="mr-2" />
-                  Capture
+                  <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+                    <div className="w-4 h-4 rounded-full bg-white/50 group-hover:bg-white transition-colors"></div>
+                  </div>
                 </Button>
               )}
-              
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-              />
             </div>
           )}
           
-          <p className="text-white/50 text-xs text-center">
-            {capturedImage 
-              ? "You can confirm or retake the photo"
-              : "Take a photo or upload from your device"}
-          </p>
+          {/* Hidden file input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            className="hidden"
+          />
         </div>
       </GlassCard>
     </motion.div>
   );
-};
+}; 

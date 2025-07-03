@@ -1,4 +1,3 @@
-
 import React from "react";
 import { motion } from "framer-motion";
 
@@ -40,4 +39,4 @@ export const Logo = ({ size = "md", className = "", withText = true }: LogoProps
       </motion.div>
     </div>
   );
-};
+}; 

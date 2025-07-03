@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useApp } from "@/context/AppContext";
@@ -84,4 +83,4 @@ export const ThemeBackground: React.FC<{
       />
     </div>
   );
-};
+}; 

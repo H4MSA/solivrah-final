@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,7 @@ const steps = [
   {
     title: "Community Support",
     description: "Join our community of like-minded individuals for support and inspiration.",
-    image: "/onboarding/community.svg"
+    image: "src/assets/community.svg"
   }
 ];
 
@@ -93,4 +92,4 @@ export const OnboardingFlow = ({ onComplete }: { onComplete: () => void }) => {
       </AnimatePresence>
     </div>
   );
-};
+}; 

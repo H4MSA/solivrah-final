@@ -1,4 +1,3 @@
-
 import React from "react";
 import { 
   Medal, 
@@ -13,7 +12,7 @@ import {
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { motion } from "framer-motion";
-import { PremiumCard } from "./PremiumCard";
+import { PremiumCard } from "../../PremiumCard";
 
 // Define achievement types and data
 interface Achievement {
@@ -178,4 +177,4 @@ const AchievementCard = ({ achievement }: { achievement: Achievement }) => {
       )}
     </PremiumCard>
   );
-};
+}; 

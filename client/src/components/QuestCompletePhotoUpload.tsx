@@ -1,6 +1,5 @@
-
 import React, { useState } from "react";
-import { GlassCard } from "@/components/GlassCard";
+import { GlassCard } from "@/components/common/GlassCard";
 import { CameraUpload } from "@/components/CameraUpload";
 import { Camera, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";

@@ -1,9 +1,9 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Wifi, WifiOff, CloudUpload } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOfflineSupport } from '@/hooks/useOfflineSupport';
 import { GlassCard } from './GlassCard';
+import { useNetworkState } from '@uidotdev/usehooks';
 
 interface NetworkStatusIndicatorProps {
   position?: 'top' | 'bottom';
@@ -15,6 +15,7 @@ export const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
   variant = 'minimal',
 }) => {
   const { isOnline, pendingOperationsCount, syncStatus } = useOfflineSupport();
+  const { online, previous, since, downlink, downlinkMax, effectiveType, rtt, type } = useNetworkState();
   
   // Don't show indicator when online and no pending operations
   if (isOnline && pendingOperationsCount === 0 && variant === 'minimal') {
@@ -99,4 +100,4 @@ export const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
       </motion.div>
     </AnimatePresence>
   );
-};
+}; 

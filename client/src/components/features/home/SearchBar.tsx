@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, X } from "lucide-react";
@@ -75,4 +74,4 @@ export const SearchBar: React.FC = () => {
       )}
     </motion.div>
   );
-};
+}; 

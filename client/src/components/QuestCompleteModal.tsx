@@ -1,6 +1,5 @@
-
 import React, { useState } from "react";
-import { GlassCard } from "@/components/GlassCard";
+import { GlassCard } from "@/components/common/GlassCard";
 import { CheckCircle, Camera, Award, ArrowRight, Wifi, WifiOff, Loader } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { useToast } from "@/hooks/use-toast";

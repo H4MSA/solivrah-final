@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Home, Award, MessageCircle, Users, User } from "lucide-react";
-import { SolivrahBrandIcon } from "./SolivrahIcons";
+import { SolivrahBrandIcon } from "../common/SolivrahIcons";
 
 export const TabNavigation = () => {
   // Safely handle the location to prevent errors outside Router context
@@ -131,4 +130,4 @@ export const TabNavigation = () => {
       </motion.div>
     </div>
   );
-};
+}; 

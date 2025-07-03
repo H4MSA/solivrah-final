@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { PremiumCard } from '@/components/PremiumCard';
@@ -8,9 +7,8 @@ import { motion } from 'framer-motion';
 import { Camera, Edit, UserCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { CameraUpload } from '@/components/CameraUpload';
-import { TabNavigation } from '@/components/TabNavigation';
-import { ProfileTabs } from '@/components/ProfileTabs';
-import { ThemeBackground } from '@/components/ThemeBackground';
+import { ProfileTabs } from '@/components/features/profile/ProfileTabs';
+import { SolivrahMascot } from "@/components/SolivrahMascot";
 
 const Profile = () => {
   const { user, selectedTheme } = useApp();
@@ -162,7 +160,6 @@ const Profile = () => {
 
   return (
     <div className="h-full overflow-y-auto">
-      <ThemeBackground />
       <motion.div 
         className="px-4 py-6 pb-24 w-full max-w-sm mx-auto"
         initial={{ opacity: 0 }}

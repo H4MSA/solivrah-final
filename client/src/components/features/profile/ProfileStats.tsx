@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { PremiumCard } from '@/components/PremiumCard';
+import { PremiumCard } from '../../PremiumCard';
 import { useApp } from '@/context/AppContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
@@ -132,4 +131,4 @@ export const ProfileStats: React.FC = () => {
       </motion.div>
     </motion.div>
   );
-};
+}; 

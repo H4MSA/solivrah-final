@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { PremiumCard } from '@/components/PremiumCard';
+import { PremiumCard } from '../../PremiumCard';
 import { Button } from '@/components/ui/button';
 import { useApp } from '@/context/AppContext';
 import { useToast } from '@/hooks/use-toast';
-import { ProfileReset } from '@/components/ProfileReset';
+import { ProfileReset } from './ProfileReset';
 import { Settings, LogOut, Send, Bell, Shield, Moon, Layout } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useNavigate } from 'react-router-dom';
@@ -248,38 +248,32 @@ export const ProfileSettings: React.FC = () => {
         <PremiumCard className="p-4">
           <h3 className="text-lg font-semibold mb-4">Account</h3>
           {user ? (
-            <>
-              <div className="flex items-center justify-between p-3 mb-4 rounded-lg bg-white/5 border border-white/5">
-                <div className="flex items-center">
-                  <Send size={18} className="text-white/70 mr-3" />
-                  <span className="text-white/90">Email</span>
-                </div>
-                <span className="text-white/60 text-sm max-w-[180px] truncate">{user.email}</span>
-              </div>
-              
-              <Button 
+            <div className="space-y-3">
+              <Button
                 onClick={handleSignOut}
-                className="w-full bg-white/5 text-white hover:bg-white/10 focus:ring-white/10 border border-white/10 rounded-lg"
+                variant="destructive"
+                className="w-full bg-red-900/40 text-red-300 hover:bg-red-900/60 border border-red-500/20"
               >
                 <LogOut size={16} className="mr-2" />
                 Sign Out
               </Button>
-            </>
-          ) : (
-            <div className="p-3 rounded-lg bg-white/5 border border-white/5">
-              <p className="text-white/70">Currently in guest mode</p>
+              <Button
+                onClick={() => setIsResetting(true)}
+                variant="outline"
+                className="w-full bg-transparent text-white/70 hover:bg-white/5 border-white/10"
+              >
+                Reset Progress
+              </Button>
             </div>
+          ) : (
+            <Button onClick={() => navigate('/auth')} className="w-full">
+              Sign In to Manage Account
+            </Button>
           )}
         </PremiumCard>
       </motion.div>
       
-      {/* Profile Reset */}
-      <motion.div variants={itemVariants}>
-        <ProfileReset 
-          onReset={handleResetProfile} 
-          isLoading={isResetting} 
-        />
-      </motion.div>
+      {isResetting && <ProfileReset onCancel={() => setIsResetting(false)} onConfirm={handleResetProfile} />}
     </motion.div>
   );
 };

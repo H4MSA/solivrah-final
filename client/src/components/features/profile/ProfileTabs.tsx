@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ProfileOverview } from './ProfileOverview';
@@ -80,4 +79,4 @@ export const ProfileTabs: React.FC = () => {
       </TabsContent>
     </Tabs>
   );
-};
+}; 

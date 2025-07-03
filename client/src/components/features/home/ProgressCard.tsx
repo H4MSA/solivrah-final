@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Star, Trophy, Calendar } from 'lucide-react';
@@ -109,4 +108,4 @@ export const ProgressCard: React.FC<ProgressCardProps> = ({
       </div>
     </motion.div>
   );
-};
+}; 

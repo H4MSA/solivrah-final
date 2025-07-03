@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Star, Trophy, Target, Calendar, Share2 } from 'lucide-react';
-import { PremiumCard } from './PremiumCard';
+import { PremiumCard } from '../../PremiumCard';
 import { useApp } from '@/context/AppContext';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -138,4 +137,4 @@ export const ProfileOverview: React.FC = () => {
       </motion.div>
     </motion.div>
   );
-};
+}; 

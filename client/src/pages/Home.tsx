@@ -1,22 +1,19 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { TabNavigation } from "@/components/TabNavigation";
 import { useApp } from "@/context/AppContext";
-import { QRScanner } from "@/components/QRScanner";
+import { QRScanner } from "@/components/common/QRScanner";
 import { CameraUpload } from "@/components/CameraUpload";
-import { ThemeBackground } from "@/components/ThemeBackground";
 import { DailyAffirmation } from "@/components/DailyAffirmation";
 import { QuickGuide } from "@/components/QuickGuide";
 import { FeatureHighlight } from "@/components/FeatureHighlight";
 
 // Import the enhanced components
-import { HeaderSection } from "@/components/home/HeaderSection";
-import { SearchBar } from "@/components/home/SearchBar";
-import { QuestCard } from "@/components/home/QuestCard";
-import { MoodSection } from "@/components/home/MoodSection";
-import { CollapsibleSection } from "@/components/home/CollapsibleSection";
+import { HeaderSection } from "@/components/features/home/HeaderSection";
+import { SearchBar } from "@/components/features/home/SearchBar";
+import { QuestCard } from "@/components/features/home/QuestCard";
+import { MoodSection } from "@/components/features/home/MoodSection";
+import { CollapsibleSection } from "@/components/features/home/CollapsibleSection";
 import { DailyQuestHero } from "@/components/ui/daily-quest-hero";
 import { StatsDisplay } from "@/components/ui/stats-display";
 import { QuickActionGrid } from "@/components/ui/quick-action-grid";
@@ -96,7 +93,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen pb-20 text-white">
-      <ThemeBackground />
       {showScanner && (
         <QRScanner 
           onClose={() => setShowScanner(false)} 
@@ -210,7 +206,8 @@ const Home = () => {
         </motion.div>
       </motion.div>
       
-      <TabNavigation />
+      {/* Footer placeholder */}
+      <div className="h-24" />
     </div>
   );
 };

@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef } from "react";
-import { GlassCard } from "@/components/GlassCard";
+import { GlassCard } from "@/components/common/GlassCard";
 import { Camera, ChevronLeft, X, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
