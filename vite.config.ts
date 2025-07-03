@@ -1,30 +1,26 @@
 
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
-import path from "path";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import path from 'path'
+import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
-  root: "./client",
   server: {
-    host: "::",
+    host: '0.0.0.0',
     port: 8080,
+    strictPort: true
   },
   plugins: [
     react(),
-    ...(mode === 'development' ? [
-      (async () => {
-        const { componentTagger } = await import("lovable-tagger");
-        return componentTagger();
-      })()
-    ] : []),
+    mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./client/src"),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
-  build: {
-    outDir: "../dist",
-    emptyOutDir: true,
+  define: {
+    // Fix for "process is not defined" error
+    'process.env': {}
   },
-}));
+}))
