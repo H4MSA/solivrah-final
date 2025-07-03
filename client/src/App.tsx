@@ -1,3 +1,4 @@
+
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { MobileOptimization, useMobileOptimization } from "@/components/ui/mobile-optimization";
@@ -24,7 +25,7 @@ import { Help } from "./pages/Help";
 import { ContextHelp } from "./components/ContextHelp";
 import { OnboardingFlow } from "./components/common/OnboardingFlow";
 import Admin from "./pages/Admin";
-import { useAuth, User } from "./hooks/useAuth";
+import { type User } from "./hooks/useAuth";
 
 // Create a new QueryClient instance with custom options
 const queryClient = new QueryClient({
@@ -171,9 +172,9 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const showNavigation = ['/home', '/quests', '/community', '/coach', '/profile'].includes(location.pathname);
 
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden bg-gray-100"> {/* Added background color */}
+    <div className="flex flex-col h-screen w-full overflow-hidden bg-gray-100">
       {/* Network status indicator */}
-      <NetworkStatusIndicator position="top" variant="minimal" />
+      <NetworkStatusIndicator />
 
       {/* Main content area with proper mobile scroll */}
       <main className="flex-1 overflow-y-auto overflow-x-hidden">
