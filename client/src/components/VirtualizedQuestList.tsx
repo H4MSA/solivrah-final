@@ -1,7 +1,7 @@
 import React, { useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useVirtualList } from '@/hooks/useVirtualList';
-import { GlassCard } from './common/GlassCard';
+import { GlassCard } from './GlassCard';
 import { FiCheck, FiLock } from 'react-icons/fi';
 import { useMemoized } from '@/hooks/useMemoized';
 

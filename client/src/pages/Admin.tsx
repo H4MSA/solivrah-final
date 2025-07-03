@@ -5,13 +5,10 @@ import { ArrowLeft, Save, RefreshCw, Settings, MessageCircle, Map, Quote, Image 
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { GlassCard } from '@/components/common/GlassCard';
+import { ThemeBackground } from '@/components/ThemeBackground';
+import { GlassCard } from '@/components/GlassCard';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface AdminSettings {
   affirmation: string;
@@ -212,6 +209,7 @@ Roadmap requirements:
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
+      <ThemeBackground />
       
       <div className="px-4 pt-8 pb-32 max-w-4xl mx-auto">
         <motion.div 

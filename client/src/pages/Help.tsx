@@ -1,7 +1,9 @@
+
 import React, { useState } from 'react';
 import { Search, ArrowLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { ThemeBackground } from '@/components/ThemeBackground';
 
 interface FAQItem {
   question: string;
@@ -101,6 +103,7 @@ export const Help = () => {
   
   return (
     <div className="min-h-screen bg-black text-white pb-20">
+      <ThemeBackground />
       
       <div className="px-4 pt-8 pb-20 max-w-md mx-auto">
         <div className="flex items-center mb-6">

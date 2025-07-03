@@ -1,17 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AuthService } from "@/services/AuthService";
-import { Logo } from "@/components/common/Logo";
+import { Logo } from "@/components/Logo";
 import { useApp } from "@/context/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Mail, Lock, AlertCircle, ArrowRight } from "lucide-react";
-import { GlassCard } from "@/components/common/GlassCard";
-import { supabase } from "@/integrations/supabase/client";
-import { Auth as SupabaseAuth } from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ThemeBackground } from "@/components/ThemeBackground";
+import { GlassCard } from "@/components/GlassCard";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -23,7 +20,6 @@ const Auth = () => {
   const [isSignup, setIsSignup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   // Get the redirect URL from state, or default to "/home"
   const returnUrl = location.state?.returnUrl || "/home";
@@ -95,38 +91,39 @@ const Auth = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-[#0A0A0A] p-4 text-white">
-      {isLoading && (
-        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="flex flex-col items-center justify-center">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <Logo className="h-28 w-auto mb-6" />
-            </motion.div>
-            
-            <motion.h2 
-              className="mb-2 text-center text-2xl font-bold text-white"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              Processing...
-            </motion.h2>
-            
-            <motion.p 
-              className="text-center text-sm text-white/70 max-w-[280px]"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-            >
-              Please wait while we process your request.
-            </motion.p>
-          </div>
-        </div>
-      )}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0A0A] px-6 py-12 relative overflow-hidden">
+      <ThemeBackground />
+      
+      {/* Animated background elements */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <motion.div 
+          className="bubble w-32 h-32 top-[10%] left-[10%]"
+          animate={{ 
+            x: [0, 20, 0], 
+            y: [0, -30, 0],
+            opacity: [0.05, 0.08, 0.05]
+          }}
+          transition={{ 
+            repeat: Infinity, 
+            duration: 15,
+            ease: "easeInOut" 
+          }}
+        />
+        <motion.div 
+          className="bubble w-64 h-64 bottom-[10%] right-[5%]"
+          animate={{ 
+            x: [0, -30, 0], 
+            y: [0, 20, 0],
+            opacity: [0.03, 0.06, 0.03]
+          }}
+          transition={{ 
+            repeat: Infinity, 
+            duration: 20,
+            ease: "easeInOut",
+            delay: 2
+          }}
+        />
+      </div>
       
       <motion.div 
         className="w-full max-w-sm space-y-6 relative z-10"

@@ -1,8 +1,10 @@
+
 import React, { useState } from "react";
-import { Star, Users, MessageCircle, Heart, Search, Plus } from "lucide-react";
+import { Star, Users, MessageCircle, Heart, Search } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { TabNavigation } from "@/components/TabNavigation";
 
 const Community = () => {
   const [activeTab, setActiveTab] = useState("leaderboards");

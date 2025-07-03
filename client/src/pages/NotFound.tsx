@@ -1,7 +1,9 @@
+
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { AlertCircle, ArrowLeft } from "lucide-react";
+import { ThemeBackground } from "@/components/ThemeBackground";
 
 const NotFound = () => {
   const location = useLocation();
@@ -15,6 +17,7 @@ const NotFound = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
+      <ThemeBackground />
       
       <motion.div 
         className="text-center px-6 py-10 max-w-md"

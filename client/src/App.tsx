@@ -1,4 +1,4 @@
-
+import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { MobileOptimization, useMobileOptimization } from "@/components/ui/mobile-optimization";
@@ -6,9 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AppProvider, useApp } from "./context/AppContext";
 import { AppShell } from "./components/ui/app-shell";
-import { ThemeBackground } from "./components/layouts/ThemeBackground";
-import { TabNavigation } from "./components/layouts/TabNavigation";
-import { NetworkStatusIndicator } from "./components/common/NetworkStatusIndicator";
+import { ThemeBackground } from "./components/ThemeBackground";
+import { TabNavigation } from "./components/TabNavigation";
+import { NetworkStatusIndicator } from "./components/NetworkStatusIndicator";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
@@ -23,9 +23,8 @@ import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 import { Help } from "./pages/Help";
 import { ContextHelp } from "./components/ContextHelp";
-import { OnboardingFlow } from "./components/common/OnboardingFlow";
+import { OnboardingFlow } from "./components/OnboardingFlow";
 import Admin from "./pages/Admin";
-import { type User } from "./hooks/useAuth";
 
 // Create a new QueryClient instance with custom options
 const queryClient = new QueryClient({
@@ -172,9 +171,9 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const showNavigation = ['/home', '/quests', '/community', '/coach', '/profile'].includes(location.pathname);
 
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden bg-gray-100">
+    <div className="flex flex-col h-screen w-full overflow-hidden bg-gray-100"> {/* Added background color */}
       {/* Network status indicator */}
-      <NetworkStatusIndicator />
+      <NetworkStatusIndicator position="top" variant="minimal" />
 
       {/* Main content area with proper mobile scroll */}
       <main className="flex-1 overflow-y-auto overflow-x-hidden">
@@ -292,6 +291,7 @@ const App = () => {
 
             {/* Mobile-optimized viewport container */}
             <div className="h-screen w-screen max-w-sm mx-auto bg-transparent overflow-hidden">
+              <Toaster />
               <Sonner />
 
               <BrowserRouter>

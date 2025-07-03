@@ -1,269 +1,278 @@
 
-import React, { useState, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Camera, X, RotateCcw, Check, Upload, Image as ImageIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useDropzone } from "react-dropzone";
+import React, { useState, useRef } from 'react';
+import { X, Camera, Upload, Check } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { GlassCard } from '@/components/GlassCard';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useToast } from '@/hooks/use-toast';
 
 interface CameraUploadProps {
-  onCapture: (file: File | null) => void;
   onClose: () => void;
+  onCapture: (file: File | null) => void;
   title?: string;
+  aspectRatio?: string; // e.g. "1:1" or "16:9"
 }
 
 export const CameraUpload: React.FC<CameraUploadProps> = ({
-  onCapture,
   onClose,
-  title = "Take a Photo"
+  onCapture,
+  title = "Take Photo",
+  aspectRatio = "1:1"
 }) => {
-  const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
-  
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  const startCamera = useCallback(async () => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+  
+  const aspectRatioValue = aspectRatio === "16:9" ? 9/16 : 1;
+  
+  const startCamera = async () => {
+    setIsCapturing(true);
     try {
-      setError(null);
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("Camera access not supported by your browser");
+      }
       
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode,
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { 
+          facingMode: "environment",
           width: { ideal: 1280 },
           height: { ideal: 720 }
-        },
-        audio: false
+        }
       });
       
-      setStream(mediaStream);
-      
       if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        videoRef.current.play();
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
       }
-    } catch (err) {
-      console.error("Error accessing camera:", err);
-      setError("Could not access camera. Please check permissions.");
+    } catch (error) {
+      console.error("Error accessing camera:", error);
+      toast({
+        variant: "destructive",
+        title: "Camera Error",
+        description: "Unable to access your camera. Check permissions or try uploading a file instead."
+      });
+      setIsCapturing(false);
     }
-  }, [facingMode]);
-
-  const stopCamera = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
+  };
+  
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+      tracks.forEach(track => track.stop());
+      videoRef.current.srcObject = null;
     }
-  }, [stream]);
-
-  const switchCamera = useCallback(() => {
-    stopCamera();
-    setFacingMode(prev => prev === "user" ? "environment" : "user");
-  }, [stopCamera]);
-
-  const capturePhoto = useCallback(() => {
-    if (!videoRef.current || !canvasRef.current) return;
-    
-    setIsCapturing(true);
-    
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
-    
-    if (!context) return;
-    
-    // Set canvas dimensions to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    // Draw the video frame to canvas
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    // Convert to blob
-    canvas.toBlob((blob) => {
-      if (blob) {
-        const imageUrl = URL.createObjectURL(blob);
-        setCapturedImage(imageUrl);
+    setIsCapturing(false);
+  };
+  
+  const takePicture = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      
+      // Set canvas dimensions to match video
+      const videoAspectRatio = video.videoWidth / video.videoHeight;
+      let width = video.videoWidth;
+      let height = video.videoHeight;
+      
+      // Adjust canvas size based on desired aspect ratio
+      if (aspectRatio === "1:1") {
+        // For square, use the smaller dimension
+        const size = Math.min(width, height);
+        width = size;
+        height = size;
+      }
+      // For 16:9, we'll use the video's native ratio if it's close enough
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      // Calculate centering for crop
+      const sx = (video.videoWidth - width) / 2;
+      const sy = (video.videoHeight - height) / 2;
+      
+      const context = canvas.getContext('2d');
+      if (context) {
+        // Draw the current video frame onto the canvas with cropping
+        context.drawImage(
+          video, 
+          sx, sy, width, height, // Source crop
+          0, 0, width, height // Destination (no crop)
+        );
+        
+        // Convert to data URL
+        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        setCapturedImage(imageDataUrl);
         stopCamera();
       }
-      setIsCapturing(false);
-    }, "image/jpeg", 0.8);
-  }, [stopCamera]);
-
-  const retakePhoto = useCallback(() => {
-    if (capturedImage) {
-      URL.revokeObjectURL(capturedImage);
-      setCapturedImage(null);
     }
-    startCamera();
-  }, [capturedImage, startCamera]);
-
-  const confirmPhoto = useCallback(() => {
-    if (capturedImage) {
-      // Convert the captured image back to a File object
-      fetch(capturedImage)
-        .then(res => res.blob())
-        .then(blob => {
-          const file = new File([blob], "photo.jpg", { type: "image/jpeg" });
-          onCapture(file);
-          URL.revokeObjectURL(capturedImage);
-        });
+  };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setCapturedImage(event.target.result as string);
+        }
+      };
+      
+      reader.readAsDataURL(file);
     }
-  }, [capturedImage, onCapture]);
-
-  const handleFileUpload = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0];
-      onCapture(file);
-    }
-  }, [onCapture]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: handleFileUpload,
-    accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.webp']
-    },
-    multiple: false
-  });
-
-  React.useEffect(() => {
-    if (!capturedImage && !error) {
-      startCamera();
-    }
+  };
+  
+  const handleConfirm = () => {
+    if (!capturedImage) return;
     
-    return () => stopCamera();
-  }, [startCamera, stopCamera, capturedImage, error]);
-
+    // Convert data URL to File object
+    fetch(capturedImage)
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], "captured-image.jpg", { type: "image/jpeg" });
+        onCapture(file);
+      })
+      .catch(err => {
+        console.error("Error converting image:", err);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "There was a problem processing your image."
+        });
+      });
+  };
+  
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm"
+      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-5"
     >
-      <div className="relative h-full w-full flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 bg-black/50">
-          <h2 className="text-white font-semibold text-lg">{title}</h2>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-          >
-            <X size={20} className="text-white" />
-          </button>
+      <GlassCard className="w-full max-w-md overflow-hidden">
+        <div className="p-5 border-b border-white/10">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-medium text-white">{title}</h2>
+            <button 
+              onClick={onClose}
+              className="p-2 rounded-full hover:bg-white/10"
+            >
+              <X size={20} className="text-white" />
+            </button>
+          </div>
         </div>
-
-        {/* Camera/Image Display */}
-        <div className="flex-1 relative">
-          {error ? (
-            <div className="h-full flex flex-col items-center justify-center text-white p-8">
-              <Camera size={48} className="mb-4 opacity-50" />
-              <p className="text-center mb-6">{error}</p>
-              
-              {/* File upload fallback */}
-              <div
-                {...getRootProps()}
-                className={`w-full max-w-sm p-8 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
-                  isDragActive 
-                    ? "border-blue-400 bg-blue-400/10" 
-                    : "border-white/30 hover:border-white/50"
-                }`}
-              >
-                <input {...getInputProps()} />
-                <div className="text-center">
-                  <Upload size={32} className="mx-auto mb-2 opacity-70" />
-                  <p className="text-sm">
-                    {isDragActive
-                      ? "Drop the image here..."
-                      : "Tap to select an image from your device"}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : capturedImage ? (
-            <div className="h-full flex items-center justify-center">
-              <img
-                src={capturedImage}
-                alt="Captured"
-                className="max-w-full max-h-full object-contain"
-              />
-            </div>
+        
+        <div className={`aspect-${aspectRatio} bg-black relative overflow-hidden`}>
+          {/* Canvas for taking snapshot (hidden) */}
+          <canvas ref={canvasRef} className="hidden"></canvas>
+          
+          {capturedImage ? (
+            // Captured image preview
+            <img 
+              src={capturedImage} 
+              alt="Captured" 
+              className="w-full h-full object-cover"
+            />
+          ) : isCapturing ? (
+            // Live camera preview
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+            />
           ) : (
-            <>
-              <video
-                ref={videoRef}
-                className="w-full h-full object-cover"
-                playsInline
-                muted
-              />
-              <canvas ref={canvasRef} className="hidden" />
-              
-              {/* Camera overlay */}
-              <div className="absolute inset-0 pointer-events-none">
-                <div className="h-full w-full flex items-center justify-center">
-                  <div className="w-64 h-64 border-2 border-white/50 rounded-lg"></div>
-                </div>
+            // Placeholder when not capturing
+            <div className="w-full h-full flex items-center justify-center bg-[#121212]">
+              <Camera size={64} className="text-white/30" />
+            </div>
+          )}
+          
+          {/* Camera grid overlay */}
+          {isCapturing && !capturedImage && (
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="w-full h-full grid grid-cols-3 grid-rows-3">
+                {[...Array(9)].map((_, i) => (
+                  <div key={i} className="border border-white/20"></div>
+                ))}
               </div>
-            </>
+            </div>
           )}
         </div>
-
-        {/* Controls */}
-        <div className="p-6 bg-black/50">
+        
+        <div className="p-5 space-y-4">
           {capturedImage ? (
-            <div className="flex gap-4 justify-center">
-              <Button
-                onClick={retakePhoto}
+            // Controls for captured image
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => {
+                  setCapturedImage(null);
+                  startCamera();
+                }}
                 variant="outline"
-                size="lg"
-                className="flex-1 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                className="flex-1 bg-white/5 hover:bg-white/10 border-white/10 text-white"
               >
-                <RotateCcw size={20} className="mr-2" />
                 Retake
               </Button>
-              <Button
-                onClick={confirmPhoto}
-                variant="default"
-                size="lg"
-                className="flex-1"
+              <Button 
+                onClick={handleConfirm}
+                className="flex-1 bg-white text-black hover:bg-white/90"
               >
-                <Check size={20} className="mr-2" />
-                Use Photo
+                <Check size={18} className="mr-2" />
+                Confirm
               </Button>
             </div>
           ) : (
-            <div className="flex items-center justify-between">
-              {/* File Upload Button */}
-              <div {...getRootProps()}>
-                <input {...getInputProps()} />
-                <button className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
-                  <ImageIcon size={24} className="text-white" />
-                </button>
-              </div>
-
-              {/* Capture Button */}
-              <button
-                onClick={capturePhoto}
-                disabled={isCapturing || !stream}
-                className="w-16 h-16 rounded-full bg-white border-4 border-gray-300 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            // Controls for camera/upload
+            <div className="flex gap-3">
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                variant="outline"
+                className="flex-1 bg-white/5 hover:bg-white/10 border-white/10 text-white"
               >
-                {isCapturing && (
-                  <div className="w-full h-full rounded-full bg-red-500"></div>
-                )}
-              </button>
-
-              {/* Switch Camera Button */}
-              <button
-                onClick={switchCamera}
-                className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-              >
-                <RotateCcw size={24} className="text-white" />
-              </button>
+                <Upload size={18} className="mr-2" />
+                Upload
+              </Button>
+              
+              {!isCapturing ? (
+                <Button 
+                  onClick={startCamera}
+                  className="flex-1 bg-white text-black hover:bg-white/90"
+                >
+                  <Camera size={18} className="mr-2" />
+                  Use Camera
+                </Button>
+              ) : (
+                <Button 
+                  onClick={takePicture}
+                  className="flex-1 bg-white text-black hover:bg-white/90"
+                >
+                  <Camera size={18} className="mr-2" />
+                  Capture
+                </Button>
+              )}
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
             </div>
           )}
+          
+          <p className="text-white/50 text-xs text-center">
+            {capturedImage 
+              ? "You can confirm or retake the photo"
+              : "Take a photo or upload from your device"}
+          </p>
         </div>
-      </div>
+      </GlassCard>
     </motion.div>
   );
 };

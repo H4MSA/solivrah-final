@@ -1,13 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ThemeBackground } from '@/components/ThemeBackground';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, ArrowRight, LightbulbIcon, CheckIcon } from 'lucide-react';
-import { GlassCard } from '@/components/common/GlassCard';
+import { GlassCard } from '@/components/GlassCard';
 
 const Survey = () => {
   const navigate = useNavigate();
@@ -225,6 +227,7 @@ const Survey = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0A0A0A] text-white overflow-x-hidden">
+      <ThemeBackground />
       
       {/* Animated background elements */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">

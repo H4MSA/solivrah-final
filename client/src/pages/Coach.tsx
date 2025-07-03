@@ -1,185 +1,527 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { Send, User, Smile, Meh, Frown, ChevronDown, ChevronUp, Clock } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { supabase } from "@/integrations/supabase/client";
+import { AIService } from "@/services/AIService";
 import { useToast } from "@/hooks/use-toast";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Download, RefreshCw } from "lucide-react";
-import { GlassCard } from "@/components/common/GlassCard";
+import { motion } from "framer-motion";
+import { ChatHistoryDrawer } from "@/components/coach/ChatHistoryDrawer";
+import { TabNavigation } from "@/components/TabNavigation";
+import { Card } from "@/components/ui/card";
+import type { Database } from "@/integrations/supabase/types";
 
-interface ChatMessage {
-  id: string;
-  content: string;
-  isBot: boolean;
-  timestamp: Date;
+interface Message {
+  id?: string;
+  sender: "user" | "ai";
+  text: string;
+  timestamp?: string;
+  error?: boolean;
 }
 
-export default function Coach() {
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+interface ChatHistory {
+  id: string;
+  date: string;
+  preview: string;
+  unread?: boolean;
+}
+
+// The key for storing chat history in local storage
+const CHAT_HISTORY_KEY = 'ai_coach_chat_history';
+
+const Coach = () => {
+  const { selectedTheme, user, isGuest } = useApp();
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<Message[]>([
+    { sender: "ai", text: `Hi, I'm your AI Coach for ${selectedTheme || 'personal development'}. How can I help you today?` },
+  ]);
   const [isLoading, setIsLoading] = useState(false);
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-  const { user } = useApp();
+  const [selectedMood, setSelectedMood] = useState<string>("neutral");
+  const [showMoodSelector, setShowMoodSelector] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
+  const [currentChatId, setCurrentChatId] = useState<string>("new");
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const aiService = new AIService();
 
-  const sendMessage = async () => {
-    if (!message.trim()) return;
-    
-    const userId = user?.id;
-    if (!userId) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to use the coach feature.",
-        variant: "destructive"
-      });
-      return;
+  // Load messages from local storage on initial load
+  useEffect(() => {
+    const savedMessages = localStorage.getItem(CHAT_HISTORY_KEY);
+    if (savedMessages) {
+      try {
+        const parsedMessages = JSON.parse(savedMessages);
+        if (Array.isArray(parsedMessages) && parsedMessages.length > 0) {
+          setMessages(parsedMessages);
+        }
+      } catch (error) {
+        console.error("Error parsing saved messages:", error);
+      }
     }
+  }, []);
 
+  // Save messages to local storage whenever they change
+  useEffect(() => {
+    // Don't save if it's just the initial greeting
+    if (messages.length > 1) {
+      localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(messages));
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    scrollToBottom();
+    
+    // Load chat history if the user is logged in
+    if (user?.id) {
+      loadChatHistory();
+      loadRecentConversations();
+    }
+    
+    // Save current mood to localStorage for affirmation context
+    localStorage.setItem("currentMood", selectedMood);
+  }, [user?.id, selectedMood]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const loadChatHistory = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('chat_history')
+        .select('message, response, timestamp')
+        .eq('user_id', user?.id)
+        .order('timestamp', { ascending: false })
+        .limit(5);
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        // Transform to our message format and add to state (oldest first)
+        const historicalMessages: Message[] = [];
+        data.reverse().forEach(item => {
+          historicalMessages.push({ sender: "user", text: item.message });
+          historicalMessages.push({ sender: "ai", text: item.response });
+        });
+        
+        setMessages(prev => [
+          prev[0], // Keep the greeting
+          ...historicalMessages
+        ]);
+      }
+    } catch (error) {
+      console.error("Failed to load chat history:", error);
+    }
+  };
+
+  const loadRecentConversations = async () => {
+    try {
+      // Get recent distinct conversations grouped by date
+      const { data, error } = await supabase
+        .from('chat_history')
+        .select('id, message, timestamp')
+        .eq('user_id', user?.id)
+        .order('timestamp', { ascending: false })
+        .limit(20);
+      
+      if (error) throw error;
+      
+      // Process into conversation groups by date (simplified approach)
+      if (data && data.length > 0) {
+        const conversations: Record<string, ChatHistory> = {};
+        
+        data.forEach(item => {
+          const date = new Date(item.timestamp);
+          const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
+          
+          if (!conversations[dateKey]) {
+            conversations[dateKey] = {
+              id: dateKey,
+              date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+              preview: item.message,
+              unread: false
+            };
+          }
+        });
+        
+        setChatHistory(Object.values(conversations));
+      }
+    } catch (error) {
+      console.error("Failed to load recent conversations:", error);
+    }
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const getConversationHistory = (): string => {
+    // Get the last 5 message pairs to provide as context
+    const contextMessages = messages
+      .filter(m => !m.error)
+      .slice(-10)
+      .map(m => `${m.sender === "user" ? "User" : "Coach"}: ${m.text}`)
+      .join("\n");
+    
+    return contextMessages;
+  };
+
+  const selectChat = (chatId: string) => {
+    // In a real app, this would load the specific chat
+    setCurrentChatId(chatId);
+    setShowHistory(false);
+    
+    // For now, just show a toast notification
+    toast({
+      title: "Chat selected",
+      description: `Selected chat from ${chatId}`,
+      duration: 2000,
+    });
+  };
+
+  const clearChatHistory = () => {
+    // Clear local storage and reset messages
+    localStorage.removeItem(CHAT_HISTORY_KEY);
+    setMessages([
+      { sender: "ai", text: `Hi, I'm your AI Coach for ${selectedTheme || 'personal development'}. How can I help you today?` }
+    ]);
+    toast({
+      title: "Chat history cleared",
+      description: "Your conversation history has been cleared.",
+      duration: 2000,
+    });
+  };
+
+  const handleSend = async () => {
+    if (input.trim() === "") return;
+
+    const userMessage: Message = { sender: "user", text: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput("");
     setIsLoading(true);
-    const userMessage = message;
-    setMessage("");
-    
-    // Add user message to chat
-    const newUserMessage: ChatMessage = {
-      id: Date.now().toString(),
-      content: userMessage,
-      isBot: false,
-      timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, newUserMessage]);
 
     try {
-      // Mock AI response for now
-      const botResponse = {
-        id: (Date.now() + 1).toString(),
-        content: "I understand you're working on your personal development journey. That's wonderful! What specific area would you like to focus on today?",
-        isBot: true,
-        timestamp: new Date()
+      // Get user profile data for context
+      const { data: profileData } = user?.id ? await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle() : { data: null };
+        
+      const userProfile = {
+        theme: selectedTheme,
+        ...(profileData || {})
       };
       
-      setTimeout(() => {
-        setMessages(prev => [...prev, botResponse]);
-        setIsLoading(false);
-      }, 1000);
+      // Get conversation history for context
+      const conversationContext = getConversationHistory();
       
+      // Call AI service for coaching response
+      const aiResponse = await aiService.generateCoachingReply(
+        input,
+        selectedMood,
+        conversationContext,
+        userProfile
+      );
+
+      // Add AI response to messages
+      const aiMessage: Message = { 
+        sender: "ai", 
+        text: aiResponse,
+        timestamp: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, aiMessage]);
+
+      // Save to database if user is logged in
+      if (user?.id) {
+        await saveMessageToSupabase(input, aiResponse);
+      }
+      
+      // Show toast on insightful responses (randomly, to avoid too many notifications)
+      if (Math.random() > 0.7) {
+        toast({
+          title: "Coach insight",
+          description: "Your coach has provided a valuable insight",
+          duration: 3000,
+        });
+      }
     } catch (error) {
-      console.error("Error sending message:", error);
-      toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
-        variant: "destructive"
-      });
+      console.error("Error getting AI response:", error);
+      setMessages(prev => [...prev, { 
+        sender: "ai", 
+        text: "I'm having trouble connecting right now. Please try again later.",
+        error: true
+      }]);
+    } finally {
       setIsLoading(false);
     }
   };
 
-  const exportChat = () => {
-    const userId = user?.id;
-    if (!userId) {
-      toast({
-        title: "Authentication Required", 
-        description: "Please log in to export chat history.",
-        variant: "destructive"
-      });
-      return;
+  const saveMessageToSupabase = async (userMessage: string, aiResponse: string) => {
+    try {
+      if (!user?.id) return;
+      const { error } = await supabase
+        .from("chat_history")
+        .insert([{
+          message: userMessage,
+          response: aiResponse,
+          theme: selectedTheme || "General",
+          user_id: user.id,
+          timestamp: new Date().toISOString()
+        } as Database["public"]["Tables"]["chat_history"]["Insert"]]);
+
+      if (error) {
+        console.error('Error saving message:', error);
+        throw error;
+      }
+      
+      // Update chat history
+      loadRecentConversations();
+      
+    } catch (error) {
+      console.error('Error saving message:', error);
+      // Continue even if saving fails
     }
-
-    const chatContent = messages.map(msg => {
-      const sender = msg.isBot ? "Coach" : "You";
-      return `${sender}: ${msg.content} (${msg.timestamp.toLocaleString()})`;
-    }).join('\n');
-
-    const blob = new Blob([chatContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `chat-export-${new Date().toISOString()}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   };
 
-  useEffect(() => {
-    // Scroll to bottom on new messages
-    chatContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, [messages]);
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const getMoodIcon = (mood: string) => {
+    switch (mood) {
+      case 'happy':
+        return <Smile className="text-amber-400" />;
+      case 'sad':
+        return <Frown className="text-blue-400" />;
+      case 'neutral':
+      default:
+        return <Meh className="text-white/70" />;
+    }
+  };
+  
+  const messageVariants = {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -10 }
+  };
 
   return (
-    <div className="container relative pb-20">
-      <div className="px-4 py-6">
-        <GlassCard>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold">Your Personal Coach</h1>
-              <Button variant="secondary" onClick={exportChat}>
-                <Download size={16} className="mr-2" />
-                Export Chat
-              </Button>
-            </div>
-            
-            <div className="space-y-4">
-              {messages.map((msg) => (
-                <div 
-                  key={msg.id}
-                  className={`flex items-start gap-3 ${msg.isBot ? 'flex-row' : 'flex-row-reverse text-right'}`}
-                >
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={msg.isBot ? "/images/bot-avatar.png" : user?.user_metadata?.avatar_url} />
-                    <AvatarFallback>{msg.isBot ? "AI" : user?.user_metadata?.name?.slice(0, 2)}</AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="flex flex-col">
-                    <p className="text-sm text-white/70">
-                      {msg.isBot ? "Coach" : "You"}
-                    </p>
-                    <GlassCard className="bg-black/70 border-white/10 p-3 rounded-md">
-                      {msg.content}
-                    </GlassCard>
-                    <p className="text-xs text-white/40 mt-1">
-                      {msg.timestamp.toLocaleTimeString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
-              
-              {isLoading && (
-                <div className="flex items-center gap-3">
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src="/images/bot-avatar.png" />
-                    <AvatarFallback>AI</AvatarFallback>
-                  </Avatar>
-                  
-                  <GlassCard className="bg-black/70 border-white/10 p-3 rounded-md">
-                    Thinking...
-                  </GlassCard>
-                </div>
-              )}
-              
-              <div ref={chatContainerRef} />
-            </div>
-            
-            <div className="flex gap-3">
-              <Input
-                type="text"
-                placeholder="Ask your coach anything..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    sendMessage();
-                  }
-                }}
-              />
-              <Button onClick={sendMessage} disabled={isLoading}>
-                {isLoading ? <RefreshCw className="animate-spin" /> : <Send />}
-              </Button>
-            </div>
+    <div className="pb-24 flex flex-col min-h-screen">
+      <ChatHistoryDrawer 
+        isOpen={showHistory} 
+        onClose={() => setShowHistory(false)}
+        historyItems={chatHistory}
+        onSelectChat={selectChat}
+      />
+      
+      <motion.div 
+        className="p-4 flex-shrink-0 border-b border-white/10 bg-[#1A1A1A] z-10 sticky top-0 rounded-b-xl"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <button
+              onClick={() => setShowHistory(true)}
+              className="p-2 mr-2 rounded-full hover:bg-white/10 transition-colors"
+            >
+              <Clock size={20} />
+            </button>
+            <h1 className="text-lg font-semibold text-white">AI Coach</h1>
           </div>
-        </GlassCard>
+          <div className="flex items-center gap-2">
+            <motion.button 
+              onClick={() => setShowMoodSelector(!showMoodSelector)}
+              className="flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-[#222222] hover:bg-[#333333] border border-white/10 transition-all duration-300 text-sm"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              <span>Mood</span>
+              {getMoodIcon(selectedMood)}
+              {showMoodSelector ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            </motion.button>
+            
+            <motion.div 
+              className="w-9 h-9 rounded-full bg-[#222222] flex items-center justify-center border border-white/10 hover:border-white/20 transition-all hover:bg-[#333333]"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <User className="text-white h-4 w-4" />
+            </motion.div>
+          </div>
+        </div>
+
+        {showMoodSelector && (
+          <motion.div 
+            className="absolute right-4 mt-2 bg-[#1A1A1A] border border-white/10 rounded-xl p-2 shadow-xl z-20"
+            initial={{ opacity: 0, scale: 0.9, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: -10 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            <div className="grid grid-cols-3 gap-2">
+              <motion.button 
+                onClick={() => {
+                  setSelectedMood('happy');
+                  setShowMoodSelector(false);
+                }}
+                className={`flex flex-col items-center p-3 rounded-lg transition-all duration-300 ${
+                  selectedMood === 'happy' 
+                    ? 'bg-[#222222] border border-white/15 shadow-inner' 
+                    : 'hover:bg-[#222222]/50'
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Smile size={22} className="text-amber-400 mb-1" />
+                <span className="text-xs font-medium">Happy</span>
+              </motion.button>
+              
+              <motion.button 
+                onClick={() => {
+                  setSelectedMood('neutral');
+                  setShowMoodSelector(false);
+                }}
+                className={`flex flex-col items-center p-3 rounded-lg transition-all duration-300 ${
+                  selectedMood === 'neutral' 
+                    ? 'bg-[#222222] border border-white/15 shadow-inner' 
+                    : 'hover:bg-[#222222]/50'
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Meh size={22} className="text-white mb-1" />
+                <span className="text-xs font-medium">Neutral</span>
+              </motion.button>
+              
+              <motion.button 
+                onClick={() => {
+                  setSelectedMood('sad');
+                  setShowMoodSelector(false);
+                }}
+                className={`flex flex-col items-center p-3 rounded-lg transition-all duration-300 ${
+                  selectedMood === 'sad' 
+                    ? 'bg-[#222222] border border-white/15 shadow-inner' 
+                    : 'hover:bg-[#222222]/50'
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Frown size={22} className="text-blue-400 mb-1" />
+                <span className="text-xs font-medium">Sad</span>
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </motion.div>
+
+      <div className="flex-1 overflow-y-auto px-4 pb-36 chat-container">
+        <div className="space-y-3 py-3 max-w-[430px] mx-auto">
+          {messages.map((message, index) => (
+            <motion.div 
+              key={index}
+              variants={messageVariants}
+              initial="initial"
+              animate="animate"
+              className={`${
+                message.sender === "user" 
+                  ? "ml-auto bg-[#222222] text-white" 
+                  : "mr-auto bg-[#1A1A1A] text-white"
+              } p-3 rounded-xl max-w-[85%] shadow-md border ${
+                message.sender === "user" 
+                  ? "border-white/5" 
+                  : message.error 
+                    ? "border-red-500/20" 
+                    : "border-white/5"
+              }`}
+            >
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
+            </motion.div>
+          ))}
+
+          {isLoading && (
+            <motion.div 
+              className="mr-auto bg-[#1A1A1A] p-3 rounded-xl max-w-[85%] border border-white/5"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex items-center space-x-2">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse delay-150"></div>
+                  <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse delay-300"></div>
+                </div>
+                <span className="text-xs text-white/50">AI is thinking...</span>
+              </div>
+            </motion.div>
+          )}
+          
+          {messages.some(m => m.error) && (
+            <motion.div 
+              className="mx-auto my-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <p className="text-xs text-red-400">
+                There was an error connecting to the AI. Please try again.
+              </p>
+            </motion.div>
+          )}
+
+          {messages.length > 1 && (
+            <div className="flex justify-center my-4">
+              <button
+                onClick={clearChatHistory}
+                className="text-xs text-white/50 hover:text-white/70 transition-colors px-3 py-1 bg-black/20 rounded-full border border-white/5"
+              >
+                Clear chat history
+              </button>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
       </div>
+
+      <motion.div 
+        className="fixed left-0 right-0 bottom-0 px-4 z-10 mx-auto max-w-[430px] pb-safe mb-16"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.3 }}
+      >
+        <Card className="flex items-center gap-2 rounded-full p-1 pr-2 border border-white/10 hover:border-white/20 transition-all shadow-lg mb-4">
+          <input 
+            type="text" 
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyPress}
+            placeholder="Ask me anything..."
+            className="flex-1 bg-transparent border-none outline-none text-sm text-white px-4 py-3"
+            disabled={isLoading}
+          />
+          <motion.button 
+            className={`bg-white text-black rounded-full p-2 transition-all ${
+              input.trim() ? 'hover:bg-white/90 active:scale-95' : 'opacity-50 cursor-not-allowed'
+            }`}
+            onClick={handleSend}
+            disabled={isLoading || !input.trim()}
+            aria-label="Send message"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Send size={16} />
+          </motion.button>
+        </Card>
+      </motion.div>
     </div>
   );
-}
+};
+
+export default Coach;
