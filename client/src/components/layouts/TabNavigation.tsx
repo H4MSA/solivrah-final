@@ -1,133 +1,64 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { Home, Award, MessageCircle, Users, User } from "lucide-react";
-import { SolivrahBrandIcon } from "../common/SolivrahIcons";
 
-export const TabNavigation = () => {
-  // Safely handle the location to prevent errors outside Router context
-  let pathname = '/';
-  let locationHook;
-  
-  try {
-    locationHook = useLocation();
-    pathname = locationHook.pathname;
-  } catch (error) {
-    console.warn("Router context not available in TabNavigation");
-  }
-  
-  const [activeTab, setActiveTab] = useState(pathname);
-  
-  useEffect(() => {
-    if (locationHook) {
-      setActiveTab(pathname);
-    }
-  }, [pathname, locationHook]);
-  
-  const navTabs = [
-    { to: "/home", icon: Home, label: "Home" },
-    { to: "/quests", icon: Award, label: "Quests" },
-    { to: "/coach", icon: MessageCircle, label: "Coach" },
-    { to: "/community", icon: Users, label: "Community" },
-    { to: "/profile", icon: User, label: "Profile" },
-  ];
-  
-  // Only render navigation if we're on a page that should have it
-  const shouldShowNavigation = ['/home', '/quests', '/coach', '/community', '/profile'].includes(pathname);
-  
-  if (!shouldShowNavigation) {
-    return null;
-  }
+import React from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Home, Target, MessageCircle, Users, User } from "lucide-react";
 
-  // Enhanced animation variants
-  const containerVariants = {
-    hidden: { y: 100, opacity: 0 },
-    visible: { 
-      y: 0, 
-      opacity: 1,
-      transition: { 
-        type: "spring", 
-        stiffness: 300, 
-        damping: 30,
-        staggerChildren: 0.05,
-      }
-    }
-  };
+const tabs = [
+  { id: "home", label: "Home", icon: Home, path: "/" },
+  { id: "quests", label: "Quests", icon: Target, path: "/quests" },
+  { id: "coach", label: "Coach", icon: MessageCircle, path: "/coach" },
+  { id: "community", label: "Community", icon: Users, path: "/community" },
+  { id: "profile", label: "Profile", icon: User, path: "/profile" },
+];
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-  };
+export const TabNavigation: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   
+  const activeTab = tabs.find(tab => tab.path === location.pathname)?.id || "home";
+
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 px-4 flex justify-center pb-safe">
-      <motion.div 
-        className="flex items-center justify-between px-4 py-2 rounded-xl backdrop-blur-xl bg-[#1A1A1A]/80 border border-[#333333] shadow-lg w-[95%] max-w-[340px] mb-3 relative"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {/* Solivrah Brand Icon - positioned in the center */}
-        <div className="absolute left-1/2 top-[-20px] transform -translate-x-1/2">
-          <motion.div
-            className="w-10 h-10 rounded-xl bg-gradient-to-b from-[#1A1A1A] to-[#0A0A0A] border border-white/20 flex items-center justify-center shadow-xl"
-            whileHover={{ scale: 1.1, y: -2 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 400, damping: 10 }}
-          >
-            <SolivrahBrandIcon size={20} />
-          </motion.div>
-        </div>
-
-        {navTabs.map((tab, index) => {
+    <div className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-xl border-t border-white/10 z-40">
+      <div className="flex justify-around items-center py-2 px-4 max-w-md mx-auto">
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
           const Icon = tab.icon;
-          const isActive = activeTab === tab.to;
           
           return (
-            <motion.div
-              key={tab.to}
-              variants={itemVariants}
-              custom={index}
+            <button
+              key={tab.id}
+              onClick={() => navigate(tab.path)}
+              className="relative flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-200"
             >
-              <Link
-                to={tab.to}
-                className="flex flex-col items-center justify-center"
-              >
+              {isActive && (
                 <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                  className="relative p-1"
-                >
-                  <AnimatePresence mode="wait">
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeTab"
-                        className="absolute inset-0 rounded-full bg-white/10 backdrop-blur-sm"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                      />
-                    )}
-                  </AnimatePresence>
-                  
-                  <div className={`p-1.5 ${isActive ? 'text-white' : 'text-gray-400'} transition-colors duration-200`}>
-                    <Icon className="w-4 h-4" strokeWidth={2.5} />
-                  </div>
-                </motion.div>
-                
-                <motion.span 
-                  className={`text-[10px] font-medium mt-0.5 ${isActive ? 'text-white' : 'text-gray-400'}`}
-                  animate={{ opacity: isActive ? 1 : 0.7 }}
-                >
-                  {tab.label}
-                </motion.span>
-              </Link>
-            </motion.div>
+                  layoutId="activeTab"
+                  className="absolute inset-0 bg-white/10 rounded-xl"
+                  transition={{ type: "spring", duration: 0.3 }}
+                />
+              )}
+              
+              <div className="relative z-10">
+                <Icon
+                  size={22}
+                  className={`transition-colors ${
+                    isActive ? "text-white" : "text-white/60"
+                  }`}
+                />
+              </div>
+              
+              <span
+                className={`text-xs font-medium transition-colors relative z-10 ${
+                  isActive ? "text-white" : "text-white/60"
+                }`}
+              >
+                {tab.label}
+              </span>
+            </button>
           );
         })}
-      </motion.div>
+      </div>
     </div>
   );
-}; 
+};

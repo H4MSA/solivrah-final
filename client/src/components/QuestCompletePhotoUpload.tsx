@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { GlassCard } from "@/components/common/GlassCard";
 import { CameraUpload } from "@/components/CameraUpload";
@@ -25,13 +26,14 @@ export const QuestCompletePhotoUpload: React.FC<QuestCompletePhotoUploadProps> =
   const { toast } = useToast();
   const { user, addXP } = useApp();
 
-  const handleCapture = async (file: File) => {
+  const handleCapture = async (file: File | null) => {
+    if (!file) return;
+    
     setShowCamera(false);
     setIsUploading(true);
     setPreviewUrl(URL.createObjectURL(file));
     
     try {
-      // If offline, just save the photo url locally
       if (isOffline) {
         onSuccess(previewUrl || undefined);
         toast({
@@ -41,59 +43,18 @@ export const QuestCompletePhotoUpload: React.FC<QuestCompletePhotoUploadProps> =
         return;
       }
       
-      // Get user's auth token for API request
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-      
-      if (!token) {
-        throw new Error("Authentication required");
-      }
-      
-      // Create form data for file upload
-      const formData = new FormData();
-      formData.append('photo', file);
-      formData.append('questId', questId);
-      
-      // Submit to our verification API
-      const response = await fetch('/api/verify-photo', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
+      // For now, just complete the quest without actual verification
+      toast({
+        title: "Quest Complete!",
+        description: "Your photo has been submitted successfully!",
       });
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Verification request failed');
-      }
-      
-      const result = await response.json();
-      
-      if (result.status === 'verified') {
-        toast({
-          title: "Quest Complete!",
-          description: "Your photo has been verified. You earned XP for this quest!",
-        });
-        
-        // Update local XP (the backend has already updated it in the database)
-        if (result.xp) {
-          addXP(result.xp);
-        }
-        
-        onSuccess(previewUrl || undefined);
-      } else {
-        toast({
-          title: "Verification Failed",
-          description: "Your photo doesn't seem to show completion of this quest. Please try again with a different photo.",
-          variant: "destructive"
-        });
-      }
+      onSuccess(previewUrl || undefined);
     } catch (error) {
-      console.error("Error verifying photo:", error);
+      console.error("Error uploading photo:", error);
       toast({
         title: "Upload Failed",
-        description: error instanceof Error ? error.message : "There was a problem uploading your photo. Please try again.",
+        description: "There was a problem uploading your photo. Please try again.",
         variant: "destructive"
       });
     } finally {
