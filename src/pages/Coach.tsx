@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Send, User, Smile, Meh, Frown, ChevronDown, ChevronUp, Clock } from "lucide-react";
 import { useApp } from "@/context/AppContext";
@@ -7,6 +6,7 @@ import { AIService } from "@/services/AIService";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { ChatHistoryDrawer } from "@/components/coach/ChatHistoryDrawer";
+import { TabNavigation } from "@/components/TabNavigation";
 import { Card } from "@/components/ui/card";
 import type { Database } from "@/integrations/supabase/types";
 

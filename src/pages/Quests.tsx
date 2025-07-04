@@ -5,9 +5,6 @@ import { QuestCompleteModal } from "@/components/QuestCompleteModal";
 import { useApp } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Brain, Heart, Trophy, Focus } from "lucide-react";
-import { ThemeBackground } from "@/components/ThemeBackground";
-import QuestCard from "@/components/ui/QuestCard";
 
 interface Quest {
   id: number;
@@ -27,6 +24,7 @@ const Quests = () => {
   const [quests, setQuests] = useState<Quest[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAllQuests, setShowAllQuests] = useState(false);
+  
   const disciplineQuests = [
     { day: 1, title: "Track Time", description: "Track your time for 24 hours using a time-tracking app.", requiresPhoto: false, xp: 50 },
     { day: 2, title: "Block Distractions", description: "Block 1 distracting app (e.g., Instagram) for 3 hours.", requiresPhoto: true, xp: 75 },

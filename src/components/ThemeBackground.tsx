@@ -29,7 +29,7 @@ export const ThemeBackground: React.FC<{
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">
       {/* Main background - dark gradient */}
-      <div className="absolute inset-0 bg-black" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0A] to-[#121212]" />
       
       {/* Subtle grid pattern overlay */}
       <div 
@@ -42,7 +42,7 @@ export const ThemeBackground: React.FC<{
       
       {/* Subtle animated gradient overlays for depth */}
       <motion.div
-        className="absolute w-[800px] h-[800px] rounded-full bg-gradient-radial from-white/[0.03] to-transparent -top-[400px] -left-[400px]"
+        className="absolute w-[600px] h-[600px] rounded-full bg-gradient-radial from-white/[0.03] to-transparent -top-[300px] -left-[300px]"
         animate={{
           x: [0, 30, 0],
           y: [0, 20, 0],
@@ -55,7 +55,7 @@ export const ThemeBackground: React.FC<{
       />
       
       <motion.div
-        className="absolute w-[1000px] h-[1000px] rounded-full bg-gradient-radial from-white/[0.02] to-transparent -bottom-[500px] -right-[500px]"
+        className="absolute w-[800px] h-[800px] rounded-full bg-gradient-radial from-white/[0.02] to-transparent -bottom-[400px] -right-[400px]"
         animate={{
           x: [0, -40, 0],
           y: [0, -20, 0],

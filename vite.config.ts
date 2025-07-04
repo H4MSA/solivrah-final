@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   define: {
+    // Fix for "process is not defined" error
     'process.env': {}
   },
 }))
