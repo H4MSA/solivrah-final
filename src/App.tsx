@@ -3,26 +3,29 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { MotionConfig, LazyMotion, domAnimation } from "framer-motion";
 import { AppProvider, useApp } from "./context/AppContext";
 import { ThemeBackground } from "./components/ThemeBackground";
 import { TabNavigation } from "./components/TabNavigation";
 import { NetworkStatusIndicator } from "./components/NetworkStatusIndicator";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import Index from "./pages/Index";
-import Home from "./pages/Home";
-import Quests from "./pages/Quests";
-import Coach from "./pages/Coach";
-import Community from "./pages/Community";
-import Profile from "./pages/Profile";
-import Survey from "./pages/Survey";
-import Auth from "./pages/Auth";
-import AuthCallback from "./pages/AuthCallback";
-import NotFound from "./pages/NotFound";
-import { Help } from "./pages/Help";
 import { ContextHelp } from "./components/ContextHelp";
 import { OnboardingFlow } from "./components/OnboardingFlow";
-import Admin from "./pages/Admin";
+
+// Lazy load pages for better performance
+const Index = lazy(() => import("./pages/Index"));
+const Home = lazy(() => import("./pages/Home"));
+const Quests = lazy(() => import("./pages/Quests"));
+const Coach = lazy(() => import("./pages/Coach"));
+const Community = lazy(() => import("./pages/Community"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Survey = lazy(() => import("./pages/Survey"));
+const Auth = lazy(() => import("./pages/Auth"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Help = lazy(() => import("./pages/Help"));
+const Admin = lazy(() => import("./pages/Admin"));
 
 // Create a new QueryClient instance with custom options
 const queryClient = new QueryClient({
@@ -34,6 +37,71 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// Premium Loading Screen Component
+const PremiumLoadingScreen = () => (
+  <div className="flex items-center justify-center h-screen bg-gradient-to-br from-black via-zinc-900 to-black">
+    <div className="flex flex-col items-center space-y-6">
+      <div className="relative">
+        <div className="w-16 h-16 border-4 border-white/20 border-t-calm-500 rounded-full animate-spin"></div>
+        <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-gold-500 rounded-full animate-spin animation-delay-150"></div>
+      </div>
+      <div className="text-center">
+        <h2 className="text-xl font-semibold text-white mb-2">Solivrah</h2>
+        <div className="loading-dots">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// Enhanced Error Boundary Component
+class PremiumErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Premium Error Boundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex items-center justify-center h-screen bg-gradient-to-br from-black via-zinc-900 to-black p-6">
+          <div className="glass-card max-w-md w-full p-8 text-center">
+            <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-white mb-2">Something went wrong</h2>
+            <p className="text-gray-400 mb-6">We're sorry for the inconvenience. Please refresh the page to try again.</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="btn-primary w-full"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 // SessionHandler component to manage authentication state
 const SessionHandler = ({ children }: { children: React.ReactNode }) => {
@@ -122,11 +190,7 @@ const SessionHandler = ({ children }: { children: React.ReactNode }) => {
   }, [setUser, setSession, setIsGuest, navigate, location.pathname]);
 
   if (checking) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-black">
-        <div className="animate-spin w-8 h-8 border-t-2 border-white rounded-full"></div>
-      </div>
-    );
+    return <PremiumLoadingScreen />;
   }
 
   return <>{children}</>;
@@ -146,11 +210,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }, [isGuest, location.pathname, navigate]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-black">
-        <div className="animate-spin w-8 h-8 border-t-2 border-white rounded-full"></div>
-      </div>
-    );
+    return <PremiumLoadingScreen />;
   }
 
   // Allow access if user is authenticated or is a guest
@@ -190,21 +250,23 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
-  // Check if app is installed as PWA
+  // Premium app state management
   const [isPWA, setIsPWA] = useState(false);
   const [hasSafeArea, setHasSafeArea] = useState(false);
-  
-  // Add state for onboarding
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return localStorage.getItem('onboardingCompleted') !== 'true';
   });
   
+  // Detect user's motion preference for accessibility
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
   useEffect(() => {
-    // Check if app is running as installed PWA
+    // Enhanced PWA and device detection
     const isPWACheck = window.matchMedia('(display-mode: standalone)').matches;
     setIsPWA(isPWACheck);
     
-    // Check for device with safe areas
+    // Premium safe area detection
     const detectSafeArea = () => {
       const hasSafeAreaInsets = 
         window.CSS && CSS.supports('padding-top: env(safe-area-inset-top)') && 
@@ -213,22 +275,22 @@ const App = () => {
       
       setHasSafeArea(hasSafeAreaInsets);
       
-      // Add CSS variables for detection
+      // Enhanced CSS variables for premium safe area handling
       document.documentElement.style.setProperty('--sat', 'env(safe-area-inset-top, 0px)');
       document.documentElement.style.setProperty('--sab', 'env(safe-area-inset-bottom, 0px)');
       document.documentElement.style.setProperty('--sal', 'env(safe-area-inset-left, 0px)');
       document.documentElement.style.setProperty('--sar', 'env(safe-area-inset-right, 0px)');
       
-      // Add classes to handle different devices
+      // Premium device-specific classes
       if (hasSafeAreaInsets) {
         document.body.classList.add('has-safe-area');
         
-        // Check for iPhone X and newer with notch
+        // iPhone X and newer with notch
         if (window.innerWidth >= 375 && window.innerHeight >= 812) {
           document.body.classList.add('has-notch');
         }
         
-        // Check for iPhone with Dynamic Island
+        // iPhone with Dynamic Island
         if (window.innerWidth >= 390 && window.innerHeight >= 844) {
           document.body.classList.add('has-dynamic-island');
         }
@@ -237,124 +299,127 @@ const App = () => {
     
     detectSafeArea();
     
-    // Request camera permission on mobile devices
-    const requestCameraPermission = async () => {
-      if ('mediaDevices' in navigator && isPWACheck) {
-        try {
-          // Just check if we can access the camera
-          const devices = await navigator.mediaDevices.enumerateDevices();
-          const hasCamera = devices.some(device => device.kind === 'videoinput');
-          
-          if (hasCamera) {
-            console.log("Camera access is available");
-          }
-        } catch (err) {
-          console.log("Camera access may require permission", err);
-        }
-      }
-    };
+    // Network status monitoring
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
     
-    requestCameraPermission();
-
-    // Performance improvements
-    // Use passive event listeners for better scroll performance
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    // Premium performance optimizations
     const opts = { passive: true };
     document.addEventListener('touchstart', () => {}, opts);
     document.addEventListener('touchmove', () => {}, opts);
     
-    // Optimize image loading
+    // Enhanced image loading optimization
     if ('loading' in HTMLImageElement.prototype) {
       const images = document.querySelectorAll('img[loading="lazy"]');
       images.forEach(img => {
         img.setAttribute('loading', 'lazy');
       });
     }
+    
+    // Premium font loading optimization
+    if ('fonts' in document) {
+      document.fonts.ready.then(() => {
+        document.body.classList.add('fonts-loaded');
+      });
+    }
 
     return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
       document.removeEventListener('touchstart', () => {});
       document.removeEventListener('touchmove', () => {});
     };
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AppProvider>
-        <TooltipProvider>
-          {/* Theme background applied to the entire app */}
-          <ThemeBackground />
+    <PremiumErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AppProvider>
+          <LazyMotion features={domAnimation}>
+            <MotionConfig reducedMotion={prefersReducedMotion ? "always" : "never"}>
+              <TooltipProvider>
+                {/* Premium theme background */}
+                <ThemeBackground />
 
-          {/* Onboarding flow for first-time users */}
-          {showOnboarding && <OnboardingFlow onComplete={() => setShowOnboarding(false)} />}
+                {/* Premium onboarding flow */}
+                {showOnboarding && <OnboardingFlow onComplete={() => setShowOnboarding(false)} />}
 
-          {/* Fixed viewport container with safe areas */}
-          <div className={`fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-transparent overflow-hidden ${hasSafeArea ? 'dynamic-island-aware' : 'p-4 pb-20'}`}>
-            <Toaster />
-            <Sonner />
+                {/* Premium viewport container with enhanced safe areas */}
+                <div className={`fixed inset-0 flex flex-col w-full max-w-[430px] mx-auto bg-transparent overflow-hidden ${hasSafeArea ? 'dynamic-island-aware' : 'p-4 pb-20'}`}>
+                  <Toaster />
+                  <Sonner />
 
-            <BrowserRouter>
-              <SessionHandler>
-                {/* Context help should be inside Router context */}
-                <Routes>
-                  {/* Public routes */}
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/auth/callback" element={<AuthCallback />} />
+                  <BrowserRouter>
+                    <SessionHandler>
+                      <Suspense fallback={<PremiumLoadingScreen />}>
+                        <Routes>
+                          {/* Public routes */}
+                          <Route path="/" element={<Index />} />
+                          <Route path="/auth" element={<Auth />} />
+                          <Route path="/auth/callback" element={<AuthCallback />} />
 
-                  {/* Survey route (accessible after auth) */}
-                  <Route path="/survey" element={
-                    <ProtectedRoute>
-                      <Survey />
-                    </ProtectedRoute>
-                  } />
+                          {/* Survey route (accessible after auth) */}
+                          <Route path="/survey" element={
+                            <ProtectedRoute>
+                              <Survey />
+                            </ProtectedRoute>
+                          } />
 
-                  {/* Protected routes with TabNavigation */}
-                  <Route path="/home" element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Home />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/quests" element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Quests />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/coach" element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Coach />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/community" element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Community />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/profile" element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Profile />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/help" element={<Help />} />
-                  <Route path="/admin" element={<Admin />} />
+                          {/* Protected routes with premium layout */}
+                          <Route path="/home" element={
+                            <ProtectedRoute>
+                              <AppLayout>
+                                <Home />
+                              </AppLayout>
+                            </ProtectedRoute>
+                          } />
+                          <Route path="/quests" element={
+                            <ProtectedRoute>
+                              <AppLayout>
+                                <Quests />
+                              </AppLayout>
+                            </ProtectedRoute>
+                          } />
+                          <Route path="/coach" element={
+                            <ProtectedRoute>
+                              <AppLayout>
+                                <Coach />
+                              </AppLayout>
+                            </ProtectedRoute>
+                          } />
+                          <Route path="/community" element={
+                            <ProtectedRoute>
+                              <AppLayout>
+                                <Community />
+                              </AppLayout>
+                            </ProtectedRoute>
+                          } />
+                          <Route path="/profile" element={
+                            <ProtectedRoute>
+                              <AppLayout>
+                                <Profile />
+                              </AppLayout>
+                            </ProtectedRoute>
+                          } />
+                          <Route path="/help" element={<Help />} />
+                          <Route path="/admin" element={<Admin />} />
 
-                  {/* Catch-all for 404s */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </SessionHandler>
-            </BrowserRouter>
-          </div>
-        </TooltipProvider>
-      </AppProvider>
-    </QueryClientProvider>
+                          {/* Catch-all for 404s */}
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </Suspense>
+                    </SessionHandler>
+                  </BrowserRouter>
+                </div>
+              </TooltipProvider>
+            </MotionConfig>
+          </LazyMotion>
+        </AppProvider>
+      </QueryClientProvider>
+    </PremiumErrorBoundary>
   );
 };
 
